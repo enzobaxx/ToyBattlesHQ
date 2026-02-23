@@ -1682,7 +1682,7 @@ namespace Main
 				const std::uint32_t day = rewards.day - 1;
 				if (day < rewards.items.size() && Main::CdbUtils::itemExists(rewards.items[day]))
 				{
-					m_packet.setCommand(66, 0, 51, 1); // n.b. option0, mission3 => story reward
+					m_packet.setCommand(66, 0, 51, 2);
 					Main::Structures::SpawnedItem spawnedItem{ rewards.items[day] };
 					spawnedItem.serialInfo.itemNumber = m_player.getLatestItemNumber() + 1;
 					addItem(Item{ spawnedItem });
@@ -1723,7 +1723,7 @@ namespace Main
 
 				if (rewards.day < rewards.items.size() && Main::CdbUtils::itemExists(rewards.items[rewards.day]))
 				{
-					m_packet.setCommand(66, 0, 51, 1); // n.b. option0, mission3 => story reward
+					m_packet.setCommand(66, 0, 51, 2);
 					Main::Structures::SpawnedItem spawnedItem{ rewards.items[rewards.day] };
 					spawnedItem.serialInfo.itemNumber = m_player.getLatestItemNumber() + 1;
 					addItem(Item{ spawnedItem });
