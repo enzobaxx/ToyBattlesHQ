@@ -25,6 +25,7 @@ namespace Cast
 		Cast::Network::SessionsManager m_sessionsManager{};
 		static inline Cast::Classes::RoomsManager m_roomsManager{};
 		std::shared_ptr<asio::steady_timer> m_positionTimer;
+		std::shared_ptr<asio::steady_timer> m_sessionTimer;
 
 		tcp::acceptor m_mainServerAcceptor;
 		std::optional<tcp::socket> m_mainSocket;
@@ -36,6 +37,7 @@ namespace Cast
 		void asyncAccept();
 		void asyncAcceptMainServer();
 		void tickPositionFlush();
+		void tickSessionHeartbeat();
 	};
 }
 

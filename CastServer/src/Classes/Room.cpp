@@ -41,6 +41,7 @@ namespace Cast
 		void Room::endMatch()
 		{
 			m_hasMatchStarted = false;
+			m_roomTick = 0;
 
 			for (auto& weakSession : m_playersVec)
 			{
@@ -399,29 +400,39 @@ namespace Cast
 			if (m_pendingPositions.empty()) return;
 
 			static std::array<std::uint8_t, 2048> batchBuffer;
-			std::size_t totalSize = 0;
-			std::size_t count = 0;
+			std::size_t index = 0;
 
-			for (auto& pkt : m_pendingPositions)
+			while (index < m_pendingPositions.size())
 			{
-				const auto size = pkt.getDataSize();
-				if (totalSize + size > 2036) break;  // 8 bytes header + 4 bytes roomtick
-				std::memcpy(batchBuffer.data() + totalSize, pkt.getData(), size);
-				totalSize += size;
-				++count;
+				std::size_t totalSize = 0;
+				std::size_t count = 0;
+
+				for (; index < m_pendingPositions.size(); ++index)
+				{
+					auto& pkt = m_pendingPositions[index];
+					const auto size = pkt.getDataSize();
+
+					if (totalSize + size > 2036) // 8 bytes header + 4 bytes roomtick
+						break;
+
+					std::memcpy(batchBuffer.data() + totalSize, pkt.getData(), size);
+					totalSize += size;
+					++count;
+				}
+
+				std::memmove(batchBuffer.data() + sizeof(m_roomTick), batchBuffer.data(), totalSize);
+				std::memcpy(batchBuffer.data(), &m_roomTick, sizeof(m_roomTick));
+				totalSize += sizeof(m_roomTick);
+
+				static Common::Network::UnecryptedPacket batch(2048, 322, 0);
+				batch.setOption(static_cast<uint32_t>(count));
+				batch.setData(batchBuffer.data(), static_cast<uint16_t>(totalSize));
+
+				broadcastToRoom(batch);
 			}
 
-			//const std::uint32_t serverTick = m_roomTick - (((Common::Utils::getCurrentTimestampMs() - timeSinceLastRestart) / 10) - m_roomTick);
-			std::memmove(batchBuffer.data() + sizeof(m_roomTick), batchBuffer.data(), totalSize);
-			std::memcpy(batchBuffer.data(), &m_roomTick, sizeof(m_roomTick));
-			totalSize += sizeof(m_roomTick);
-			static Common::Network::UnecryptedPacket batch(2048, 322, static_cast<uint32_t>(count));
-			batch.setOption(static_cast<uint32_t>(count));
-			batch.setData(batchBuffer.data(), static_cast<uint16_t>(totalSize));
-
-			broadcastToRoom(batch);
 			m_pendingPositions.clear();
+			++m_roomTick;
 		}
-
 	};
 }

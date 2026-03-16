@@ -6,6 +6,7 @@
 #include "../include/ChatCommands/Commands/ChangeHost.h"
 #include "../include/ChatCommands/Commands/ChangePw.h"
 #include "../include/ChatCommands/Commands/ChangeRoomTitle.h"
+#include "../include/ChatCommands/Commands/ChangeUsername.h"
 #include "../include/ChatCommands/Commands/ClanAccept.h"
 #include "../include/ChatCommands/Commands/ClanDeny.h"
 #include "../include/ChatCommands/Commands/ClanKick.h"

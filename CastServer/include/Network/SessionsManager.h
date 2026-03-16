@@ -27,6 +27,8 @@ namespace Cast
 			void removeSession(std::size_t sessionId);
 
 			std::shared_ptr<Cast::Network::Session> getSession(std::size_t sessionId);
+
+			const auto getAllSessions() const { return m_sessionsBySessionId; }
 		};
 	}
 }

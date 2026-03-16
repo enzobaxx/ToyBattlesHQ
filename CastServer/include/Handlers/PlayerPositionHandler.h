@@ -29,7 +29,7 @@ namespace Cast
 
             Cast::Structures::ClientPlayerInfoBasic playerPositionFromClient = Cast::Details::parseData<Cast::Structures::ClientPlayerInfoBasic>(request);
             if (playerPositionFromClient.isBad()) return;
-            room->m_roomTick = playerPositionFromClient.matchTick;
+            //room->m_roomTick = playerPositionFromClient.matchTick; // Note: this is now inside positionFlush (Room.cpp)
 
 
             if (room->m_isInvisible || session->m_isInvisible)
