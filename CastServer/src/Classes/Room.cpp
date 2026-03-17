@@ -103,8 +103,11 @@ namespace Cast
 
 			auto it = std::remove_if(m_playersVec.begin(), m_playersVec.end(),
 				[&](const std::weak_ptr<Cast::Network::Session>& weakSession) {
-					auto session = weakSession.lock();
-					return !session || session->getId() == playerSession->getId();
+					if (auto session = weakSession.lock()) 
+					{
+						return session->getId() == playerSession->getId();
+					}
+					return false; 
 				});
 
 			if (it != m_playersVec.end())

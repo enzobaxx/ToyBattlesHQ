@@ -107,15 +107,12 @@ namespace Common
 			virtual ~Session()
 			{
 				closeSocket();
+				sessionIdManager.releaseSessionID(m_id);
 			}
 
 			void setSessionId(std::size_t id)
 			{
-				if (m_id != id)
-				{
-					sessionIdManager.releaseSessionID(m_id);
-					m_id = id;
-				}
+				m_id = id;
 			}
 
 			void setAccountId(std::uint32_t accountId)
