@@ -150,7 +150,7 @@ namespace Cast
 			{
 				if (auto player = currentPlayer.lock())
 				{
-					//packet.setTcpHeader(player->getId());
+					packet.setTcpHeader(player->getId());
 					player->asyncWrite(packet);
 				}
 			}
