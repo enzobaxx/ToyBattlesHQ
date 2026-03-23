@@ -150,7 +150,7 @@ namespace Cast
 			{
 				if (auto player = currentPlayer.lock())
 				{
-					packet.setTcpHeader(player->getId());
+					//packet.setTcpHeader(player->getId());
 					player->asyncWrite(packet);
 				}
 			}
@@ -409,7 +409,7 @@ namespace Cast
 					auto& pkt = m_pendingPositions[index];
 					const auto size = pkt.getDataSize();
 
-					if (totalSize + size > 2028) // 8 bytes header + 4 bytes roomtick
+					if (totalSize + size > 2032) // 8 bytes header + 4 bytes roomtick
 						break;
 
 					std::memcpy(batchBuffer.data() + totalSize, pkt.getData(), size);
