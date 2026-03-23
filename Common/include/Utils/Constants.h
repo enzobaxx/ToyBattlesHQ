@@ -9,7 +9,6 @@ namespace Common
 	namespace Constants
 	{
 		// IPC handler ids
-		constexpr inline std::uint32_t A2M_disconnectOnlinePlayer = 0;
 		constexpr inline std::uint32_t A2M_getPlayersPerServer = 1;
 		constexpr inline std::uint32_t M2C_mapId = 2;
 		constexpr inline std::uint32_t M2C_roomNumber = 3;
@@ -20,7 +19,7 @@ namespace Common
 		constexpr inline std::uint32_t M2C_playerTeamInfoBatch = 8;
 		constexpr inline std::uint32_t M2C_Invisibility = 9;
 		constexpr inline std::uint32_t C2M_CloseSocketReq = 10;
-
+		constexpr inline std::uint32_t A2M_disconnectOnlinePlayer = 11;
 
 		// Rest
 		constexpr inline std::uint16_t maxSessionsPerServer = 500;

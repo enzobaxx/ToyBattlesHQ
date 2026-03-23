@@ -43,6 +43,11 @@ namespace Common
                 return m_header.isValidCast() && m_command.isValid();
             }
 
+            bool isValidMain() const noexcept
+            {
+                return m_header.isValidMain() && m_command.isValid();
+
+            }
             void setCommand(std::uint16_t order, std::uint8_t mission, std::uint8_t extra, std::uint8_t option)
             {
                 m_command = Common::Protocol::CommandHeader{ mission, order, extra, option };
@@ -160,6 +165,12 @@ namespace Common
                 crypt.KeySetup(0);
                 crypt.RC5Decrypt32(data, &m_header, headerSize);
 
+                if (!m_header.isValidMain())
+                {
+                    std::cout << "Session::processIncomingPacket invalid Main header detected\n";
+                    return;
+                }
+
                 const std::uint16_t messageSize = static_cast<std::uint16_t>(m_header.getSize()) - headerSize;
                 if (messageSize <= 0) return;
 
@@ -194,6 +205,11 @@ namespace Common
                 }
 
                 std::memcpy(&m_command, decryptedBytes.data(), commandSize);
+                if (!m_command.isValid())
+                {
+                    std::cout << "Session::processIncomingPacket invalid Main m_command detected\n";
+                    return;
+                }
 
                 if (messageSize > commandSize)
                 {

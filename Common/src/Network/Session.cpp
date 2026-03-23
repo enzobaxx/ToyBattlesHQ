@@ -110,13 +110,19 @@ namespace Common
 					if (m_crypt.isUsed) 
 					{
 						cryptography.RC5Decrypt32(reinterpret_cast<int32_t*>(m_reader.data()), &header, headerSize);
+						if (!header.isValidMain())
+						{
+							std::cout << "Session::onRead Invalid Main Header Detected\n";
+							return;
+						}
 					}
 					else
 					{
 						std::memcpy(&header, m_reader.data(), headerSize);
 						if (!header.isValidCast())
 						{
-							std::cout << "Session::onRead Invalid Header Detected\n";
+							std::cout << "Session::onRead Invalid Cast Header Detected\n";
+							return;
 						}
 					}
 

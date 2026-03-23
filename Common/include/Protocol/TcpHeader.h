@@ -46,6 +46,13 @@ PACK_PUSH(1)
 
 			std::uint32_t getCrypt() const;
 
+            bool isValidMain() const noexcept
+            {
+                return sessionId <= Common::Constants::maxSessionsPerServer
+                    && size <= 2048
+                    && crypt <= Common::Enums::USER_LARGE_ENCRYPTION;
+            }
+
             bool isValidCast() const noexcept
             {
                 bool valid = true;

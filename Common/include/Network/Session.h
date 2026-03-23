@@ -156,6 +156,11 @@ namespace Common
 					std::cout << "Session::asyncWriteImpl Invalid Cast\n";
 					return false;
 				}
+				else if (packetType == PacketType::ENCRYPTED && !message.isValiMain())
+				{
+					std::cout << "Session::asyncWriteImpl Invalid Main\n";
+					return false;
+				}
 
 				auto packetData = std::make_shared<std::vector<std::uint8_t>>();
 
