@@ -6,6 +6,7 @@
 #include "Macros.h"
 #include <Constants.h>
 #include "Enums/MiscellaneousEnums.h"
+#include <iostream>
 
 namespace Common
 {
