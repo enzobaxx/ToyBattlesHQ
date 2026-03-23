@@ -15,7 +15,7 @@ namespace Cast
 			room->flushPendingPositions();
 		}
 
-		m_positionTimer->expires_after(std::chrono::milliseconds(50));
+		m_positionTimer->expires_after(std::chrono::milliseconds(100));
 		m_positionTimer->async_wait([this](auto) { tickPositionFlush(); });
 	}
 
@@ -174,7 +174,7 @@ namespace Cast
 			std::shared_ptr<Cast::Network::Session> session)
 			{
 				// Not sure what this is for -- each player in the room sends this to host (through request.getSession())
-				m_roomsManager.broadcastToMatch(session->getId(), const_cast<Common::Network::UnecryptedPacket&>(request));
+				//m_roomsManager.broadcastToMatch(session->getId(), const_cast<Common::Network::UnecryptedPacket&>(request));
 			});
 
 		// Player sync (needed because otherwise the player: 1. does not get the time left of the match, and 2. they don't respawn at all)

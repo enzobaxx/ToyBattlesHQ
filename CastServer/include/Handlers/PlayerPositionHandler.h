@@ -167,6 +167,7 @@ namespace Cast
                 }
             }
             
+            response.setSession(session->getId());
             room->enqueuePosition(std::move(response));
         }
     }
