@@ -153,6 +153,7 @@ namespace Common
 
 				if (packetType == PacketType::UNECRYPTED && !message.isValidCast())
 				{
+					std::cout << "Session::asyncWriteImpl Invalid Cast\n";
 					return false;
 				}
 

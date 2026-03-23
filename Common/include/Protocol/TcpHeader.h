@@ -45,11 +45,43 @@ PACK_PUSH(1)
 
 			std::uint32_t getCrypt() const;
 
-			bool isValidCast() const noexcept
-			{
-				return sessionId <= Common::Constants::maxSessionsPerServer
-					&& size < 2049 && crypt == Common::Enums::NO_ENCRYPTION;
-			}
+            bool isValidCast() const noexcept
+            {
+                bool valid = true;
+
+                if (sessionId > Common::Constants::maxSessionsPerServer)
+                {
+                    std::cout << "[INVALID] sessionId too large: "
+                        << sessionId << " > "
+                        << Common::Constants::maxSessionsPerServer << "\n";
+                    valid = false;
+                }
+
+                if (size >= 2049)
+                {
+                    std::cout << "[INVALID] size too large: "
+                        << size << " (max 2048)\n";
+                    valid = false;
+                }
+
+                if (!(crypt == Common::Enums::NO_ENCRYPTION ||
+                    crypt == Common::Enums::DEFAULT_ENCRYPTION))
+                {
+                    std::cout << "[INVALID] invalid crypt value: "
+                        << static_cast<int>(crypt) << "\n";
+                    valid = false;
+                }
+
+                if (!valid)
+                {
+                    std::cout << "[PACKET DEBUG] sessionId=" << sessionId
+                        << " size=" << size
+                        << " crypt=" << static_cast<int>(crypt)
+                        << "\n";
+                }
+
+                return valid;
+            }
 		};
 PACK_POP()
 	}
