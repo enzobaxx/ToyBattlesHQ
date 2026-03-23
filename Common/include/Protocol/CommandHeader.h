@@ -50,6 +50,11 @@ PACK_PUSH(1)
 			std::uint32_t getExtra() const;
 
 			std::uint32_t getOption() const;
+
+			bool isValid() const noexcept
+			{
+				return order <= 600;
+			}
 		};
 PACK_POP()
 	}

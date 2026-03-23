@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <cstdlib>
 #include "Macros.h"
+#include <Constants.h>
 
 namespace Common
 {
@@ -42,6 +43,12 @@ PACK_PUSH(1)
 			std::uint32_t getSize() const;
 
 			std::uint32_t getCrypt() const;
+
+			bool isValidCast() const noexcept
+			{
+				return sessionId < Common::Constants::maxSessionsPerServer
+					&& size < 2049 && crypt == Common::Enums::NO_ENCRYPTION;
+			}
 		};
 PACK_POP()
 	}

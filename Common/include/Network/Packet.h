@@ -38,6 +38,11 @@ namespace Common
                 setCommand(order, 0, 0, option);
             }
 
+            bool isValidCast() const noexcept
+            {
+                return m_header.isValidCast() && m_command.isValid();
+            }
+
             void setCommand(std::uint16_t order, std::uint8_t mission, std::uint8_t extra, std::uint8_t option)
             {
                 m_command = Common::Protocol::CommandHeader{ mission, order, extra, option };

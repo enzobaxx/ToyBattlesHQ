@@ -144,9 +144,14 @@ namespace Common
 
 			template<PacketType packetType, typename Packet>
 			bool asyncWriteImpl(const Packet& message)
-				requires (packetType == PacketType::ENCRYPTED || packetType == PacketType::UNECRYPTED)
+			requires (packetType == PacketType::ENCRYPTED || packetType == PacketType::UNECRYPTED)
 			{
 				if (!m_socket.is_open())
+				{
+					return false;
+				}
+
+				if (packetType == PacketType::UNECRYPTED && !message.isValidCast())
 				{
 					return false;
 				}
