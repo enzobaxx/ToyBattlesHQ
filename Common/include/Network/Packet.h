@@ -182,7 +182,7 @@ namespace Common
 
                 case Common::Enums::EncryptionType::DEFAULT_ENCRYPTION:
                     crypt.KeySetup(0);
-                    crypt.RC5Decrypt64(decryptedBytes.data(), decryptedBytes.data(), messageSize);
+                    crypt.RC5Decrypt64(decryptedBytes.data(), decryptedBytes.data(), messageSize);  
                     break;
 
                 case Common::Enums::EncryptionType::DEFAULT_LARGE_ENCRYPTION:

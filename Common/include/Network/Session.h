@@ -156,7 +156,7 @@ namespace Common
 					std::cout << "Session::asyncWriteImpl Invalid Cast\n";
 					return false;
 				}
-				else if (packetType == PacketType::ENCRYPTED && !message.isValiMain())
+				else if (packetType == PacketType::ENCRYPTED && !message.isValidMain())
 				{
 					std::cout << "Session::asyncWriteImpl Invalid Main\n";
 					return false;
