@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include "Macros.h"
 #include <Constants.h>
+#include "Enums/MiscellaneousEnums.h"
 
 namespace Common
 {
