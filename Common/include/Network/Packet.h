@@ -212,13 +212,21 @@ namespace Common
                 if (size < headerSize) return;
 
                 std::memcpy(&m_header, data, headerSize);
-                if (!m_header.isValidCast()) return;
+                if (!m_header.isValidCast())
+                {
+                    std::cout << "Session::processIncomingPacket invalid header detected\n";
+                    return;
+                }
 
                 const std::uint16_t messageSize = static_cast<std::uint16_t>(m_header.getSize()) - headerSize;
                 if (messageSize <= 0 || messageSize > 1450) return;
 
                 std::memcpy(&m_command, data + headerSize, commandSize);
-                if (!m_command.isValid()) return;
+                if (!m_command.isValid())
+                {
+                    std::cout << "Session::processIncomingPacket invalid header detected\n";
+                    return;
+                }
 
                 if (messageSize > commandSize)
                 {

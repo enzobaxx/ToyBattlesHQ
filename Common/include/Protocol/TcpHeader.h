@@ -47,7 +47,7 @@ PACK_PUSH(1)
 
 			bool isValidCast() const noexcept
 			{
-				return sessionId < Common::Constants::maxSessionsPerServer
+				return sessionId <= Common::Constants::maxSessionsPerServer
 					&& size < 2049 && crypt == Common::Enums::NO_ENCRYPTION;
 			}
 		};

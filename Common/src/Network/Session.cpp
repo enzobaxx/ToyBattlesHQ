@@ -25,7 +25,7 @@
 #include <cryptopp/secblock.h>
 #include <cryptopp/oids.h> 
 #include <cstring>
-
+#include <iostream>
 
 namespace Common
 {
@@ -104,7 +104,6 @@ namespace Common
 				Common::Protocol::TcpHeader header;
 				Common::Cryptography::Crypt cryptography;
 				cryptography.KeySetup(0);
-				bool isCast = false;
 
 				while (m_reader.size() >= headerSize)
 				{
@@ -114,13 +113,11 @@ namespace Common
 					}
 					else
 					{
-						isCast = true;
 						std::memcpy(&header, m_reader.data(), headerSize);
-					}
-
-					if (isCast && !header.isValidCast())
-					{
-						return;
+						if (!header.isValidCast())
+						{
+							std::cout << "Session::onRead Invalid Header Detected\n";
+						}
 					}
 
 					if (header.getSize() >= 1450)
