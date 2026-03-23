@@ -32,6 +32,8 @@ namespace Cast
 			{
 				m_sessionsBySessionId[sessionId]->setIsInMatch(false);
 				m_sessionsBySessionId.erase(sessionId);
+				if (m_roomsManager)
+					m_roomsManager->removePlayerFromRoom(sessionId);
 			}
 		}
 
