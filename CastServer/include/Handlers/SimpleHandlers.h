@@ -299,7 +299,9 @@ namespace Cast
                 }
                 session->isDead = true;
                 session->m_isInMatch = true;
-
+                auto now = std::chrono::steady_clock::now();
+                session->m_positionCount = 0;
+                session->m_lastPositionCheck = now;
 
                 if (room->m_isAssassinMode && request.getSession() == session->getId())
                 {
