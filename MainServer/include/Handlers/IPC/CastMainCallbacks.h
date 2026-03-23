@@ -67,6 +67,22 @@ namespace Main
             session->asyncWrite(response); // "pong" the cast server with success/failure status
         }
 
+        inline void ipcRequestCast(const Common::Network::UnecryptedPacket& request, std::shared_ptr<Common::Network::Session> session,
+            Main::Network::SessionsManager& sessionsManager)
+        {
+            auto response = request;
+            response.setData(nullptr, 0);
+
+            const std::uint32_t seid = Main::Details::parseData<std::uint64_t>(request);
+
+            if (auto targetSession = sessionsManager.getSessionBySessionId(seid); targetSession)
+            {
+                targetSession->closeSocket();
+            }
+
+            session->asyncWrite(response);
+        }
+
     }
 }
 

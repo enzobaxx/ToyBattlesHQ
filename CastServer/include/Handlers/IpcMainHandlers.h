@@ -36,6 +36,15 @@ namespace Cast
             else if (request.getExtra() == 3) room->m_isInvisible = false;
         }
 
+        inline void closeSocketAfterMain(const Common::Network::UnecryptedPacket& request, std::shared_ptr<Common::Network::Session> session, Cast::Network::SessionsManager& sm)
+        {
+            if (auto s = sm.getSession(request.getSession()))
+            {
+                s->closeSocket();
+            }
+        }
+
+
         inline void handleAssassinMode(const Common::Network::UnecryptedPacket& request, std::shared_ptr<Common::Network::Session> session,
             Cast::Classes::RoomsManager& roomsManager)
         {

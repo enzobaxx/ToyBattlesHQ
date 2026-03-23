@@ -34,7 +34,7 @@ namespace Cast
 
             session->m_positionCount++;
 
-            if (session->m_positionCount > 15)
+            if (session->m_positionCount > 18)
             {
                 session->closeSocket();
                 return;

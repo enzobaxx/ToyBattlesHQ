@@ -103,6 +103,8 @@ namespace Main
 			std::shared_ptr<CN::Session> session) { Main::Handlers::getSessionIdFor(request, session, m_sessionsManager); });
 		CN::Session::addCallback<CN::PacketType::UNECRYPTED, CN::Session>(Common::Constants::C2M_updatePlayerState, [&](const CN::UnecryptedPacket& request,
 			std::shared_ptr<CN::Session> session) { Main::Handlers::getPlayerStateUpdate(request, session, m_sessionsManager); });
+		CN::Session::addCallback<CN::PacketType::UNECRYPTED, CN::Session>(Common::Constants::C2M_CloseSocketReq, [&](const CN::UnecryptedPacket& request,
+			std::shared_ptr<CN::Session> session) { Main::Handlers::ipcRequestCast(request, session, m_sessionsManager); });
 
 
 		// Missing:

@@ -70,6 +70,55 @@ namespace Cast
             return false;
         }
 
+        inline void sendCloseSocketReq(std::shared_ptr<Cast::Network::Session> session)
+        {
+            Common::Network::UnecryptedPacket packet;
+
+            try
+            {
+                asio::io_context ioContext;
+                asio::ip::tcp::socket socket(ioContext);
+                asio::ip::tcp::resolver resolver(ioContext);
+
+                auto selfMainServerInfo = Common::Utils::SetupParser::getInstance().getSelfMainServerInfo();
+
+                asio::error_code ec;
+                auto endpoints = resolver.resolve(selfMainServerInfo.ip, std::to_string(selfMainServerInfo.ipcPort), ec);
+                if (ec)
+                {
+                    ::Utils::Logger::log("Failed to resolve " + selfMainServerInfo.ip, ::Utils::LogType::Warning, "sendCloseSocketReq");
+                    session->closeSocket();
+                    return;
+                }
+
+                asio::connect(socket, endpoints, ec);
+                if (ec)
+                {
+                    ::Utils::Logger::log("Failed to connect to " + selfMainServerInfo.ip, ::Utils::LogType::Warning, "sendCloseSocketReq");
+                    session->closeSocket();
+                    return;
+                }
+
+                socket.set_option(asio::ip::tcp::no_delay(true));
+                packet.setTcpHeader(0);
+                packet.setCommand(Common::Constants::C2M_CloseSocketReq, 0, 0, 0);
+                auto seid = session->getId();
+                packet.setData(reinterpret_cast<const std::uint8_t*>(&seid), sizeof(seid));
+                asio::write(socket, asio::buffer(packet.generateOutgoingPacket()), ec);
+                if (ec)
+                {
+                    ::Utils::Logger::log("Failed to send player state update to " + selfMainServerInfo.ip, ::Utils::LogType::Warning, "sendCloseSocketReq");
+                    session->closeSocket();
+                    return;
+                }
+            }
+            catch (const std::exception& e)
+            {
+                session->closeSocket();
+                ::Utils::Logger::log("Exception: " + std::string(e.what()), ::Utils::LogType::Error, "sendCloseSocketReq");
+            }
+        }
+
 
         inline std::optional<std::uint32_t> getSessionId(std::uint32_t aid)
         {

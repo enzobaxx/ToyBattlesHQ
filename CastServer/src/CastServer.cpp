@@ -67,7 +67,8 @@ namespace Cast
 			std::shared_ptr<CN::Session> session) { Cast::Handlers::handleIpReq(request, session); });
 		CN::Session::addCallback<CN::PacketType::UNECRYPTED, CN::Session>(Common::Constants::M2C_Invisibility, [&](const CN::UnecryptedPacket& request,
 			std::shared_ptr<CN::Session> session) { Cast::Handlers::handleInvisibleCmd(request, session, m_roomsManager, m_sessionsManager); });
-
+		CN::Session::addCallback<CN::PacketType::UNECRYPTED, CN::Session>(Common::Constants::C2M_CloseSocketReq, [&](const CN::UnecryptedPacket& request,
+			std::shared_ptr<CN::Session> session) { Cast::Handlers::closeSocketAfterMain(request, session, m_sessionsManager); });
 
 		Common::Network::Session::addCallback<CN::PacketType::UNECRYPTED, Session>(71, [&](const Common::Network::UnecryptedPacket& request,
 			std::shared_ptr<Cast::Network::Session> session) { Cast::Handlers::pongHandler(request, session, m_roomsManager, m_sessionsManager, m_serverId); });
