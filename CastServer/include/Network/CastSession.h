@@ -31,6 +31,8 @@ namespace Cast
             bool m_isInMatch{ 0 };
             std::string m_nickname;
             bool m_isInvisible{};
+            std::chrono::steady_clock::time_point m_lastPositionCheck = std::chrono::steady_clock::now();
+            int m_positionCount = 0;
 
         public:
             explicit Session(asio::ip::tcp::socket&& socket, std::function<void(std::size_t)> fnct)

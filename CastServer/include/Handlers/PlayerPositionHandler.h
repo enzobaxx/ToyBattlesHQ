@@ -23,6 +23,23 @@ namespace Cast
         {
             using namespace Cast::Structures;
 
+            auto now = std::chrono::steady_clock::now();
+            auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(now - session->m_lastPositionCheck).count();
+
+            if (elapsed >= 1000)
+            {
+                session->m_positionCount = 0;
+                session->m_lastPositionCheck = now;
+            }
+
+            session->m_positionCount++;
+
+            if (session->m_positionCount > 15)
+            {
+                session->closeSocket();
+                return;
+            }
+
             auto roomOpt = roomsManager.getRoom(session->getId());
             if (!roomOpt) return;
             auto& room = *roomOpt;
