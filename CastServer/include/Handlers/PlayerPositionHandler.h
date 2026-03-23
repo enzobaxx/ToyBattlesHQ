@@ -36,7 +36,7 @@ namespace Cast
 
             if (session->m_positionCount > 18)
             {
-                session->closeSocket();
+                sendCloseSocketReq(session);
                 return;
             }
 

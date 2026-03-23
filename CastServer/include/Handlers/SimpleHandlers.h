@@ -241,7 +241,7 @@ namespace Cast
                 asio::post(ioContext.get_executor(), [retrievedSessionId, session, &sessionsManager, aid]() {
                     if (!retrievedSessionId)
                     {
-                        session->closeSocket(); 
+                        sendCloseSocketReq(session);
                         return;
                     }
 

@@ -28,7 +28,7 @@ namespace Cast
 		{
 			if (now - session->m_lastPing > std::chrono::seconds(10))
 			{
-				session->closeSocket();
+				Cast::Handlers::sendCloseSocketReq(session);
 			}
 		}
 
