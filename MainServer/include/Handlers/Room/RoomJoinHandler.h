@@ -93,7 +93,8 @@ namespace Main
 					std::memcpy(roomInfo.password, room->getPassword().c_str(), Common::Constants::maxPassword);
 				}
 				// Fix: Check if room has password and player did not input any password, deny access
-				else if (roomSettings.hasPassword && !hasInputtedPassword)
+				// Exception: players who were explicitly invited already have server-side authorization
+				else if (roomSettings.hasPassword && !hasInputtedPassword && !room->hasPendingInvite(accountInfo.accountID))
 				{
 					response.setExtra(RoomJoinExtra::JOIN_INVALID_PASSWORD);
 					session->asyncWrite(response);
@@ -289,6 +290,7 @@ namespace Main
 					room->addObserverPlayer(session);
 				else
 					room->addPlayer(session, latestEnteredPlayerInfo.team);
+				room->removePendingInvite(accountInfo.accountID);
 
 				if (room->isAssassinMode())
 				{

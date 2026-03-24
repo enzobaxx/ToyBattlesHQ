@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <vector>
 #include <string>
+#include <unordered_set>
 #include "../Structures/Room/ClientRoomCreationInfo.h"
 #include "../Structures/Room/RoomPlayerInfo.h"
 #include "../Structures/Room/RoomsList.h"
@@ -41,6 +42,7 @@ namespace Main
 
 			std::vector<std::pair<std::uint32_t, std::string>> m_kickedPlayerAccountIds{};
 			std::vector<std::uint32_t> m_votekickStarters{}; // each player has only 1 votekick per match
+			std::unordered_set<std::uint32_t> m_pendingInviteAccountIds{};
 
 			// Points
 			std::uint32_t m_bluePoints{};
@@ -290,6 +292,9 @@ namespace Main
 			bool wasPreviouslyKicked(std::uint32_t accountId) const;
 			bool removeKickedPlayerByNickname(const std::string& nickname);
 			std::vector<std::string> getKickedPlayerNicknames() const;
+			void addPendingInvite(std::uint32_t accountId);
+			bool hasPendingInvite(std::uint32_t accountId) const;
+			void removePendingInvite(std::uint32_t accountId);
 			Main::Structures::RoomSettingsUpdateTitlePassword getRoomSettingsUpdate() const;
 			Main::Network::Session::AccountInfo getAccountInfoFor(const Main::Structures::UniqueId& uniqueId) const;
 

@@ -1228,6 +1228,21 @@ namespace Main
 				!= m_kickedPlayerAccountIds.end();
 		}
 
+		void Room::addPendingInvite(std::uint32_t accountId)
+		{
+			m_pendingInviteAccountIds.insert(accountId);
+		}
+
+		bool Room::hasPendingInvite(std::uint32_t accountId) const
+		{
+			return m_pendingInviteAccountIds.contains(accountId);
+		}
+
+		void Room::removePendingInvite(std::uint32_t accountId)
+		{
+			m_pendingInviteAccountIds.erase(accountId);
+		}
+
 		bool Room::removeKickedPlayerByNickname(const std::string& nickname)
 		{
 			auto initialSize = m_kickedPlayerAccountIds.size();

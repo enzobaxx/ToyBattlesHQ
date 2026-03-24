@@ -138,6 +138,7 @@ namespace Main
 						}
 						response.setData(reinterpret_cast<std::uint8_t*>(&roomFollow), sizeof(roomFollow));
 						targetSession->asyncWrite(response);
+						room->addPendingInvite(targetSession->getAccountInfo().accountID);
 					}
 					else
 					{
