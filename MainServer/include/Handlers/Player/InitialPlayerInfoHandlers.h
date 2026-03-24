@@ -25,6 +25,18 @@ namespace Main
 				session->sendInventory(*reinterpret_cast<const std::uint32_t*>(request.getData()));
 				handleAccountInformation(request, session, sessionsManager, scheduler, *accountInfo, timeSinceLastServerRestart, serverId, 59);
 
+				Common::Network::Packet response;
+				response.setTcpHeader(request.getSession(), Common::Enums::NO_ENCRYPTION);
+				response.setOrder(204);
+				struct Advertisement
+				{
+					std::uint32_t displayTime = 30;
+					char fileName[17]{ "welcome_logo.dds" };
+					char unused[495];
+				} advertisement;
+				response.setData(reinterpret_cast<std::uint8_t*>(&advertisement), sizeof(advertisement));
+				session->asyncWrite(response);
+
 				session->sendWeeklyReward();
 				session->sendMonthlyReward();
 
@@ -41,18 +53,6 @@ namespace Main
 					Main::Handlers::handleModeEvents(request, session, scheduler);
 					Main::Handlers::handleMapEvents(request, session, scheduler);
 				}
-
-				Common::Network::Packet response;
-				response.setTcpHeader(request.getSession(), Common::Enums::NO_ENCRYPTION);
-				response.setOrder(204);
-				struct Advertisement
-				{
-					std::uint32_t displayTime = 30;
-					char fileName[17]{ "welcome_logo.dds" };
-					char unused[495];
-				} advertisement;
-				response.setData(reinterpret_cast<std::uint8_t*>(&advertisement), sizeof(advertisement));
-				session->asyncWrite(response);
 			}
 		}
 	}
