@@ -25,7 +25,6 @@ namespace Cast
             std::uint32_t m_roomNumber{};
 
         public:
-            std::chrono::steady_clock::time_point m_lastPing = std::chrono::steady_clock::now();
             Common::Enums::Team m_team{};
             bool isDead{};
             bool m_isInMatch{ 0 };

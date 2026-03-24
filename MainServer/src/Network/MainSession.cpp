@@ -51,6 +51,7 @@ namespace Main
 			Common::Network::Packet incomingPacket;
 			if (!incomingPacket.processIncomingPacket(data.data(), static_cast<std::uint16_t>(data.size()), m_crypt.UserKey))
 			{
+				std::cout << "MainSv OnPacket - closeSocket\n";
 				closeSocket();
 				return;
 			}

@@ -19,23 +19,6 @@ namespace Cast
 		m_positionTimer->async_wait([this](auto) { tickPositionFlush(); });
 	}
 
-	void CastServer::tickSessionHeartbeat()
-	{
-		using Clock = std::chrono::steady_clock;
-		auto now = Clock::now();
-
-		for (auto [id, session] : m_sessionsManager.getAllSessions()) 
-		{
-			if (now - session->m_lastPing > std::chrono::seconds(15))
-			{
-				Cast::Handlers::sendCloseSocketReq(session);
-			}
-		}
-
-		m_sessionTimer->expires_after(std::chrono::seconds(1));
-		m_sessionTimer->async_wait([this](auto) { tickSessionHeartbeat(); });
-	}
-
 	CastServer::CastServer(ioContext& io_context, const std::string& serverIp, std::uint16_t port, std::uint16_t mainPort, std::uint16_t serverId)
 		: m_io_context{ io_context }
 		, m_acceptor{ io_context, tcp::endpoint(asio::ip::address::from_string(serverIp), port) }
@@ -47,9 +30,6 @@ namespace Cast
 		m_sessionsManager.setRoomsManager(&m_roomsManager);
 		m_positionTimer = std::make_shared<asio::steady_timer>(m_io_context);
 		tickPositionFlush();
-
-		m_sessionTimer = std::make_shared<asio::steady_timer>(m_io_context);
-		tickSessionHeartbeat();
 
 		namespace CN = Common::Network;
 		using namespace Cast::Network;

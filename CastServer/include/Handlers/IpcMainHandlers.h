@@ -40,6 +40,7 @@ namespace Cast
         {
             if (auto s = sm.getSession(request.getSession()))
             {
+                std::cout << "closeSocketAfterMain - closeSocket\n";
                 s->closeSocket();
             }
         }
