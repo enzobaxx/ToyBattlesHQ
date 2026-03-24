@@ -178,7 +178,6 @@ namespace Common
 			Common::Network::UnecryptedPacket incomingPacket;
 			if (!incomingPacket.processIncomingPacket(data.data(), static_cast<std::uint16_t>(data.size())))
 			{
-				closeSocket();
 				return;
 			}
 

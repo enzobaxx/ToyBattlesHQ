@@ -47,7 +47,7 @@ namespace Cast
 			Common::Network::UnecryptedPacket incomingPacket;
 			if (!incomingPacket.processIncomingPacket(data.data(), static_cast<std::uint16_t>(data.size())))
 			{
-				Cast::Handlers::sendCloseSocketReq(std::static_pointer_cast<Cast::Network::Session>(shared_from_this()));
+				return;
 			}
 
 			const std::uint16_t callbackNum = incomingPacket.getOrder();
