@@ -19,7 +19,11 @@ namespace Auth
 		void Session::onPacket(std::vector<std::uint8_t>& data)
 		{
 			Common::Network::Packet incomingPacket;
-			incomingPacket.processIncomingPacket(data.data(), static_cast<std::uint16_t>(data.size()), m_crypt.UserKey);
+			if (!incomingPacket.processIncomingPacket(data.data(), static_cast<std::uint16_t>(data.size()), m_crypt.UserKey))
+			{
+				closeSocket();
+				return;
+			}
 
 			const std::uint16_t callbackNum = incomingPacket.getOrder();
 			if (!Common::Network::Session::callbacks<Common::Network::PacketType::ENCRYPTED, Session>.contains(callbackNum))

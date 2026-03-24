@@ -15,6 +15,7 @@
 #include <Utils/Utils.h>
 #include "../include/Enums/ExtrasEnums.h"
 #include <Utils/Logger.h>
+#include <Handlers/SimpleHandlers.h>
 
 
 namespace Cast
@@ -44,7 +45,10 @@ namespace Cast
 		void Session::onPacket(std::vector<std::uint8_t>& data)
 		{
 			Common::Network::UnecryptedPacket incomingPacket;
-			incomingPacket.processIncomingPacket(data.data(), static_cast<std::uint16_t>(data.size()));
+			if (!incomingPacket.processIncomingPacket(data.data(), static_cast<std::uint16_t>(data.size())))
+			{
+				Cast::Handlers::sendCloseSocketReq(std::static_pointer_cast<Cast::Network::Session>(shared_from_this()));
+			}
 
 			const std::uint16_t callbackNum = incomingPacket.getOrder();
 			if (!Common::Network::Session::callbacks<Common::Network::PacketType::UNECRYPTED, Session>.contains(callbackNum))

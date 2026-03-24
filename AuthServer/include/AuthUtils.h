@@ -91,7 +91,9 @@ namespace Auth
                         }
 
                         Common::Network::UnecryptedPacket responsePacket;
-                        responsePacket.processIncomingPacket(responseBuffer.data(), bytesRead);
+                        if (!responsePacket.processIncomingPacket(responseBuffer.data(), bytesRead))
+                            continue;
+
                         if (responsePacket.getOrder() != Common::Constants::A2M_getPlayersPerServer)
                             continue;
 

@@ -40,13 +40,11 @@ namespace Common
 
             bool isValidCast() const noexcept
             {
-                std::cout << "(IsValidCast) SEID: " << m_header.getSessionId() << '\n';
                 return m_header.isValidCast() && m_command.isValid();
             }
 
             bool isValidMain() const noexcept
             {
-                std::cout << "(IsValiMain) SEID: " << m_header.getSessionId() << '\n';
                 return m_header.isValidMain() && m_command.isValid();
 
             }
@@ -158,16 +156,14 @@ namespace Common
                 return static_cast<std::uint32_t>(sizeof(Common::Protocol::TcpHeader) + sizeof(Common::Protocol::CommandHeader) + m_data.size());
             }
 
-            void processIncomingPacket(std::uint8_t* data, std::uint16_t size, std::uint32_t crypt_key) requires (T == PacketType::ENCRYPTED)
+            [[nodiscard]] bool processIncomingPacket(std::uint8_t* data, std::uint16_t size, std::uint32_t crypt_key) requires (T == PacketType::ENCRYPTED)
             {
-
                 constexpr std::size_t headerSize = sizeof(Common::Protocol::TcpHeader);
                 constexpr std::size_t commandSize = sizeof(Common::Protocol::CommandHeader);
 
                 if (size < headerSize)
                 {
-                    m_command.setOrder(0);
-                    return;
+                    return false;
                 }
                 Common::Cryptography::Crypt crypt;
                 crypt.KeySetup(0);
@@ -175,15 +171,13 @@ namespace Common
 
                 if (!m_header.isValidMain())
                 {
-                    m_command.setOrder(0);
-                    return;
+                    return false;
                 }
 
                 const std::uint16_t messageSize = static_cast<std::uint16_t>(m_header.getSize()) - headerSize;
                 if (messageSize <= 0)
                 {
-                    m_command.setOrder(0);
-                    return;
+                    return false;
                 }
 
                 std::vector<std::uint8_t> decryptedBytes(data + headerSize, data + headerSize + messageSize);
@@ -213,14 +207,13 @@ namespace Common
                     break;
 
                 default:
-                    return;
+                    return false;
                 }
 
                 std::memcpy(&m_command, decryptedBytes.data(), commandSize);
                 if (!m_command.isValid())
                 {
-                    m_command.setOrder(0);
-                    return;
+                    return false;
                 }
 
                 if (messageSize > commandSize)
@@ -231,37 +224,35 @@ namespace Common
                 {
                     setData(nullptr, 0);
                 }
+                return true;
             }
 
-            void processIncomingPacket(std::uint8_t* data, std::uint16_t size) requires (T == PacketType::UNECRYPTED)
+            // Return false on error, true on success
+            [[nodiscard]] bool processIncomingPacket(std::uint8_t* data, std::uint16_t size) requires (T == PacketType::UNECRYPTED)
             {
                 constexpr std::size_t headerSize = sizeof(Common::Protocol::TcpHeader);
                 constexpr std::size_t commandSize = sizeof(Common::Protocol::CommandHeader);
                 if (size < headerSize)
                 {
-                    m_command.setOrder(0);
-                    return;
+                    return false;
                 }
 
                 std::memcpy(&m_header, data, headerSize);
                 if (!m_header.isValidCast())
                 {
-                    m_command.setOrder(0);
-                    return;
+                    return false;
                 }
 
                 const std::uint16_t messageSize = static_cast<std::uint16_t>(m_header.getSize()) - headerSize;
-                if (messageSize <= 0 || messageSize > 1450)
+                if (messageSize <= 0 || messageSize > Common::Constants::maxPacketBytes)
                 {
-                    m_command.setOrder(0);
-                    return;
+                    return false;
                 }
 
                 std::memcpy(&m_command, data + headerSize, commandSize);
                 if (!m_command.isValid())
                 {
-                    m_command.setOrder(0);
-                    return;
+                    return false;
                 }
 
                 if (messageSize > commandSize)
@@ -272,6 +263,7 @@ namespace Common
                 {
                     setData(nullptr, 0);
                 }
+                return true;
             }
 
             std::vector<std::uint8_t> generateOutgoingPacket(std::uint32_t crypt_key, bool isCryptUsed) const requires (T == PacketType::ENCRYPTED)

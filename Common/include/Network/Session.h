@@ -78,7 +78,7 @@ namespace Common
 				: m_socket{ std::move(socket) }
 				, m_onCloseSocketCallback{ fnct }
 			{
-				m_reader.reserve(1450);
+				m_reader.reserve(Common::Constants::maxPacketBytes);
 				m_socket.set_option(asio::ip::tcp::no_delay(true));
 
 				try

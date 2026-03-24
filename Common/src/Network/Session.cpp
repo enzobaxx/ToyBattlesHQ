@@ -112,6 +112,7 @@ namespace Common
 						cryptography.RC5Decrypt32(reinterpret_cast<int32_t*>(m_reader.data()), &header, headerSize);
 						if (!header.isValidMain())
 						{
+							closeSocket();
 							return;
 						}
 					}
@@ -120,15 +121,11 @@ namespace Common
 						std::memcpy(&header, m_reader.data(), headerSize);
 						if (!header.isValidCast())
 						{
+							closeSocket();
 							return;
 						}
 					}
 
-					if (header.getSize() >= Common::Constants::maxPacketBytes)
-					{
-						closeSocket();
-						return;
-					}
 					if (m_reader.size() >= static_cast<std::size_t>(header.getSize()))
 					{
 						std::vector<std::uint8_t> data(m_reader.begin(), m_reader.begin() + header.getSize());
@@ -179,7 +176,11 @@ namespace Common
 		void Session::onPacket(std::vector<std::uint8_t>& data)
 		{
 			Common::Network::UnecryptedPacket incomingPacket;
-			incomingPacket.processIncomingPacket(data.data(), static_cast<std::uint16_t>(data.size()));
+			if (!incomingPacket.processIncomingPacket(data.data(), static_cast<std::uint16_t>(data.size())))
+			{
+				closeSocket();
+				return;
+			}
 
 			const std::uint16_t callbackNum = incomingPacket.getOrder();
 			if (!Common::Network::Session::callbacks<Common::Network::PacketType::UNECRYPTED, Session>.contains(callbackNum))

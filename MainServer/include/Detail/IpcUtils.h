@@ -51,7 +51,10 @@ namespace Main
                 }
 
                 Common::Network::UnecryptedPacket responsePacket;
-                responsePacket.processIncomingPacket(responseBuffer.data(), bytesRead);
+                if (!responsePacket.processIncomingPacket(responseBuffer.data(), bytesRead))
+                {
+                    return false;
+                }
 
                 if (responsePacket.getOrder() == Common::Constants::M2C_mapId)
                 {
@@ -105,7 +108,10 @@ namespace Main
                 }
 
                 Common::Network::UnecryptedPacket responsePacket;
-                responsePacket.processIncomingPacket(responseBuffer.data(), bytesRead);
+                if (!responsePacket.processIncomingPacket(responseBuffer.data(), bytesRead))
+                {
+                    return false;
+                }
 
                 if (responsePacket.getOrder() == Common::Constants::M2C_roomNumber)
                 {
@@ -176,7 +182,10 @@ namespace Main
                 }
 
                 Common::Network::UnecryptedPacket responsePacket;
-                responsePacket.processIncomingPacket(responseBuffer.data(), bytesRead);
+                if (!responsePacket.processIncomingPacket(responseBuffer.data(), bytesRead))
+                {
+                    return false;
+                }
 
                 if (responsePacket.getOrder() == Common::Constants::M2C_assassinModeInfo)
                 {

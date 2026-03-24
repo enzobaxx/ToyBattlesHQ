@@ -194,7 +194,10 @@ namespace Cast
                     return std::nullopt;
                 }
 
-                responsePacket.processIncomingPacket(responseBuffer.data(), bytesRead);
+                if (!responsePacket.processIncomingPacket(responseBuffer.data(), bytesRead))
+                {
+                    return std::nullopt;
+                }
 
                 if (responsePacket.getOrder() != Common::Constants::M2C_sessionId || responsePacket.getExtra() == 1)
                 {
