@@ -26,7 +26,7 @@ namespace Cast
 
 		for (auto [id, session] : m_sessionsManager.getAllSessions()) 
 		{
-			if (now - session->m_lastPing > std::chrono::seconds(10))
+			if (now - session->m_lastPing > std::chrono::seconds(15))
 			{
 				Cast::Handlers::sendCloseSocketReq(session);
 			}
