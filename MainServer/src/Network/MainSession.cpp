@@ -1877,8 +1877,6 @@ namespace Main
 			const std::uint32_t index = eventMission.eventIndex;
 			if (m_eventMissions.find(index) == m_eventMissions.end())
 			{
-				//sendMessage("[sendEventMission] error while sending event mission point (EventMissionIndex: " + std::to_string(index) + ", ActiveEventsSize: " + 
-					//std::to_string(m_eventMissions.size()) + ") - please report this issue");
 				return;
 			}
 			
@@ -1933,8 +1931,7 @@ namespace Main
 						eventIndex, Common::Constants::eventMissionTotal);
 
 					// Also send 5,000 RT for each event mission + 10 coupons + boss battle ticket
-					sendRt(5'000);
-					spawnCouponImmediate(5);
+					sendRt(10'000);
 					spawnItemCommand(4811300, "Item spawned automatically - event mission rewards");
 					sendMessage("You obtained 5'000 RT, 5 coupons and a Boss Battle ticket!", Main::Enums::TIP);
 				}

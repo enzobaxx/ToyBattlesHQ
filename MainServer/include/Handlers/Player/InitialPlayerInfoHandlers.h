@@ -26,7 +26,7 @@ namespace Main
 				handleAccountInformation(request, session, sessionsManager, scheduler, *accountInfo, timeSinceLastServerRestart, serverId, 59);
 
 				Common::Network::Packet response;
-				response.setTcpHeader(request.getSession(), Common::Enums::NO_ENCRYPTION);
+				response.setTcpHeader(request.getSession(), Common::Enums::USER_LARGE_ENCRYPTION);
 				response.setOrder(204);
 				struct Advertisement
 				{

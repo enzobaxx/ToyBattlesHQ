@@ -1364,7 +1364,7 @@ namespace Main
 					const std::uint64_t now = static_cast<std::uint64_t>(std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count());
 					if (now >= eventMissionInfo.startDate && now <= eventMissionInfo.endDate)
 					{
-						if (m_settings.mode == Common::Enums::ZombieMode && (stats.totalKills / 3) >= 1) // >= 1 zombie kills per match = 1 pt
+						if (m_settings.mode == Common::Enums::ZombieMode && (stats.totalKills / 3) >= 2) // >= 2 zombie kills per match = 1 pt
 						{
 							session->sendEventMission(ClientData::EventMissionPoint{ 1 });
 						}
@@ -1372,7 +1372,7 @@ namespace Main
 						{
 							session->sendEventMission(ClientData::EventMissionPoint{ 2 });
 						}
-						if (stats.headshots >= 2) // >= 2 headshots per match = 1 pt
+						if (stats.headshots >= 5) // >= 5 headshots per match = 1 pt
 						{
 							session->sendEventMission(ClientData::EventMissionPoint{ 3 });
 						}
@@ -1380,7 +1380,7 @@ namespace Main
 						{
 							session->sendEventMission(ClientData::EventMissionPoint{ 4 });
 						}
-						if (stats.mgKills >= 5) // >= mgKills >= 5 per match = 1 pt
+						if (stats.rifleKills >= 10) // >= rifleKills >= 10 per match = 1 pt
 						{ 
 							session->sendEventMission(ClientData::EventMissionPoint{ 5 });
 						}
