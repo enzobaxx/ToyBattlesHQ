@@ -46,7 +46,7 @@ namespace Common
 
             bool isValidMain() const noexcept
             {
-                st::cout << "(IsValiMain) SEID: " << m_header.getSessionId() << '\n';
+                std::cout << "(IsValiMain) SEID: " << m_header.getSessionId() << '\n';
                 return m_header.isValidMain() && m_command.isValid();
 
             }
