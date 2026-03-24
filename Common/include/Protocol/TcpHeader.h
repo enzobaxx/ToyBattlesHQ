@@ -48,11 +48,41 @@ PACK_PUSH(1)
 
             bool isValidMain() const noexcept
             {
-                return sessionId <= Common::Constants::maxSessionsPerServer
-                    && size <= 2048
-                    && crypt <= Common::Enums::USER_LARGE_ENCRYPTION;
-            }
+                bool valid = true;
 
+                if (sessionId > Common::Constants::maxSessionsPerServer)
+                {
+                    std::cout << "[INVALID] sessionId too large: "
+                        << sessionId << " > "
+                        << Common::Constants::maxSessionsPerServer << "\n";
+                    valid = false;
+                }
+
+                if (size > 2048)
+                {
+                    std::cout << "[INVALID] size too large: "
+                        << size << " (max 2048)\n";
+                    valid = false;
+                }
+
+                if (crypt > Common::Enums::USER_LARGE_ENCRYPTION)
+                {
+                    std::cout << "[INVALID] crypt value too high: "
+                        << static_cast<int>(crypt)
+                        << " (max " << static_cast<int>(Common::Enums::USER_LARGE_ENCRYPTION) << ")\n";
+                    valid = false;
+                }
+
+                if (!valid)
+                {
+                    std::cout << "[PACKET DEBUG] sessionId=" << sessionId
+                        << " size=" << size
+                        << " crypt=" << static_cast<int>(crypt)
+                        << "\n";
+                }
+
+                return valid;
+            }
             bool isValidCast() const noexcept
             {
                 bool valid = true;

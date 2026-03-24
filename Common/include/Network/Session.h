@@ -151,25 +151,24 @@ namespace Common
 					return false;
 				}
 
-				if (packetType == PacketType::UNECRYPTED && !message.isValidCast())
-				{
-					std::cout << "Session::asyncWriteImpl Invalid Cast\n";
-					return false;
-				}
-				else if (packetType == PacketType::ENCRYPTED && !message.isValidMain())
-				{
-					std::cout << "Session::asyncWriteImpl Invalid Main\n";
-					return false;
-				}
-
 				auto packetData = std::make_shared<std::vector<std::uint8_t>>();
 
 				if constexpr (packetType == PacketType::ENCRYPTED)
 				{
+					if (!message.isValidMain())
+					{
+						std::cout << "Session::asyncWriteImpl Invalid Cast\n";
+						return false;
+					}
 					*packetData = message.generateOutgoingPacket(m_crypt.UserKey, m_crypt.isUsed);
 				}
 				else if constexpr (packetType == PacketType::UNECRYPTED)
 				{
+					if (!message.isValidCast())
+					{
+						std::cout << "Session::asyncWriteImpl Invalid Main\n";
+						return false;
+					}
 					*packetData = message.generateOutgoingPacket();
 				}
 
