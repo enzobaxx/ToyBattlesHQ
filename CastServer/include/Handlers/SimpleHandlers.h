@@ -265,8 +265,6 @@ namespace Cast
             Cast::Classes::RoomsManager& roomsManager,
             Cast::Network::SessionsManager& sessionsManager, std::uint32_t m_serverId)
         {
-            session->m_lastPing = std::chrono::steady_clock::now();
-
             Common::Network::UnecryptedPacket response;
             response.setTcpHeader(session->getId());
             response.setCommand(72, 1, 0, request.getOption());
@@ -351,9 +349,6 @@ namespace Cast
                 }
                 session->isDead = true;
                 session->m_isInMatch = true;
-                auto now = std::chrono::steady_clock::now();
-                session->m_positionCount = 0;
-                session->m_lastPositionCheck = now;
 
                 if (room->m_isAssassinMode && request.getSession() == session->getId())
                 {

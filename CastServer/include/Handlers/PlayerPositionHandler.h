@@ -23,31 +23,12 @@ namespace Cast
         {
             using namespace Cast::Structures;
 
-            auto now = std::chrono::steady_clock::now();
-            auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(now - session->m_lastPositionCheck).count();
-
-            if (elapsed >= 1000)
-            {
-                session->m_positionCount = 0;
-                session->m_lastPositionCheck = now;
-            }
-
-            session->m_positionCount++;
-
-            if (session->m_positionCount > 18)
-            {
-                sendCloseSocketReq(session);
-                return;
-            }
-
             auto roomOpt = roomsManager.getRoom(session->getId());
             if (!roomOpt) return;
             auto& room = *roomOpt;
 
             Cast::Structures::ClientPlayerInfoBasic playerPositionFromClient = Cast::Details::parseData<Cast::Structures::ClientPlayerInfoBasic>(request);
             if (playerPositionFromClient.isBad()) return;
-            //room->m_roomTick = playerPositionFromClient.matchTick; // Note: this is now inside positionFlush (Room.cpp)
-
 
             if (room->m_isInvisible || session->m_isInvisible)
             {
@@ -112,7 +93,7 @@ namespace Cast
                 playerInfoResponseWithBullets.specificInfo.enableBullet = true;
                 playerInfoResponseWithBullets.specificInfo.enableJump = true;
 
-              //  playerInfoResponseWithBullets.tick = playerPositionFromClient.matchTick;
+                //  playerInfoResponseWithBullets.tick = playerPositionFromClient.matchTick;
                 playerInfoResponseWithBullets.position = playerPositionFromClient.position;
                 playerInfoResponseWithBullets.direction = playerPositionFromClient.direction;
                 playerInfoResponseWithBullets.specificInfo.animation1 = playerPositionFromClient.animation1;
@@ -131,7 +112,7 @@ namespace Cast
             else
             {
                 PlayerInfoBasicResponse playerInfoBasicResponse;
-               // playerInfoBasicResponse.tick = playerPositionFromClient.matchTick;
+                // playerInfoBasicResponse.tick = playerPositionFromClient.matchTick;
                 playerInfoBasicResponse.position = playerPositionFromClient.position;
                 playerInfoBasicResponse.direction = playerPositionFromClient.direction;
                 playerInfoBasicResponse.currentWeapon = playerPositionFromClient.weapon;
@@ -167,7 +148,6 @@ namespace Cast
                 }
             }
             
-            response.setSession(session->getId());
             room->enqueuePosition(std::move(response));
         }
     }
