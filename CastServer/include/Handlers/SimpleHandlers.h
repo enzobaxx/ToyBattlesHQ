@@ -265,6 +265,8 @@ namespace Cast
             Cast::Classes::RoomsManager& roomsManager,
             Cast::Network::SessionsManager& sessionsManager, std::uint32_t m_serverId)
         {
+            session->m_lastPing = std::chrono::steady_clock::now();
+
             Common::Network::UnecryptedPacket response;
             response.setTcpHeader(session->getId());
             response.setCommand(72, 1, 0, request.getOption());
