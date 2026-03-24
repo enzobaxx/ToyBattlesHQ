@@ -160,7 +160,6 @@ namespace Common
 
             void processIncomingPacket(std::uint8_t* data, std::uint16_t size, std::uint32_t crypt_key) requires (T == PacketType::ENCRYPTED)
             {
-                std::cout << "processIncomingPacket MAIN\n";
 
                 constexpr std::size_t headerSize = sizeof(Common::Protocol::TcpHeader);
                 constexpr std::size_t commandSize = sizeof(Common::Protocol::CommandHeader);
@@ -176,7 +175,6 @@ namespace Common
 
                 if (!m_header.isValidMain())
                 {
-                    std::cout << "Session::processIncomingPacket invalid Main header detected\n";
                     m_command.setOrder(0);
                     return;
                 }
@@ -221,7 +219,6 @@ namespace Common
                 std::memcpy(&m_command, decryptedBytes.data(), commandSize);
                 if (!m_command.isValid())
                 {
-                    std::cout << "Session::processIncomingPacket invalid Main m_command detected\n";
                     m_command.setOrder(0);
                     return;
                 }
@@ -238,8 +235,6 @@ namespace Common
 
             void processIncomingPacket(std::uint8_t* data, std::uint16_t size) requires (T == PacketType::UNECRYPTED)
             {
-                std::cout << "processIncomingPacket CAST\n";
-
                 constexpr std::size_t headerSize = sizeof(Common::Protocol::TcpHeader);
                 constexpr std::size_t commandSize = sizeof(Common::Protocol::CommandHeader);
                 if (size < headerSize)
@@ -251,7 +246,6 @@ namespace Common
                 std::memcpy(&m_header, data, headerSize);
                 if (!m_header.isValidCast())
                 {
-                    std::cout << "Session::processIncomingPacket invalid header detected\n";
                     m_command.setOrder(0);
                     return;
                 }
@@ -266,7 +260,6 @@ namespace Common
                 std::memcpy(&m_command, data + headerSize, commandSize);
                 if (!m_command.isValid())
                 {
-                    std::cout << "Session::processIncomingPacket invalid header detected\n";
                     m_command.setOrder(0);
                     return;
                 }
@@ -283,8 +276,6 @@ namespace Common
 
             std::vector<std::uint8_t> generateOutgoingPacket(std::uint32_t crypt_key, bool isCryptUsed) const requires (T == PacketType::ENCRYPTED)
             {
-                std::cout << "GenerateOutgoingPacket MAIN\n";
-
                 constexpr std::size_t headerSize = sizeof(Common::Protocol::TcpHeader);
                 constexpr std::size_t commandSize = sizeof(Common::Protocol::CommandHeader);
                 const std::size_t partialSize = commandSize + m_data.size();
@@ -335,7 +326,6 @@ namespace Common
 
             std::vector<std::uint8_t> generateOutgoingPacket() const requires (T == PacketType::UNECRYPTED)
             {
-                std::cout << "GenerateOutgoingPacket CAST\n";
                 constexpr std::size_t headerSize = sizeof(Common::Protocol::TcpHeader);
                 constexpr std::size_t commandSize = sizeof(Common::Protocol::CommandHeader);
                 const std::size_t partialSize = commandSize + m_data.size();

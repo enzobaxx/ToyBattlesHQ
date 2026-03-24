@@ -396,7 +396,7 @@ namespace Cast
 		{
 			if (m_pendingPositions.empty()) return;
 
-			static std::array<std::uint8_t, 1450> batchBuffer;
+			static std::array<std::uint8_t, Common::Constants::maxPacketBytes> batchBuffer;
 			std::size_t index = 0;
 
 			while (index < m_pendingPositions.size())
@@ -409,7 +409,7 @@ namespace Cast
 					auto& pkt = m_pendingPositions[index];
 					const auto size = pkt.getDataSize();
 
-					if (totalSize + size > 1436) // 8 bytes header + 4 bytes roomtick
+					if (totalSize + size > (Common::Constants::maxPacketBytes - 8 - 4)) // 8 bytes header + 4 bytes roomtick
 						break;
 
 					std::memcpy(batchBuffer.data() + totalSize, pkt.getData(), size);
@@ -421,15 +421,14 @@ namespace Cast
 				std::memcpy(batchBuffer.data(), &m_roomTick, sizeof(m_roomTick));
 				totalSize += sizeof(m_roomTick);
 
-				static Common::Network::UnecryptedPacket batch(1450, 322, 0);
+				static Common::Network::UnecryptedPacket batch(Common::Constants::maxPacketBytes, 322, 0);
 				batch.setOption(static_cast<uint32_t>(count));
 				batch.setData(batchBuffer.data(), static_cast<uint16_t>(totalSize));
 
 				broadcastToRoom(batch);
+				++m_roomTick;
 			}
-
 			m_pendingPositions.clear();
-			++m_roomTick;
 		}
 	};
 }

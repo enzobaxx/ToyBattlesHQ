@@ -54,26 +54,7 @@ PACK_PUSH(1)
 
 			bool isValid() const noexcept
 			{
-				bool valid = true;
-
-				if (order <= 0)
-				{
-					std::cout << "[INVALID] order too small: " << order << " (min 1)\n";
-					valid = false;
-				}
-
-				if (order >= 600)
-				{
-					std::cout << "[INVALID] order too large: " << order << " (max 599)\n";
-					valid = false;
-				}
-
-				if (!valid)
-				{
-					std::cout << "[PACKET DEBUG] order=" << order << "\n";
-				}
-
-				return valid;
+				return order > 0 && order < 600;
 			}
 		};
 PACK_POP()

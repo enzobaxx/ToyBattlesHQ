@@ -112,7 +112,6 @@ namespace Common
 						cryptography.RC5Decrypt32(reinterpret_cast<int32_t*>(m_reader.data()), &header, headerSize);
 						if (!header.isValidMain())
 						{
-							std::cout << "Session::onRead Invalid Main Header Detected\n";
 							return;
 						}
 					}
@@ -121,14 +120,12 @@ namespace Common
 						std::memcpy(&header, m_reader.data(), headerSize);
 						if (!header.isValidCast())
 						{
-							std::cout << "Session::onRead Invalid Cast Header Detected\n";
 							return;
 						}
 					}
 
-					if (header.getSize() >= 1450)
+					if (header.getSize() >= Common::Constants::maxPacketBytes)
 					{
-						std::printf("Session::onRead() - Invalid packet size: %d\n", header.getSize());
 						closeSocket();
 						return;
 					}

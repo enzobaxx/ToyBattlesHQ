@@ -157,7 +157,6 @@ namespace Common
 				{
 					if (!message.isValidMain())
 					{
-						std::cout << "Session::asyncWriteImpl Invalid Cast\n";
 						return false;
 					}
 					*packetData = message.generateOutgoingPacket(m_crypt.UserKey, m_crypt.isUsed);
@@ -166,7 +165,6 @@ namespace Common
 				{
 					if (!message.isValidCast())
 					{
-						std::cout << "Session::asyncWriteImpl Invalid Main\n";
 						return false;
 					}
 					*packetData = message.generateOutgoingPacket();
