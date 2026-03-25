@@ -2295,7 +2295,7 @@ namespace Main
                         Main::Structures::EquippedItem equippedItem{ item };
                         const auto characterId = static_cast<std::uint16_t>(resultSet->getInt("CharacterID"));
 
-                        if ((equippedItem.type >= 0 && equippedItem.type <= 17) || equippedItem.type == 511)
+                        if ((equippedItem.type >= 0 && equippedItem.type <= 17) || equippedItem.type == 19 || equippedItem.type == 20 /* diorama and scaffold */)
                         {
                             auto& equippedList = equippedItemsPerCharacter[characterId];
                             auto duplicateIt = std::find_if(equippedList.begin(), equippedList.end(),
