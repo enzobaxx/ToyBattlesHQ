@@ -326,9 +326,9 @@ namespace Main
 				{
 					m_packet.setMission(Main::Enums::AddFriendServerMission::RECEIVER_FRIENDLIST_FULL);
 				}
-				m_packet.setExtra(result);
-				asyncWrite(m_packet);
 			}
+			m_packet.setExtra(result);
+			asyncWrite(m_packet);
 		}
 
 		void Session::handleOnlineFriendRequest(std::shared_ptr<Main::Network::Session> targetSession, const AccountInfo& accountInfo)

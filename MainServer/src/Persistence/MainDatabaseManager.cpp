@@ -3316,24 +3316,17 @@ namespace Main
 
                 stmt->setUInt(1, accountID);
                 stmt->setUInt(2, targetAccountId);
-                if (stmt->executeUpdate() == 0)
-                {
-                    return;
-                }
+                stmt->executeUpdate(); 
 
                 stmt->setUInt(1, targetAccountId);
                 stmt->setUInt(2, accountID);
-                if (stmt->executeUpdate() == 0)
-                {
-                    return;
-                }
+                stmt->executeUpdate(); 
 
                 tg.commit();
             }
             catch (const sql::SQLException& e)
             {
                 ::Utils::Logger::log("MariaDB exception: " + std::string(e.what()), Utils::LogType::Error, "PersistentDatabase::addFriend");
-                return;
             }
         }
 

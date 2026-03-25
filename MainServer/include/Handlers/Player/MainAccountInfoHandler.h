@@ -45,7 +45,7 @@ namespace Main
 				if (auto targetSession = sessionsManager.getSessionByAccountId(currentFriend.targetAccountId))
 				{ // This friend is online. Notify them that we're online
 					session->updateFriendSession(targetSession);
-					targetSession->updateFriendSession(sessionsManager.getSessionBySessionId(session->getId()));
+					targetSession->updateFriendSession(session);
 					targetSession->logFriend(Main::Enums::FriendLogType::LOGIN, accountInfo.accountID);
 				}
 			}
