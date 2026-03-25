@@ -28,13 +28,14 @@ namespace Main
 			type = CdbUtils::getItemType(item.itemId.itemId).value_or(static_cast<std::uint32_t>(-1));
 			auto& setItemsInstance = Common::ConstantDatabase::CdbSingleton<Common::ConstantDatabase::SetItemInfo>::getInstance();
 
+			if (type == 22 || type == 23 /* diorama and scaffold */)
+			{
+				type -= 3;
+			}
+
 			if (type != static_cast<std::uint32_t>(-1) && type >= 17)
 			{
-				if (type == 22 || type == 23 /* diorama and scaffold */)
-				{
-					type -= 3;
-				}
-				if (!setItemsInstance.getEntry(item.itemId.itemId))
+				if (type != 22 && type != 23 && !setItemsInstance.getEntry(item.itemId.itemId))
 				{
 					type = static_cast<std::uint32_t>(-1);
 				}
