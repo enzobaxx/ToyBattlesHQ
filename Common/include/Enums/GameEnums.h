@@ -51,7 +51,7 @@ namespace Common
 			BAZOOKA = 15,
 			GRENADE = 16,
 			SET = 17,
-			MAX_ITEMTYPE = 18
+			MAX_ITEMTYPE = 21
 		};
 
 		inline bool isWeapon(ItemType itemType)
