@@ -26,6 +26,9 @@ namespace Main
             const std::size_t offset = targetSession->getAccountInfo().latestSelectedCharacter * Common::Enums::MAX_ITEMTYPE;
             const auto& targetEquippedItems = targetSession->getPlayer().getEquippedItems();
 
+            std::uint32_t equippedScaffoldId = 0;
+            std::uint32_t equippedDioramaId = 0;
+
             for (std::size_t i = 0; i < Common::Enums::MAX_ITEMTYPE; ++i)
             {
                 if (offset + i >= targetEquippedItems.size())
@@ -41,7 +44,15 @@ namespace Main
                 }
                 if (itemByCharacter.type >= Common::Enums::SET)
                 {
-                    if (auto entry = setItemsInstance.getEntry(itemByCharacter.id); entry)
+                    if (itemByCharacter.type == 19) // scaffold
+                    {
+                        equippedScaffoldId = itemByCharacter.id;
+                    }
+                    else if (itemByCharacter.type == 20) // diorama
+                    {
+                        equippedDioramaId = itemByCharacter.id;
+                    }
+                    else if (auto entry = setItemsInstance.getEntry(itemByCharacter.id); entry)
                     {
                         for (auto currentTypeNotNull 
                             : Common::Utils::getPartTypesWhereSetItemInfoTypeNotNull(*entry, targetSession->getAccountInfo().latestSelectedCharacter))
@@ -55,6 +66,9 @@ namespace Main
                     lobbyAccountInfo.items[itemByCharacter.type] = (itemByCharacter.id);
                 }
             }
+
+            constexpr std::uint64_t mask23 = 0x7FFFFFull;
+            lobbyAccountInfo.dioramaInfo = (std::uint64_t(equippedScaffoldId) & mask23) | ((std::uint64_t(equippedDioramaId) & mask23) << 23);
 
             Common::Network::Packet response;
             response.setTcpHeader(request.getSession(), Common::Enums::NO_ENCRYPTION);
