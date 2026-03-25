@@ -30,6 +30,10 @@ namespace Main
 
 			if (type != static_cast<std::uint32_t>(-1) && type >= 17)
 			{
+				if (type == 22 || type == 23 /* diorama and scaffold */)
+				{
+					type -= 3;
+				}
 				if (!setItemsInstance.getEntry(item.itemId.itemId))
 				{
 					type = static_cast<std::uint32_t>(-1);

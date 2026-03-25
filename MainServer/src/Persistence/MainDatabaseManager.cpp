@@ -2295,7 +2295,7 @@ namespace Main
                         Main::Structures::EquippedItem equippedItem{ item };
                         const auto characterId = static_cast<std::uint16_t>(resultSet->getInt("CharacterID"));
 
-                        if (equippedItem.type >= 0 && equippedItem.type <= 17)
+                        if ((equippedItem.type >= 0 && equippedItem.type <= 17) || equippedItem.type == 23 || equippedItem.type == 22 /* diorama */)
                         {
                             auto& equippedList = equippedItemsPerCharacter[characterId];
                             auto duplicateIt = std::find_if(equippedList.begin(), equippedList.end(),
@@ -2325,7 +2325,8 @@ namespace Main
                         else
                         {
                             Utils::Logger::log("Logic error: Player with AID " + std::to_string(playerID) +
-                                " got an equipped item that is not allowed (< 0 or > 17)!", Utils::LogType::Error, "PersistentDatabase::getPlayerItems");
+                                " got an equipped item that is not allowed (type: " + std::to_string((uint32_t)equippedItem.type)
+                                + ")", Utils::LogType::Error, "PersistentDatabase::getPlayerItems");
 
                             nonEquippedItems.push_back(std::move(item));
 
