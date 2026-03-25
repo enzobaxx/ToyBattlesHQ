@@ -35,9 +35,9 @@ namespace Main
 				type -= 3;
 			}
 
-			if (type != static_cast<std::uint32_t>(-1) && type >= 17)
+			if (type != static_cast<std::uint32_t>(-1) && type >= 17 && !isDiorama)
 			{
-				if (!isDiorama && !setItemsInstance.getEntry(item.itemId.itemId))
+				if (!setItemsInstance.getEntry(item.itemId.itemId))
 				{
 					type = static_cast<std::uint32_t>(-1);
 				}
