@@ -1880,7 +1880,7 @@ namespace Main
 			}
 			
 			auto& currentTotal = m_eventMissions[index];  
-			if (currentTotal < Common::Constants::eventMissionTotal)
+			if (currentTotal < Common::Constants::eventMissionTotal - 1)
 			{
 				sendMessage("Obtained one point for event mission idx: " + std::to_string(index));
 
