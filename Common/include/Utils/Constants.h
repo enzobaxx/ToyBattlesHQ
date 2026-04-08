@@ -54,7 +54,7 @@ namespace Common
 		constexpr inline std::uint32_t tutorialBox = 4500000;
 		constexpr inline std::uint32_t singlewaveEasyBox = 5337005;
 		constexpr inline std::uint32_t singlewaveHardBox = 5337006;
-		constexpr inline std::uint16_t eventMissionTotal = 51;
+		constexpr inline std::uint16_t eventMissionTotal = 76;
 		constexpr inline std::uint16_t totalEventMissions = 5;
 		inline std::string teamString = "Team";
 	}

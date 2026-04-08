@@ -1379,28 +1379,28 @@ namespace Main
 					const std::uint64_t now = static_cast<std::uint64_t>(std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count());
 					if (now >= eventMissionInfo.startDate && now <= eventMissionInfo.endDate)
 					{
-						if (m_settings.mode == Common::Enums::ZombieMode && (stats.totalKills / 3) >= 2) // >= 2 zombie kills per match = 1 pt
+						auto sessionMatchTime = (now * 1000) - session->getMatchStartTime();
+						if (stats.shotgunKills >= 5)
 						{
 							session->sendEventMission(ClientData::EventMissionPoint{ 1 });
 						}
-						if (m_settings.mode == Common::Enums::ZombieMode && stats.meleeKills >= 2) // >= 2 infections per match = 1 pt
+						if (sessionMatchTime >= 300000) // 5 mins
 						{
 							session->sendEventMission(ClientData::EventMissionPoint{ 2 });
 						}
-						if (stats.headshots >= 5) // >= 5 headshots per match = 1 pt
+						if (stats.sniperKills >= 10)
 						{
 							session->sendEventMission(ClientData::EventMissionPoint{ 3 });
 						}
-						if (stats.totalKills >= 15) // >= total kills >= 15 per match = 1 pt
+						if (stats.headshots >= 5)
 						{
 							session->sendEventMission(ClientData::EventMissionPoint{ 4 });
 						}
-						if (stats.rifleKills >= 10) // >= rifleKills >= 10 per match = 1 pt
+						if (stats.meleeKills >= 15 && m_settings.mode == Common::Enums::FreeForAll) 
 						{ 
 							session->sendEventMission(ClientData::EventMissionPoint{ 5 });
 						}
 					}
-					return;
 				}
 			}
 		}

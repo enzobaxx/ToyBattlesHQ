@@ -1880,7 +1880,7 @@ namespace Main
 			}
 			
 			auto& currentTotal = m_eventMissions[index];  
-			if (currentTotal < Common::Constants::eventMissionTotal)
+			if (currentTotal < Common::Constants::eventMissionTotal - 1)
 			{
 				sendMessage("Obtained one point for event mission idx: " + std::to_string(index));
 
@@ -1929,10 +1929,10 @@ namespace Main
 						m_player.getAccountID(), &Main::Persistence::PersistentDatabase::updatePlayerMissionProgress, m_player.getAccountID(),
 						eventIndex, Common::Constants::eventMissionTotal);
 
-					// Also send 5,000 RT for each event mission + 10 coupons + boss battle ticket
 					sendRt(10'000);
 					spawnItemCommand(4811300, "Item spawned automatically - event mission rewards");
-					sendMessage("You obtained 5'000 RT, 5 coupons and a Boss Battle ticket!", Main::Enums::TIP);
+					spawnItemCommand(4306004, "Coupon item spawned automatically - event mission rewards");
+					sendMessage("You obtained 10'000 RT, 15 coupons and a Boss Battle ticket!", Main::Enums::TIP);
 				}
 				else
 				{
