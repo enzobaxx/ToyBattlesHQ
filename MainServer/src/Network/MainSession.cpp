@@ -1919,6 +1919,8 @@ namespace Main
 			{
 				if (spawnItemCommand(*rewardId, "Item spawned automatically - event mission rewards"))
 				{
+					m_eventMissions[eventIndex] = Common::Constants::eventMissionTotal;
+
 					Common::Network::Packet packet;
 					packet.setTcpHeader(getId(), Common::Enums::NO_ENCRYPTION);
 					packet.setCommand(168, 0, 8, 0);
