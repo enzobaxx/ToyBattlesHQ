@@ -2004,6 +2004,11 @@ namespace Main
 				m_player.getAccountInfo().battery);
 		}
 
+		void Session::storeEvent()
+		{
+			m_scheduler.addRepetitiveCallback(std::source_location::current(),
+				m_player.getAccountID(), &Main::Persistence::PersistentDatabase::updateEvent, m_player.getAccountID());
+		}
 
 		// Trade system
 		void Session::temporarilySealAllItems()

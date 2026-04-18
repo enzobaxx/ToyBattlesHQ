@@ -208,6 +208,8 @@ namespace Main
 
 			void setMatchStartTime();
 
+			void storeEvent();
+
 			void sendEventMission(const ClientData::EventMissionPoint& eventMission);
 
 			void sendEventMissionReward(std::uint32_t eventIndex);

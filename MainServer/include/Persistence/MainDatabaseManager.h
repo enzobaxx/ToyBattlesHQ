@@ -297,6 +297,8 @@ namespace Main
 
 			std::optional<std::pair<std::string, std::string>> getGradedHwid(std::uint32_t accountId);
 
+			void updateEvent(std::uint32_t accountId);
+
 			~PersistentDatabase()
 			{
 				m_running = false;

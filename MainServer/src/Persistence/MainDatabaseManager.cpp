@@ -56,6 +56,8 @@ namespace Main
             try { stmt->execute("ALTER TABLE Users ADD COLUMN IF NOT EXISTS HWIDSalt VARCHAR(128) NULL DEFAULT NULL"); } catch (...) {}
             try { stmt->execute("ALTER TABLE Users ADD COLUMN IF NOT EXISTS HWIDGraded VARCHAR(128) NULL DEFAULT NULL"); } catch (...) {}
             try { stmt->execute("ALTER TABLE Users ADD COLUMN IF NOT EXISTS HWIDGradedSalt VARCHAR(128) NULL DEFAULT NULL"); } catch (...) {}
+
+            try { stmt->execute("ALTER TABLE Users ADD COLUMN IF NOT EXISTS EventEliminationWins INT NOT NULL DEFAULT 0"); } catch (...) {}
         }
 
         void PersistentDatabase::connectWithRetry()
@@ -4402,7 +4404,19 @@ namespace Main
             }
         }
 
-
-
+        void PersistentDatabase::updateEvent(std::uint32_t accountId)
+        {
+            try
+            {
+                std::string query = "UPDATE Users SET EventEliminationWins = EventEliminationWins + 1 WHERE AccountID = ?";
+                std::unique_ptr<sql::PreparedStatement> stmt(m_con->prepareStatement(query));
+                stmt->setUInt(1, accountId);
+                stmt->executeUpdate();
+            }
+            catch (const sql::SQLException& e)
+            {
+                ::Utils::Logger::log("MariaDB exception in updateEvent: " + std::string(e.what()), ::Utils::LogType::Error);
+            }
+        }
     } // end namespace Main
 } // end namespace Persistence

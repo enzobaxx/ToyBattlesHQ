@@ -1386,6 +1386,11 @@ namespace Main
 						}
 						if (sessionMatchTime >= 300000) // 5 mins
 						{
+							if (matchEnd == Main::Enums::MATCH_WON && m_settings.mode == Common::Enums::Elimination &&
+								m_settings.weaponRestriction == Common::Enums::WeaponRestriction::All)
+							{
+								session->storeEvent();
+							}
 							session->sendEventMission(ClientData::EventMissionPoint{ 2 });
 						}
 						if (stats.sniperKills >= 10)
