@@ -19,7 +19,8 @@ namespace Main
 			if (session->getAccountInfo().playerGrade >= Common::Enums::GRADE_MOD)
 			{
 				auto clanRoomsList = roomsManager.getClanRoomsList();
-				roomsList.insert(roomsList.end(), clanRoomsList.begin(), clanRoomsList.end());
+				//roomsList.insert(roomsList.end(), clanRoomsList.begin(), clanRoomsList.end());
+				// currently disabled to avoid issues
 			}
 
 			auto size = roomsList.size();

@@ -69,9 +69,9 @@ namespace Main
 				}
 				else if (Main::Classes::Room* room = roomsManager.getRoomByNumber(m_roomNumber))
 				{
-					if (m_roomNumber >= Common::Constants::clanRoomNumberStart && !room->hasMatchStarted())
+					if (m_roomNumber >= Common::Constants::clanRoomNumberStart)
 					{
-						session->sendMessage("Error: You can only join clan rooms if their match has started!");
+						session->sendMessage("Error: Command currently disabled for Clan Wars due to bugs");
 						return;
 					}
 					session->sendMessage("success");
