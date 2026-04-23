@@ -17,7 +17,7 @@ namespace Main
         {
             if (Main::Classes::Room* room = roomsManager.getRoomByNumber(session->getPlayer().getRoomNumber()))
             {
-                constexpr std::uint64_t tenSecondsMs = 25 * 1000;
+                constexpr std::uint64_t tenSecondsMs = 40 * 1000;
                 auto now = Main::Details::getUtcTimeMs(); 
 
                 if (now - room->getMatchStartTime() < tenSecondsMs)
