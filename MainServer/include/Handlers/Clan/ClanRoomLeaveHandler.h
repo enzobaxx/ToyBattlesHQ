@@ -57,7 +57,6 @@ namespace Main
         }
 
         // Reviewed 20.04.2026
-        // Reviewed 20.04.2026
         inline void handlePartyRoomLeave(const Common::Network::Packet& request, std::shared_ptr<Main::Network::Session> session,
             Main::Classes::PartiesManager& partiesManager,
             Main::Classes::RoomsManager& roomsManager, bool isLeaderLeaving = false)
@@ -81,49 +80,9 @@ namespace Main
                     if (*res)
                     { // the party must be closed since the only player that was in it left
                         partiesManager.removeExactRoom(ainfo.clanId, selfPartyRoomNumber);
-                        if (auto* room = roomsManager.getRoomByNumber(roomNumber))
+                        if (auto* room = roomsManager.getRoomByNumber(roomNumber); room && room->removePlayer(session, 27))
                         {
-                            bool closeRoom = room->removePlayer(session, 27);
-                            bool removeOppositeParty = false;
-                            if (room->areAllPlayersInSameTeam())
-                            {
-                                closeRoom = true;
-                                removeOppositeParty = true;
-                            }
-                            if (closeRoom)
-                            {
-                                roomsManager.removeRoom(room->getRoomNumber(), 27);
-
-                                if (removeOppositeParty)
-                                {
-                                    auto matchResult = partiesManager.getClanMatch(roomNumber);
-                                    if (matchResult)
-                                    {
-                                        auto& [partyRoomA, partyRoomB] = *matchResult;
-                                        auto processPartyRoom = [&](std::shared_ptr<Main::Classes::PartyRoom> partyRoom)
-                                            {
-                                                if (!partyRoom) return;
-
-                                                std::uint16_t clanId = partyRoom->getClanId();
-                                                std::uint16_t partyRoomNumber = partyRoom->getRoomNumber();
-
-                                                partyRoom->updatePartyStatus(false);
-                                                partyRoom->broadcast(response);
-
-                                                for (auto partySession : partyRoom->getPlayerSessions())
-                                                {
-                                                    Common::Network::Packet req;
-                                                    req.setCommand(111, 0, 0, 0);
-                                                    handlePartyRoomLeave(req, partySession, partiesManager, roomsManager, true);
-                                                }
-                                            };
-                                        processPartyRoom(partyRoomA);
-                                        processPartyRoom(partyRoomB);
-                                        partiesManager.removeClanMatch(roomNumber, true);
-                                    }
-                                }
-                            }
-
+                            roomsManager.removeRoom(room->getRoomNumber(), 27);
                         }
                         return;
                     }
@@ -209,8 +168,23 @@ namespace Main
             }
 
             auto& [partyRoomA, partyRoomB] = *matchResult;
-            roomsManager.removeRoom(selfRoomNumber, ClanRoomLeaveExtra::CLANROOM_LEAVE_CLOSE);
 
+            if (auto* room = roomsManager.getRoomByNumber(selfRoomNumber); room && room->areAllPlayersInSameTeam())
+            {
+                if (partyRoomA)
+                {
+                    handleClanRoomError(partiesManager, roomsManager, selfRoomNumber, partyRoomA->getRoomNumber(), partyRoomA->getClanId(),
+                        "The opposite team left the clanwar - please recreate the party.");
+                }
+                if (partyRoomB)
+                {
+                    handleClanRoomError(partiesManager, roomsManager, selfRoomNumber, partyRoomB->getRoomNumber(), partyRoomB->getClanId(),
+                        "The opposite team left the clanwar - please recreate the party.");
+                }
+                return;
+            }
+
+            roomsManager.removeRoom(selfRoomNumber, ClanRoomLeaveExtra::CLANROOM_LEAVE_CLOSE);
             auto processPartyRoom = [&](std::shared_ptr<Main::Classes::PartyRoom> partyRoom)
                 {
                     if (!partyRoom) return;
