@@ -82,7 +82,37 @@ namespace Main
                         partiesManager.removeExactRoom(ainfo.clanId, selfPartyRoomNumber);
                         if (auto* room = roomsManager.getRoomByNumber(roomNumber); room && room->removePlayer(session, 27))
                         {
-                            roomsManager.removeRoom(room->getRoomNumber(), 27);
+                            bool closeRoom = room->removePlayer(session, 27);
+                            bool removeOppositeParty = false;
+                            if (room->areAllPlayersInSameTeam())
+                            {
+                                closeRoom = true;
+                                removeOppositeParty = true;
+                            }
+                            if (closeRoom)
+                            {
+                                roomsManager.removeRoom(room->getRoomNumber(), 27);
+
+                                if (removeOppositeParty)
+                                {
+                                    auto matchResult = partiesManager.getClanMatch(roomNumber);
+                                    if (matchResult)
+                                    {
+                                        auto& [partyRoomA, partyRoomB] = *matchResult;
+                                        if (partyRoomA)
+                                        {
+                                            handleClanRoomError(partiesManager, roomsManager, roomNumber, partyRoomA->getRoomNumber(), partyRoomA->getClanId(),
+                                                "The opposite team left the clanwar - please recreate the party.");
+                                        }
+                                        if (partyRoomB)
+                                        {
+                                            handleClanRoomError(partiesManager, roomsManager, roomNumber, partyRoomB->getRoomNumber(), partyRoomB->getClanId(),
+                                                "The opposite team left the clanwar - please recreate the party.");
+                                        }
+                                    }
+                                }
+                            }
+
                         }
                         return;
                     }
@@ -168,23 +198,8 @@ namespace Main
             }
 
             auto& [partyRoomA, partyRoomB] = *matchResult;
-
-            if (auto* room = roomsManager.getRoomByNumber(selfRoomNumber); room && room->areAllPlayersInSameTeam())
-            {
-                if (partyRoomA)
-                {
-                    handleClanRoomError(partiesManager, roomsManager, selfRoomNumber, partyRoomA->getRoomNumber(), partyRoomA->getClanId(),
-                        "The opposite team left the clanwar - please recreate the party.");
-                }
-                if (partyRoomB)
-                {
-                    handleClanRoomError(partiesManager, roomsManager, selfRoomNumber, partyRoomB->getRoomNumber(), partyRoomB->getClanId(),
-                        "The opposite team left the clanwar - please recreate the party.");
-                }
-                return;
-            }
-
             roomsManager.removeRoom(selfRoomNumber, ClanRoomLeaveExtra::CLANROOM_LEAVE_CLOSE);
+
             auto processPartyRoom = [&](std::shared_ptr<Main::Classes::PartyRoom> partyRoom)
                 {
                     if (!partyRoom) return;
