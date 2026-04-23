@@ -17,17 +17,6 @@ namespace Main
         {
             if (Main::Classes::Room* room = roomsManager.getRoomByNumber(session->getPlayer().getRoomNumber()))
             {
-                constexpr std::uint64_t tenSecondsMs = 40 * 1000;
-                auto now = Main::Details::getUtcTimeMs(); 
-
-                if (now - room->getMatchStartTime() < tenSecondsMs)
-                {
-                    uint64_t remainingMs = tenSecondsMs - (now - room->getMatchStartTime());
-                    uint64_t remainingSecs = (remainingMs + 999) / 1000;
-                    session->sendMessage("Please wait " + std::to_string(remainingSecs) + " more seconds before leaving the clan match.");
-                    return;
-                }
-
                 const std::uint16_t partyNumber = session->getPlayer().getPartyRoomNumber();
 
                 const std::uint32_t selfRoomNumber = room->getRoomNumber();
