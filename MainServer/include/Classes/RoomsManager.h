@@ -24,6 +24,8 @@ namespace Main
 
 			std::vector<Main::Structures::SingleRoom> getRoomsList() /* const */;
 
+			std::vector<Main::Structures::SingleRoom> getClanRoomsList();
+
 			Main::Classes::Room* getRoomByNumber(std::uint16_t roomNumber);
 		};
 	}

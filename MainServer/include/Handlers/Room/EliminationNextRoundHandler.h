@@ -9,7 +9,7 @@
 #include "../../Structures/EndScoreboard.h"
 #include "RoomStartHandler.h"
 #include "Detail/IpcUtils.h"
-#include "../../Classes/ClansManager.h"
+#include "../../Classes/PartiesManager.h"
 
 namespace Main
 {
@@ -163,7 +163,7 @@ namespace Main
 
 		inline void handleMatchEnding(const Common::Network::Packet& request, std::shared_ptr<Main::Network::Session> session,
 			Main::Classes::RoomsManager& roomsManager,
-			Main::Classes::ClansManager& clansManager, Main::Persistence::MainScheduler& scheduler, const Main::Structures::ExpMpBonusInfo& expMpBonusInfo,
+			Main::Classes::PartiesManager& partiesManager, Main::Persistence::MainScheduler& scheduler, const Main::Structures::ExpMpBonusInfo& expMpBonusInfo,
 			const Main::Structures::EventMissionInfo& eventMissionInfo)
 		{
 			namespace MS = Main::Structures;
@@ -221,23 +221,25 @@ namespace Main
 
 				if (room->getRoomNumber() >= Common::Constants::clanRoomNumberStart)
 				{
-					auto clanRooms = getPartyRooms(room, clansManager);
-					bool updatedAtleastOne = false;
-					if (clanRooms.first)
+					auto matchResult = partiesManager.getClanMatch(room->getRoomNumber());
+					if (!matchResult)
 					{
-						clanRooms.first->updatePartyStatus(false);
-						clanRooms.first->storeStats(scheduler, endMatchHeader);
-						updatedAtleastOne = true;
+						session->sendMessage("[Main::Handlers::handleMatchEnding] error while retrieving clan match!");
 					}
-					if (clanRooms.second)
+					else
 					{
-						clanRooms.second->updatePartyStatus(false);
-						clanRooms.first->storeStats(scheduler, endMatchHeader);
-						updatedAtleastOne = true;
-					}
-					if (!updatedAtleastOne)
-					{
-						session->sendMessage("[Main::Handlers::handleMatchEnding] error while retrieving either clan room!");
+						auto& [partyRoomA, partyRoomB] = *matchResult;
+						if (partyRoomA)
+						{
+							partyRoomA->updatePartyStatus(false);
+							partyRoomA->storeStats(scheduler, endMatchHeader);
+						}
+
+						if (partyRoomB)
+						{
+							partyRoomB->updatePartyStatus(false);
+							partyRoomB->storeStats(scheduler, endMatchHeader);
+						}
 					}
 				}
 
@@ -247,7 +249,7 @@ namespace Main
 				if ((timeNow > roomStartTime && ((timeNow - roomStartTime) < 80 * 1000)) || room->getRoomSettings().mode == Common::Enums::SquareMode
 					|| room->getRoomSettings().mode == Common::Enums::AiBattle)
 				{ 
-					isFarm = true;
+					isFarm = room->getRoomNumber() >= Common::Constants::clanRoomNumberStart ? false : true; // don't count farming in cw
 				}
 
 				// client sends all info of all players, we resend it back to everyone (else the other clients outside the match will see the target still inside the match)

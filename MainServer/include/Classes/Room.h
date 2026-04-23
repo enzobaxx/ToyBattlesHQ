@@ -223,6 +223,9 @@ namespace Main
 			}
 
 			std::size_t getPlayersSize() /* obs + non obs */ const { return m_players.size(); }
+			bool hasObserverPlayers() const noexcept { return !m_observerPlayers.empty(); }
+			auto getObserverPlayers() { return m_observerPlayers; }
+
 
 			// Setters
 			void addPlayer(std::shared_ptr<Main::Network::Session> session, std::uint32_t team);
@@ -284,6 +287,7 @@ namespace Main
 			bool isModeTeamBased() const;
 			std::uint8_t getSpecificSetting() const;
 			const std::string& getRoomTitle() const;
+			void setRoomTitle(const std::string& title);
 			bool isRoomFullObserverExcluded() const;
 			bool hasMatchStarted() const;
 			bool isObserverFull() const;

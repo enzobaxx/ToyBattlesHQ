@@ -32,7 +32,7 @@ namespace Main
 
 		inline void handleRoomLeave(const Common::Network::Packet& request, std::shared_ptr<Main::Network::Session> session,
 			Main::Network::SessionsManager& sessionsManager,
-			Main::Classes::RoomsManager& roomsManager, Main::Classes::ClansManager& clansManager,  const Main::Structures::UniqueId& uniqueId)
+			Main::Classes::RoomsManager& roomsManager, Main::Classes::PartiesManager& partiesManager,  const Main::Structures::UniqueId& uniqueId)
 		{
 			const auto& ainfo = session->getAccountInfo();
 			const std::uint16_t selfRoomNumber = session->getPlayer().getRoomNumber();
@@ -53,32 +53,13 @@ namespace Main
 				}
 				else
 				{ // normal leave
-					const std::uint16_t clanRoomNum = session->getPlayer().getClanRoomNumber();
-					bool isClanRoom = false;
-
-					if (auto clanRoom = clansManager.getExactRoomFor(ainfo.clanId, clanRoomNum))
+					const std::uint16_t clanRoomNum = session->getPlayer().getPartyRoomNumber();
+					if (auto clanRoom = partiesManager.getExactRoomFor(ainfo.clanId, clanRoomNum))
 					{ // check if this is a clan room
-						isClanRoom = true;
-						Common::Network::Packet leavePartyReq; 
-						leavePartyReq.setTcpHeader(session->getId(), Common::Enums::NO_ENCRYPTION);
-						leavePartyReq.setCommand(111, 0, 0, 0);
-						leavePartyReq.setData(nullptr, 0);
-						session->asyncWrite(leavePartyReq);
-
-						if (auto mustCloseClanRoom = clanRoom->removePlayer(ainfo.uniqueId.session))
-						{
-							if (*mustCloseClanRoom)
-							{
-								clansManager.removeExactRoom(ainfo.clanId, clanRoomNum);
-								return;
-							}
-						}
-						else
-						{ // removing the player from the clan room failed, remove everyone to avoid further bugs
-							handleClanRoomError(clansManager, roomsManager, session, selfRoomNumber, clanRoomNum, ainfo.clanId,
-								"[handleRoomLeave] An unexpected error occurred and the party was removed.");
-								return;
-						}
+						Common::Network::Packet req;
+						req.setCommand(111, 0, 0, 0);
+						handlePartyRoomLeave(req, session, partiesManager, roomsManager, true);
+						return;
 					}
 				
 					if (room->getTargetVotekickUid() == ainfo.uniqueId)
@@ -88,7 +69,7 @@ namespace Main
 						room->resetVotekick();
 						room->broadcastMessage("[" + targetNickname + "] was kicked after attempting to leaving during a votekick.");
 					}
-					else if (room->removePlayer(session, isClanRoom ? 27 : RoomLeaveExtra::LEAVE_NORMAL))
+					else if (room->removePlayer(session, RoomLeaveExtra::LEAVE_NORMAL))
 					{ // remove the player from the actual room
 						roomsManager.removeRoom(room->getRoomNumber());
 					}

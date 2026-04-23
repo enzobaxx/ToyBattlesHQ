@@ -42,6 +42,12 @@ namespace Main
 					return;
 				}
 
+				if (session->getPlayer().getRoomNumber() >= Common::Constants::clanRoomNumberStart)
+				{
+					session->sendMessage("Error: changing host in clan war rooms is currently disabled!");
+					return;
+				}
+
 				if (Main::Classes::Room* room = roomsManager.getRoomByNumber(session->getPlayer().getRoomNumber()))
 				{
 					const bool changed = room->changeHostByNickname(m_targetPlayerName);

@@ -9,7 +9,7 @@
 #include "Network/MainSessionManager.h"
 #include "ChatCommands/ChatCommands.h"
 #include "Classes/RoomsManager.h"
-#include "Classes/ClansManager.h"
+#include "Classes/PartiesManager.h"
 
 #include <iostream>
 #include <boost/asio/io_context.hpp>
@@ -42,7 +42,7 @@ namespace Main
 		Main::Persistence::MainScheduler m_scheduler;
 		Main::Network::SessionsManager m_sessionsManager;
 		Main::Classes::RoomsManager m_roomsManager;
-		Main::Classes::ClansManager m_clansManager;
+		Main::Classes::PartiesManager m_clansManager;
 		Main::Command::ChatCommands m_chatCommands;
 		Main::Classes::ReportManager m_reportManager;
 		std::unordered_map<std::uint32_t, std::function<void(std::shared_ptr<Main::Network::Session>)>> m_generalItemCallbacks;

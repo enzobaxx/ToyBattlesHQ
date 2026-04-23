@@ -30,6 +30,11 @@ namespace Main
 				MC::RoomsManager& roomsManager, MP::MainScheduler&, std::uint32_t roomNumber,
 				Main::MainServer& mainSv) override
 			{
+				if (roomNumber >= Common::Constants::clanRoomNumberStart)
+				{
+					session->sendMessage("Error: breakroom is disabled for clan rooms (due to possible bugs)");
+					return;
+				}
 				roomsManager.removeRoom(roomNumber, 35);
 			}
 		};

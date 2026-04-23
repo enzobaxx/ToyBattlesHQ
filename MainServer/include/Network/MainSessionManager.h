@@ -6,7 +6,7 @@
 #include <functional>
 #include "MainSession.h"
 #include "../Classes/RoomsManager.h"
-#include "../Classes/ClansManager.h"
+#include "../Classes/PartiesManager.h"
 
 namespace Main
 {
@@ -18,14 +18,14 @@ namespace Main
 			std::unordered_map<std::uint64_t, std::shared_ptr<Main::Network::Session>> m_sessionsBySessionId;
 			std::vector<std::shared_ptr<Main::Network::Session>> m_sessionsVector;
 			Main::Classes::RoomsManager* roomsManager;
-			Main::Classes::ClansManager* m_clansManager;
+			Main::Classes::PartiesManager* m_clansManager;
 
 			Common::Network::Packet prepareMessage(const std::string& message) const;
 
 		public:
 			void setRoomsManager(Main::Classes::RoomsManager* roomsManager);
 
-			void setClansManager(Main::Classes::ClansManager* clansManager);
+			void setClansManager(Main::Classes::PartiesManager* clansManager);
 
 			void addSession(std::shared_ptr<Main::Network::Session> session);
 

@@ -317,8 +317,7 @@ namespace Main
 		CN::Session::addCallback<CN::PacketType::ENCRYPTED, MN::Session>(329, [&](const Common::Network::Packet& request,
 			std::shared_ptr<Main::Network::Session> session) { session->respawnBossBattle(); });
 
-		// CLANS -- TBA
-		// CLAN TODO ====> Handle client crash or client closed!
+
 		CN::Session::addCallback<CN::PacketType::ENCRYPTED, MN::Session>(58, [&](const Common::Network::Packet& request,
 			std::shared_ptr<Main::Network::Session> session) { Main::Handlers::handlePartyList(request, session, m_clansManager); });
 

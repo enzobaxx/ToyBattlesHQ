@@ -52,6 +52,12 @@ namespace Main
 					return;
 				}
 
+				if (session->getPlayer().getRoomNumber() >= Common::Constants::clanRoomNumberStart)
+				{
+					session->sendMessage("Error: kicking someone from clan war rooms is currently disabled!");
+					return;
+				}
+
 				if (Main::Classes::Room* room = roomsManager.getRoomByNumber(session->getPlayer().getRoomNumber()))
 				{
 					if (!room->kickPlayer(m_targetPlayerName.c_str()))

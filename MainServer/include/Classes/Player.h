@@ -62,7 +62,7 @@ namespace Main
 
 			// Other
 			std::uint16_t m_roomNumber{};
-			std::uint16_t m_clanRoomNumber{};
+			std::uint16_t m_partyRoomNumber{};
 			bool m_isInMatch{};
 			std::uint32_t m_batteryObtainedInMatch{};
 			std::vector<Item> m_couponItems;
@@ -198,9 +198,9 @@ namespace Main
 
 			// Room info
 			void setRoomNumber(std::uint16_t roomNumber);
-			void setClanRoomNumber(std::uint16_t clanRoomNumber);
+			void setPartyRoomNumber(std::uint16_t clanRoomNumber);
 			std::uint16_t getRoomNumber() const;
-			std::uint16_t getClanRoomNumber() const noexcept;
+			std::uint16_t getPartyRoomNumber() const noexcept;
 			void decreaseRoomNumber();
 			void setIsInMatch(bool val);
 			bool isInMatch() const;

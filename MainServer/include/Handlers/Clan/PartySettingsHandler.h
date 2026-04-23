@@ -3,7 +3,7 @@
 
 #include "../../Network/MainSession.h"
 #include "Network/Packet.h"
-#include "../../Classes/ClansManager.h"
+#include "../../Classes/PartiesManager.h"
 #include <memory>
 
 namespace Main
@@ -20,10 +20,10 @@ namespace Main
 
         template<std::size_t OrderId>
         inline void handlePartySettings(const Common::Network::Packet& request, std::shared_ptr<Main::Network::Session> session,
-            Main::Classes::ClansManager& clansManager)
+            Main::Classes::PartiesManager& clansManager)
         {
             const auto& ainfo = session->getAccountInfo();
-            auto* clanRoom = clansManager.getExactRoomFor(ainfo.clanId, session->getPlayer().getClanRoomNumber());
+            auto clanRoom = clansManager.getExactRoomFor(ainfo.clanId, session->getPlayer().getPartyRoomNumber());
 
             if (!clanRoom || !clanRoom->isLeader(ainfo.uniqueId.session))
                 return;
@@ -32,23 +32,23 @@ namespace Main
             {
                 clanRoom->updateMap(request.getOption());
                 clanRoom->updateMode(request.getExtra());
-                clanRoom->broadcastToWaitingPlayers(request);
+                clanRoom->broadcast(const_cast<Common::Network::Packet&>(request));
             }
             else if constexpr (OrderId == 117)
             {
                 clanRoom->updatePlayersPerTeam(request.getOption());
                 auto response = request;
                 response.setExtra(1);
-                clanRoom->broadcastToWaitingPlayers(response);
+                clanRoom->broadcast(response);
             }
         }
 
         inline void handlePartyLeaderChange(const Common::Network::Packet& request, std::shared_ptr<Main::Network::Session> session, 
-            Main::Classes::ClansManager& clansManager)
+            Main::Classes::PartiesManager& clansManager)
         {
             const auto& ainfo = session->getAccountInfo();
             auto response = request;
-            if (auto* clanRoom = clansManager.getExactRoomFor(ainfo.clanId, session->getPlayer().getClanRoomNumber()))
+            if (auto clanRoom = clansManager.getExactRoomFor(ainfo.clanId, session->getPlayer().getPartyRoomNumber()))
             {
                 if (!clanRoom->isLeader(ainfo.uniqueId.session))
                 {
@@ -63,7 +63,7 @@ namespace Main
                 else
                 {
                     response.setExtra(ClanChangeLeaderExtra::CHANGE_LEADER_SUCCESS);
-                    clanRoom->broadcastToWaitingPlayers(response);
+                    clanRoom->broadcast(response);
                 }
             }
             else

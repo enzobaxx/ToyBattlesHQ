@@ -14,7 +14,14 @@ namespace Main
 	{
 		inline void handleRoomsList(const Common::Network::Packet& request, std::shared_ptr<Main::Network::Session> session, Main::Classes::RoomsManager& roomsManager)
 		{
-			const auto roomsList = roomsManager.getRoomsList();
+			auto roomsList = roomsManager.getRoomsList();
+
+			if (session->getAccountInfo().playerGrade >= Common::Enums::GRADE_MOD)
+			{
+				auto clanRoomsList = roomsManager.getClanRoomsList();
+				roomsList.insert(roomsList.end(), clanRoomsList.begin(), clanRoomsList.end());
+			}
+
 			auto size = roomsList.size();
 			std::vector<std::uint8_t> message(roomsList.size() * sizeof(Main::Structures::SingleRoom) + sizeof(std::uint32_t));
 			std::memcpy(message.data(), &size, sizeof(std::uint16_t));

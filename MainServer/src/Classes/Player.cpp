@@ -1141,9 +1141,9 @@ namespace Main
 			m_roomNumber = roomNumber;
 		}
 
-		void Player::setClanRoomNumber(std::uint16_t clanRoomNumber)
+		void Player::setPartyRoomNumber(std::uint16_t partyRoomNumber)
 		{
-			m_clanRoomNumber = clanRoomNumber;
+			m_partyRoomNumber = partyRoomNumber;
 		}
 
 		std::uint16_t Player::getRoomNumber() const
@@ -1151,9 +1151,9 @@ namespace Main
 			return m_roomNumber;
 		}
 
-		std::uint16_t Player::getClanRoomNumber() const noexcept
+		std::uint16_t Player::getPartyRoomNumber() const noexcept
 		{
-			return m_clanRoomNumber;
+			return m_partyRoomNumber;
 		}
 
 		void Player::setIsInMatch(bool val)

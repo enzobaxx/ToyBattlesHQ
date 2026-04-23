@@ -3,12 +3,14 @@
 
 #include "../../Network/MainSession.h"
 #include "Network/Packet.h"
-#include "../../Classes/ClansManager.h"
+#include "../../Classes/PartiesManager.h"
 #include "../../Structures/Clan/ClanStructures.h"
 #include "../../Classes/Room.h"
 #include "PartyJoinHandler.h"
 
 #include <memory>
+#include "PartyCreationHandler.h"
+#include <Structures/ClientData/Structures.h>
 
 namespace Main
 {
@@ -23,40 +25,40 @@ namespace Main
             CLANROOM_LEAVE_GENERAL_ERROR = 28
         };
 
-        inline void handleClanRoomError(Main::Classes::ClansManager& clansManager, Main::Classes::RoomsManager& roomsManager,
-            std::shared_ptr<Main::Network::Session> session, std::uint16_t roomNumber, std::uint16_t clanRoomNumber, std::uint32_t clanId, const std::string& errorMessage)
+        // Reviewed 22.04.2026
+        inline void handleClanRoomError(Main::Classes::PartiesManager& partiesManager, Main::Classes::RoomsManager& roomsManager,
+            std::uint16_t roomNumber, std::uint16_t clanRoomNumber, std::uint32_t clanId, const std::string& errorMessage)
         {
-            if (auto* selfClanRoom = clansManager.getExactRoomFor(clanId, clanRoomNumber))
+            auto matchResult = partiesManager.getClanMatch(roomNumber);
+            if (!matchResult)
             {
-                selfClanRoom->broadcastChatMessage(errorMessage);
-                clansManager.removeExactRoom(clanId, clanRoomNumber);
+                // Fallback 
+                if (auto selfClanRoom = partiesManager.getExactRoomFor(clanId, clanRoomNumber))
+                {
+                    selfClanRoom->broadcastChatMessage(errorMessage);
+                    partiesManager.removeExactRoom(clanId, clanRoomNumber);
+                }
+
+                if (auto* room = roomsManager.getRoomByNumber(roomNumber))
+                {
+                    room->broadcastMessage(errorMessage);
+                    roomsManager.removeRoom(roomNumber);
+                }
+                return;
             }
+
+            partiesManager.removeClanMatch(roomNumber, true);
 
             if (auto* room = roomsManager.getRoomByNumber(roomNumber))
             {
                 room->broadcastMessage(errorMessage);
-
-                auto sessions = room->getAllPlayersWithSessions();
-                auto it = std::find_if(sessions.begin(), sessions.end(), [&](const auto& pair) {
-                    return pair.second->getAccountInfo().clanId != session->getAccountInfo().clanId;
-                    });
-
-                if (it != sessions.end() && it->second)
-                {
-                    const std::uint16_t otherClanRoomNumber = it->second->getPlayer().getClanRoomNumber();
-                    const std::uint32_t otherClanId = it->second->getAccountInfo().clanId;
-
-                    if (auto otherPartyRoom = clansManager.getExactRoomFor(otherClanId, otherClanRoomNumber))
-                    {
-                        clansManager.removeExactRoom(otherClanId, otherClanRoomNumber);
-                    }
-                }
-
-                roomsManager.removeRoom(roomNumber);
+                roomsManager.removeRoom(roomNumber, 27);
             }
         }
 
-        inline void handlePartyRoomLeave(const Common::Network::Packet& request, std::shared_ptr<Main::Network::Session> session, Main::Classes::ClansManager& clansManager,
+        // Reviewed 20.04.2026
+        inline void handlePartyRoomLeave(const Common::Network::Packet& request, std::shared_ptr<Main::Network::Session> session, 
+            Main::Classes::PartiesManager& partiesManager,
             Main::Classes::RoomsManager& roomsManager, bool isLeaderLeaving = false)
         {
             Common::Network::Packet response = request;
@@ -64,46 +66,99 @@ namespace Main
             response.setExtra(Main::Enums::PartyLeaveExtra::PARTY_LEAVE_SUCCESS);
 
             const auto& ainfo = session->getAccountInfo();
-            std::uint16_t clanRoomNumber = session->getPlayer().getClanRoomNumber();
-            const std::uint16_t roomNumber = session->getPlayer().getRoomNumber();
+            std::uint16_t selfPartyRoomNumber = session->getPlayer().getPartyRoomNumber();
 
-            if (auto* selfClanRoom = clansManager.getExactRoomFor(ainfo.clanId, clanRoomNumber))
+            if (auto selfPartyRoom = partiesManager.getExactRoomFor(ainfo.clanId, selfPartyRoomNumber))
             {
-                auto* room = roomsManager.getRoomByNumber(roomNumber);
-                auto targetPlayerIndex = selfClanRoom->getPlayerIndex(ainfo.uniqueId.session);
-                if (std::optional<bool> res = selfClanRoom->removePlayer(ainfo.uniqueId.session); res)
+                const std::uint16_t roomNumber = selfPartyRoom->getClanMatchRoomNumber();
+
+                auto targetPlayerIndex = selfPartyRoom->getPlayerIndex(ainfo.uniqueId.session);  // on purpose here - removePlayer invalidates targetPlayerIndex otherwise!
+                if (std::optional<bool> res = selfPartyRoom->removePlayer(ainfo.uniqueId.session); res)
                 {
                     session->asyncWrite(response);
 
                     if (*res)
                     { // the party must be closed since the only player that was in it left
-                        clansManager.removeExactRoom(ainfo.clanId, clanRoomNumber);
+                        partiesManager.removeExactRoom(ainfo.clanId, selfPartyRoomNumber);
+                        auto* room = roomsManager.getRoomByNumber(roomNumber);
+                        if (room && room->removePlayer(session, 27))
+                        {
+                            roomsManager.removeRoom(room->getRoomNumber(), 27);
+                        }
+                        else if (room && room->hasObserverPlayers())
+                        {
+                            auto obsPlayers = room->getObserverPlayers();
+                            roomsManager.removeRoom(room->getRoomNumber(), 27);
+
+                            for (auto& [info, ws] : obsPlayers)
+                            {
+                                if (auto s = ws.lock())
+                                {
+                                    if (s->getPlayer().getPartyRoomNumber())
+                                    {
+                                        Common::Network::Packet leavePartyReq;
+                                        leavePartyReq.setCommand(111, 0, 0, 0);
+                                        Main::Handlers::handlePartyRoomLeave(leavePartyReq, s, partiesManager, roomsManager);
+                                    }
+                                }
+                            }
+                            // If we dont close the room when a MOD is spectating, then the last client bugs out - that's why we're removing the room here in that case
+                            auto matchResult = partiesManager.getClanMatch(roomNumber);
+                            if (matchResult)
+                            {
+                                auto& [partyRoomA, partyRoomB] = *matchResult;
+                                auto processPartyRoom = [&](std::shared_ptr<Main::Classes::PartyRoom> partyRoom)
+                                    {
+                                        if (!partyRoom) return;
+
+                                        std::uint16_t clanId = partyRoom->getClanId();
+                                        std::uint16_t partyRoomNumber = partyRoom->getRoomNumber();
+
+                                        partyRoom->updatePartyStatus(false);
+                                        partyRoom->broadcast(response);
+
+                                        for (auto partySession : partyRoom->getPlayerSessions())
+                                        {
+                                            Common::Network::Packet req;
+                                            req.setCommand(111, 0, 0, 0);
+                                            handlePartyRoomLeave(req, partySession, partiesManager, roomsManager, true);
+                                        }
+                                    };
+                                processPartyRoom(partyRoomA);
+                                processPartyRoom(partyRoomB);
+                            }
+                        }
                         return;
                     }
 
-                    if (selfClanRoom->isRegistered())
-                    { // if in a clan vs clan room => it won't be marked as registered - no issues there
+                    if (selfPartyRoom->isRegistered() && selfPartyRoom->getClanMatchRoomNumber() == 0)
+                    { // only unregister if outside a clan vs clan room - parties in a clan vs clan room remain always registered but unjoinable
                         response.setCommand(120, 0, 45, 0);
-                        selfClanRoom->broadcastToWaitingPlayers(response);
-                        selfClanRoom->switchRegistered();
+                        selfPartyRoom->broadcast(response);
+                        selfPartyRoom->switchRegistered();
                     }
 
-                    if (room)
+                    if (auto* room = roomsManager.getRoomByNumber(roomNumber))
                     { // clan vs clan room, notify all players about leaving
-                        room->removePlayer(session, 27);
+                        if (room->removePlayer(session, 27))
+                        {
+                            roomsManager.removeRoom(room->getRoomNumber(), 27);
+                        }
                     }
-                    else if (!isLeaderLeaving)
+
+                    // TODO: Check whether this condition makes sense
+                    else if (!isLeaderLeaving && targetPlayerIndex)
                     {
                         // party room, notify other party members
-                        response.setCommand(419, 0, 0, targetPlayerIndex.value_or(0));
+                        response.setCommand(419, 0, 0, *targetPlayerIndex);
                         response.setData(reinterpret_cast<const std::uint8_t*>(&ainfo.uniqueId), sizeof(ainfo.uniqueId));
-                        selfClanRoom->broadcastToWaitingPlayersExceptSelf(response, ainfo.uniqueId.session);
+                        selfPartyRoom->broadcastExceptSelf(response, ainfo.uniqueId.session);
                     }
                 }
                 else
                 { // remove everyone to avoid further bugs
-                    handleClanRoomError(clansManager, roomsManager, session, roomNumber, clanRoomNumber, ainfo.clanId,
-                        "[handlePartyRoomLeave] An unexpected error occurred and the party was removed.");
+                    handleClanRoomError(partiesManager, roomsManager, roomNumber, selfPartyRoomNumber, ainfo.clanId,
+                        "[handlePartyRoomLeave] ERROR: removePlayer failed - Closing the party to avoid further issues.");
                 }
             }
             else
@@ -114,24 +169,25 @@ namespace Main
             }
         }
 
-        // This is sent by the leader's client when they leave a clan room
+        // This is sent by the leader's client when they leave a clan room (note: not a party room)
+        // Reviewed 20.04.2026 -- Todo: TO BE TESTED!
         inline void handleClanRoomLeave(const Common::Network::Packet& request, std::shared_ptr<Main::Network::Session> session,
-            Main::Classes::ClansManager& clansManager, Main::Classes::RoomsManager& roomsManager)
+            Main::Classes::PartiesManager& partiesManager, Main::Classes::RoomsManager& roomsManager)
         {
-            START_BENCHMARK
+            session->sendMessage("DEBUG: HandlePartyRoomLeave");
 
             Common::Network::Packet response = request;
             response.setTcpHeader(request.getSession(), Common::Enums::NO_ENCRYPTION);
             response.setExtra(ClanRoomLeaveExtra::CLANROOM_LEAVE_SUCCESS);
             response.setData(nullptr, 0);
 
-            const std::uint16_t selfClanRoomNumber = session->getPlayer().getClanRoomNumber();
+            const std::uint16_t selfClanRoomNumber = session->getPlayer().getPartyRoomNumber();
             const std::uint16_t selfRoomNumber = session->getPlayer().getRoomNumber();
 
-            if (auto* clanRoom = clansManager.getExactRoomFor(session->getAccountInfo().clanId, selfClanRoomNumber))
+            if (auto selfPartyRoom = partiesManager.getExactRoomFor(session->getAccountInfo().clanId, selfClanRoomNumber))
             {
-                if (!clanRoom->isLeader(session->getAccountInfo().uniqueId.session))
-                { // only the host should've gotten this packet
+                if (!selfPartyRoom->isLeader(session->getAccountInfo().uniqueId.session))
+                {
                     session->sendMessage("Server error: the server received a host-only packet from a non-host client. Please report this issue");
                     response.setExtra(ClanRoomLeaveExtra::CLANROOM_LEAVE_NOT_LEADER);
                     session->asyncWrite(response);
@@ -146,58 +202,86 @@ namespace Main
                 return;
             }
 
-            if (auto* room = roomsManager.getRoomByNumber(selfRoomNumber))
+            auto matchResult = partiesManager.getClanMatch(selfRoomNumber);
+            if (!matchResult)
             {
-                std::unordered_map<uint32_t, std::uint16_t> clanRoomNumbers;
-                std::unordered_map<uint32_t, std::vector<std::shared_ptr<Main::Network::Session>>> clanSessions;
+                session->sendMessage("Server error: failed to retrieve clan match information. Please report this issue");
+                response.setExtra(ClanRoomLeaveExtra::CLANROOM_LEAVE_GENERAL_ERROR);
+                session->asyncWrite(response);
+                return;
+            }
 
-                for (const auto& pair : room->getAllPlayersWithSessions())
+            auto& [partyRoomA, partyRoomB] = *matchResult;
+            roomsManager.removeRoom(selfRoomNumber, ClanRoomLeaveExtra::CLANROOM_LEAVE_CLOSE);
+
+            auto processPartyRoom = [&](std::shared_ptr<Main::Classes::PartyRoom> partyRoom)
                 {
-                    auto clanId = pair.second->getAccountInfo().clanId;
-                    clanRoomNumbers[clanId] = pair.second->getPlayer().getClanRoomNumber();
-                    clanSessions[clanId].push_back(pair.second);
-                }
+                    if (!partyRoom) return;
 
-                roomsManager.removeRoom(selfRoomNumber, ClanRoomLeaveExtra::CLANROOM_LEAVE_CLOSE);
+                    std::uint16_t clanId = partyRoom->getClanId();
+                    std::uint16_t partyRoomNumber = partyRoom->getRoomNumber();
 
-                for (const auto& [clanId, sessions] : clanSessions)
-                {
-                    if (auto* clanRoom = clansManager.getExactRoomFor(clanId, clanRoomNumbers[clanId]))
+                    partyRoom->updatePartyStatus(false);
+                    partyRoom->broadcast(response);
+
+                    // Let the non-leaders leave and rejoin first
+                    for (auto partySession : partyRoom->getPlayerSessions())
                     {
-                        clanRoom->updatePartyStatus(false);
-                        clanRoom->broadcastToWaitingPlayers(response);
-
-                        for (auto& partySession : clanRoom->getWaitingPlayerSessions())
+                        if (!partyRoom->isLeader(partySession->getSessionId()))
                         {
-                            if (!clanRoom->isLeader(partySession->getSessionId()))
-                            {
-                                Common::Network::Packet req;
-                                req.setCommand(111, 0, 0, 0);
-                                handlePartyRoomLeave(req, partySession, clansManager, roomsManager, true);
+                            Common::Network::Packet req;
+                            req.setCommand(111, 0, 0, 0);
+                            handlePartyRoomLeave(req, partySession, partiesManager, roomsManager, true);
 
-                                Main::ClientData::ClanRoomInfo requestStructure;
-                                requestStructure.clanId = clanId;
-                                requestStructure.roomNumber = clanRoomNumbers[clanId];
-                                req.setCommand(110, 0, 0, 0);
-                                req.setData(reinterpret_cast<std::uint8_t*>(&requestStructure), sizeof(requestStructure));
-                                handlePartyJoin(req, partySession, clansManager, roomsManager);
+                            Main::ClientData::ClanRoomInfo requestStructure;
+                            requestStructure.clanId = clanId;
+                            requestStructure.roomNumber = partyRoomNumber;
+                            req.setCommand(110, 0, 0, 0);
+                            req.setData(reinterpret_cast<std::uint8_t*>(&requestStructure), sizeof(requestStructure));
+                            handlePartyJoin(req, partySession, partiesManager, roomsManager);
+                        }
+                    }
+
+                    // Then let the leaders leave, rejoin, and restore their leadership
+                    for (auto partySession : partyRoom->getPlayerSessions())
+                    {
+                        if (partyRoom->isLeader(partySession->getSessionId()))
+                        {
+                            Common::Network::Packet req;
+                            req.setCommand(111, 0, 0, 0);
+                            handlePartyRoomLeave(req, partySession, partiesManager, roomsManager, true);
+
+                            Main::ClientData::ClanRoomInfo requestStructure;
+                            requestStructure.clanId = clanId;
+                            requestStructure.roomNumber = partyRoomNumber;
+                            req.setCommand(110, 0, 0, 0);
+                            req.setData(reinterpret_cast<std::uint8_t*>(&requestStructure), sizeof(requestStructure));
+                            handlePartyJoin(req, partySession, partiesManager, roomsManager);
+
+                            auto newLeaderIdx = partyRoom->getPlayerIndex(partySession->getId());
+                            if (newLeaderIdx && partyRoom->changeLeaderTo(*newLeaderIdx))
+                            {
+                                req.setCommand(114, 0, 1, *newLeaderIdx);
+                                req.setData(nullptr, 0);
+                                partyRoom->broadcast(req);
                             }
                         }
                     }
-                }
-            }
-            else
-            { // room not found
-                session->sendMessage("Server error: failed to retrieve clan-match room information. Please report this issue");
-                response.setExtra(ClanRoomLeaveExtra::CLANROOM_LEAVE_GENERAL_ERROR);
-                session->asyncWrite(response);
+                };
+
+            processPartyRoom(partyRoomA);
+            processPartyRoom(partyRoomB);
+
+            auto result = partiesManager.removeClanMatch(selfRoomNumber);
+            if (!result)
+            {
+                session->sendMessage("ERROR: Failed to remove clan match - please report this issue!");
             }
 
-            END_BENCHMARK(handleClanRoomLeave, session)
+            session->asyncWrite(response);
         }
     }
 }
-
 
 #endif
 

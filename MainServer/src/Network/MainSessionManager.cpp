@@ -64,7 +64,7 @@ namespace Main
 			// 2. remove them from the party
 			//m_clansManager->tryRemovePlayerFromParty(session->getAccountInfo().clanId, sessionId);
 
-			if (session->getPlayer().getClanRoomNumber())
+			if (session->getPlayer().getPartyRoomNumber())
 			{
 				Common::Network::Packet leavePartyReq;
 				leavePartyReq.setCommand(111, 0, 0, 0);
@@ -89,7 +89,7 @@ namespace Main
 			roomsManager = rmManager;
 		}
 
-		void SessionsManager::setClansManager(Main::Classes::ClansManager* clansManager)
+		void SessionsManager::setClansManager(Main::Classes::PartiesManager* clansManager)
 		{
 			m_clansManager = clansManager;
 		}

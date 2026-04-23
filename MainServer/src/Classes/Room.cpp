@@ -218,7 +218,9 @@ namespace Main
 				{
 					if (auto session = player.second.lock())
 					{
+						m_packet.setTcpHeader(session->getId(), Common::Enums::NO_ENCRYPTION);
 						m_packet.setCommand(141, 0, extra, 0);
+						m_packet.setData(nullptr, 0);
 						session->asyncWrite(m_packet);
 						session->leaveRoom();
 					}
@@ -473,8 +475,7 @@ namespace Main
 			return allPlayers;
 		}
 
-
-		// Refactored
+		// Reviewed 20.04.2026
 		std::vector<std::pair<Main::Structures::RoomPlayerInfo, std::shared_ptr<Main::Network::Session>>> Room::getAllPlayersWithSessions() const
 		{
 			std::vector<std::pair<Main::Structures::RoomPlayerInfo, std::shared_ptr<Main::Network::Session>>> allPlayersWithSessions;
@@ -1079,6 +1080,11 @@ namespace Main
 			return m_title;
 		}
 
+		void Room::setRoomTitle(const std::string& title)
+		{
+			 m_title = title;
+		}
+
 		bool Room::isRoomFullObserverExcluded() const
 		{
 			return static_cast<std::uint32_t>(m_players.size()) >= getPlayersPerTeam();
@@ -1374,7 +1380,7 @@ namespace Main
 					}
 
 					session->storeEndMatchStats(matchDurationSeconds, stats, matchEnd, hasLeveledUp, m_settings.mode == Common::Enums::ZombieMode,
-						session->getPlayer().getRoomNumber() >= Common::Constants::clanRoomNumberStart);
+						getRoomNumber() >= Common::Constants::clanRoomNumberStart);
 
 					const std::uint64_t now = static_cast<std::uint64_t>(std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count());
 					if (now >= eventMissionInfo.startDate && now <= eventMissionInfo.endDate)

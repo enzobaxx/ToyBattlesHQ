@@ -1595,9 +1595,9 @@ namespace Main
 			m_player.setRoomNumber(roomNumber);
 		}
 
-		void Session::setClanRoomNumber(std::uint16_t number)
+		void Session::setPartyRoomNumber(std::uint16_t number)
 		{
-			m_player.setClanRoomNumber(number);
+			m_player.setPartyRoomNumber(number);
 		}
 
 		void Session::leaveRoom()
@@ -1974,6 +1974,7 @@ namespace Main
 			ainfo.headshots += stats.headshots;
 			ainfo.experience = stats.newTotalEXP;
 			ainfo.microPoints = stats.newTotalMP;
+			ainfo.assists = stats.assists;
 			if (matchEnd == Main::Enums::MATCH_WON) ainfo.wins += 1;
 			else if (matchEnd == Main::Enums::MATCH_LOST) ainfo.losses += 1;
 			else if (matchEnd == Main::Enums::MATCH_DRAW) ainfo.draws += 1;

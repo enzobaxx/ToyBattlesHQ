@@ -769,6 +769,9 @@ namespace Main
                         return;
 
                     auto rooms = m_roomsManager.getRoomsList();
+                    auto clanRooms = m_roomsManager.getClanRoomsList();
+                    rooms.insert(rooms.end(), clanRooms.begin(), clanRooms.end());
+
                     boost::json::object responseJson;
                     boost::json::array roomsArray;
 

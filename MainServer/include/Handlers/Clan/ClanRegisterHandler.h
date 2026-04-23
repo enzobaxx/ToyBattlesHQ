@@ -2,7 +2,7 @@
 #define CLANMATCH_REGISTER_HANDLER_H
 
 #include "../../Network/MainSession.h"
-#include "../../Classes/ClansManager.h"
+#include "../../Classes/PartiesManager.h"
 #include "Network/Packet.h"
 
 namespace Main
@@ -22,8 +22,9 @@ namespace Main
 			ROOM_CHAT_CLAN_CUSTOM_LISTDOWN = 45, // "Cancelled custom match"
 		};
 
+		// Reviewed 22.04.2026
 		template<std::size_t OrderId>
-		inline void handleClanRegister(const Common::Network::Packet& request, std::shared_ptr<Main::Network::Session> session, Main::Classes::ClansManager& clansManager)
+		inline void handleClanRegister(const Common::Network::Packet& request, std::shared_ptr<Main::Network::Session> session, Main::Classes::PartiesManager& clansManager)
 		{
 			auto response = request;
 			response.setTcpHeader(request.getSession(), Common::Enums::NO_ENCRYPTION);
@@ -34,7 +35,7 @@ namespace Main
 				session->sendMessage("[INFO] Cannot register since there are already 30 registered clans, which is the current maximum");
 				return;
 			}
-			else if (auto* clanRoom = clansManager.getExactRoomFor(ainfo.clanId, session->getPlayer().getClanRoomNumber()))
+			else if (auto clanRoom = clansManager.getExactRoomFor(ainfo.clanId, session->getPlayer().getPartyRoomNumber()))
 			{
 				if (!clanRoom->isLeader(ainfo.uniqueId.session))
 				{

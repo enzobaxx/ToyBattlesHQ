@@ -11,45 +11,55 @@ namespace Main
 {
 	namespace Handlers
 	{	
-        inline void handleMatchLeave(const Common::Network::Packet& request, std::shared_ptr<Main::Network::Session> session, 
+        inline void handleMatchLeaveClan(const Common::Network::Packet& request, std::shared_ptr<Main::Network::Session> session,
             Main::Network::SessionsManager& sessionsManager,
-            Main::Classes::RoomsManager& roomsManager, Main::Classes::ClansManager& clansManager)
+            Main::Classes::RoomsManager& roomsManager, Main::Classes::PartiesManager& partiesManager)
         {
             if (Main::Classes::Room* room = roomsManager.getRoomByNumber(session->getPlayer().getRoomNumber()))
             {
-                const std::uint16_t clanRoomNum = session->getPlayer().getClanRoomNumber();
-                auto clanRoom = clansManager.getExactRoomFor(session->getAccountInfo().clanId, clanRoomNum);
+                const std::uint16_t partyNumber = session->getPlayer().getPartyRoomNumber();
 
                 const std::uint32_t selfRoomNumber = room->getRoomNumber();
                 const auto ainfo = session->getAccountInfo();
 
-                auto removePlayerFromParty = [&](Main::Classes::Room* room, auto& clanRoom, const std::uint16_t clanRoomNum, 
-                    const std::uint32_t selfRoomNumber, bool isHost) {
-                    if (clanRoom)
-                    {
-                        if (isHost)
-                        { // only the host leaves both match AND room, in which case we must check if they were without other clan members (alone)
-                            if (auto mustBeClosed = clanRoom->removePlayer(session->getAccountInfo().uniqueId.session))
-                            {
-                                if (*mustBeClosed) 
-                                    clansManager.removeExactRoom(session->getAccountInfo().clanId, clanRoomNum);
-                            }
-                            else
-                            {
-                                handleClanRoomError(clansManager, roomsManager, session, selfRoomNumber, clanRoomNum, ainfo.clanId,
-                                    "[handleMatchLeave] An unexpected error occurred and the party was removed.");
-                                return false;
-                            }
-                        }
-                        else
-                        {
-                            clanRoom->changeLeaderIfLeader(session->getAccountInfo().uniqueId.session);
-                        }
-                    }
-                    return true;
-                    };
+                // remove penalty mp
+                const auto currentMp = session->getPlayer().getAccountInfo().microPoints;
+                session->setAccountMicroPoints(currentMp <= 120 ? 0 : currentMp - 120);
+                session->sendCurrency();
 
-                
+                if (room->isHost(ainfo.uniqueId))
+                {
+                    if (room->removeHostFromMatch()) // this removes the player from both the room & the match
+                    { // no valid host could be found, close the room + the clan room + the party
+                        handleClanRoomError(partiesManager, roomsManager, selfRoomNumber, partyNumber, ainfo.clanId,
+                            "[handleMatchLeaveClan] ERROR: removeHostFromMatch failed - Closing the parties to avoid further issues.");
+                    }
+                }
+                else
+                {
+                    const auto uniqueId = ainfo.uniqueId;
+                    Common::Network::Packet response;
+                    response.setTcpHeader(request.getSession(), Common::Enums::NO_ENCRYPTION);
+                    response.setCommand(request.getOrder(), 0, 0, 0);
+                    response.setData(reinterpret_cast<const std::uint8_t*>(&uniqueId), sizeof(uniqueId));
+                    room->broadcastToRoom(response);
+                    room->setStateFor(uniqueId, Common::Enums::STATE_WAITING);
+                }
+
+                Common::Network::Packet req;
+                req.setCommand(111, 0, 0, 0);
+                handlePartyRoomLeave(req, session, partiesManager, roomsManager, true);
+            }
+        }
+
+        inline void handleMatchLeaveNormal(const Common::Network::Packet& request, std::shared_ptr<Main::Network::Session> session,
+            Main::Network::SessionsManager& sessionsManager, Main::Classes::RoomsManager& roomsManager)
+        {
+            if (Main::Classes::Room* room = roomsManager.getRoomByNumber(session->getPlayer().getRoomNumber()))
+            {
+                const std::uint32_t selfRoomNumber = room->getRoomNumber();
+                const auto ainfo = session->getAccountInfo();
+
                 if (room->getTargetVotekickUid() == ainfo.uniqueId)
                 { // The target votekicked player is leaving while a votekick is going on
                     const std::string& targetNickname = room->getAccountInfoFor(ainfo.uniqueId).nickname;
@@ -61,9 +71,9 @@ namespace Main
                 {
                     if (request.getExtra() == 28)
                     { // no penalty item used
-                        const Main::Structures::ItemSerialInfo itemSerialInfo = 
+                        const Main::Structures::ItemSerialInfo itemSerialInfo =
                             Main::Details::parseData<Main::Structures::ItemSerialInfo>(request, request.getDataSize() - sizeof(Main::Structures::ItemSerialInfo));
-                       session->useNoPenalty(itemSerialInfo, request);
+                        session->useNoPenalty(itemSerialInfo, request);
                     }
                     else if (room->getTeamForSession(session->getId()).value_or(0) != Common::Enums::TEAM_OBSERVER)
                     { // remove penalty mp
@@ -73,9 +83,6 @@ namespace Main
                     }
                     if (room->isHost(ainfo.uniqueId))
                     {
-                        if (!removePlayerFromParty(room, clanRoom, clanRoomNum, selfRoomNumber, true))
-                            return;
-
                         if (room->removeHostFromMatch())
                         {
                             roomsManager.removeRoom(selfRoomNumber);
@@ -83,9 +90,6 @@ namespace Main
                     }
                     else
                     {
-                        if (!removePlayerFromParty(room, clanRoom, clanRoomNum, selfRoomNumber, false))
-                            return;
-
                         const auto uniqueId = ainfo.uniqueId;
                         Common::Network::Packet response;
                         response.setTcpHeader(request.getSession(), Common::Enums::NO_ENCRYPTION);
@@ -95,9 +99,24 @@ namespace Main
                         room->setStateFor(uniqueId, Common::Enums::STATE_WAITING);
                     }
                 }
-
-                session->flushPendingFriendRequests();
             }
+        }
+
+
+        inline void handleMatchLeave(const Common::Network::Packet& request, std::shared_ptr<Main::Network::Session> session, 
+            Main::Network::SessionsManager& sessionsManager,
+            Main::Classes::RoomsManager& roomsManager, Main::Classes::PartiesManager& partiesManager)
+        {
+            if (session->getPlayer().getRoomNumber() >= Common::Constants::clanRoomNumberStart)
+            {
+                handleMatchLeaveClan(request, session, sessionsManager, roomsManager, partiesManager);
+            }
+            else
+            { 
+                handleMatchLeaveNormal(request, session, sessionsManager, roomsManager);
+            }
+
+            session->flushPendingFriendRequests();
 		}
 	}
 }

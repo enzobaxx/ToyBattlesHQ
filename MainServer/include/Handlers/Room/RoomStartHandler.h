@@ -5,8 +5,8 @@
 #include "../../../include/Structures/AccountInfo/MainAccountInfo.h"
 #include "Network/Packet.h"
 #include "../../Classes/RoomsManager.h"
-#include "../../Classes/ClanRoom.h"
-#include "../../Classes/ClansManager.h"
+#include "../../Classes/PartyRoom.h"
+#include "../../Classes/PartiesManager.h"
 #include <cstring> 
 #include "Detail/IpcUtils.h"
 
@@ -14,36 +14,8 @@ namespace Main
 {
 	namespace Handlers
 	{
-		inline std::pair<Main::Classes::ClanRoom*, Main::Classes::ClanRoom*> getPartyRooms(Main::Classes::Room* room, Main::Classes::ClansManager& clansManager)
-		{
-			std::pair<Main::Classes::ClanRoom*, Main::Classes::ClanRoom*> ret{nullptr, nullptr};
-			if (!room) return ret;
-
-			auto sessions = room->getAllPlayersWithSessions();
-			if (sessions.empty()) return ret;
-
-			auto firstClanIt = std::ranges::find_if(sessions, [&](const auto& pair) {
-				return clansManager.getExactRoomFor(pair.second->getAccountInfo().clanId, pair.second->getPlayer().getClanRoomNumber()) != nullptr;
-				});
-
-			if (firstClanIt == sessions.end()) return ret;
-
-			ret.first = clansManager.getExactRoomFor(firstClanIt->second->getAccountInfo().clanId, firstClanIt->second->getPlayer().getClanRoomNumber());
-			
-			auto secondClanIt = std::ranges::find_if(sessions, [&](const auto& pair) {
-				return pair.second->getAccountInfo().clanId != firstClanIt->second->getAccountInfo().clanId &&
-					clansManager.getExactRoomFor(pair.second->getAccountInfo().clanId, pair.second->getPlayer().getClanRoomNumber()) != nullptr;
-				});
-
-			if (secondClanIt == sessions.end()) return ret;
-
-			ret.second = clansManager.getExactRoomFor(secondClanIt->second->getAccountInfo().clanId, secondClanIt->second->getPlayer().getClanRoomNumber());
-			return ret;
-		}
-
-
 		inline void handleRoomStart(const Common::Network::Packet& request, std::shared_ptr<Main::Network::Session> session, Main::Classes::RoomsManager& roomsManager,
-			Main::Classes::ClansManager& clansManager, std::uint64_t timeSinceLastServerRestart)
+			Main::Classes::PartiesManager& partiesManager, std::uint64_t timeSinceLastServerRestart)
 		{
 			if (request.getExtra() == 6)
 			{ // Single wave
@@ -103,20 +75,21 @@ namespace Main
 						}
 						if (room->getRoomNumber() >= Common::Constants::clanRoomNumberStart)
 						{
-							auto clanRooms = getPartyRooms(room, clansManager);
-
-							if (!clanRooms.first && !clanRooms.second)
+							auto matchResult = partiesManager.getClanMatch(room->getRoomNumber());
+							if (!matchResult)
 							{
-								session->sendMessage("[Main::HandleRoomStart] error while retrieving either clan room!");
+								session->sendMessage("[Main::HandleRoomStart] error while retrieving clan match!");
 								return;
 							}
-							if (clanRooms.first)
+
+							auto& [partyRoomA, partyRoomB] = *matchResult;
+							if (partyRoomA)
 							{
-								clanRooms.first->updatePartyStatus(true);
+								partyRoomA->updatePartyStatus(true);
 							}
-							if (clanRooms.second)
+							if (partyRoomB)
 							{
-								clanRooms.second->updatePartyStatus(true);
+								partyRoomB->updatePartyStatus(true);
 							}
 						}
 						if (room->getRoomSettings().mode == Common::Enums::BossBattle && !session->removeBossBattleTicket())
@@ -195,6 +168,11 @@ namespace Main
 					if (room->isHost(selfUniqueId))
 					{
 						session->sendMessage("Error: use this command when you are not the host");
+						return false;
+					}
+					if (session->getPlayer().getRoomNumber() >= Common::Constants::clanRoomNumberStart && !room->hasMatchStarted())
+					{
+						session->sendMessage("Error: You can only enter clan matches if they have started!");
 						return false;
 					}
 					else if (room->hasMatchStarted())

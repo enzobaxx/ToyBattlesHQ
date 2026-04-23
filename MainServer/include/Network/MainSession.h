@@ -385,7 +385,7 @@ namespace Main
 
 			void setRoomNumber(std::uint16_t roomNumber);
 
-			void setClanRoomNumber(std::uint16_t number);
+			void setPartyRoomNumber(std::uint16_t number);
 
 			void leaveRoom();
 

@@ -11,15 +11,22 @@ namespace Main
 	{
 		void RoomsManager::addRoom(Main::Classes::Room&& room)
 		{
-			m_roomByNumber[room.getRoomNumber()] = std::move(room);
+			std::uint16_t roomNum = room.getRoomNumber();
+			bool isClanRoom = room.isClanRoom();
+			m_roomByNumber[roomNum] = std::move(room);
 		}
 
 		void RoomsManager::removeRoom(std::uint16_t roomNum, std::uint32_t extra)
 		{
 			auto it = m_roomByNumber.find(roomNum);
-			if (it == m_roomByNumber.end()) return;
+			if (it == m_roomByNumber.end())
+			{
+				return;
+			}
 
-			if (it->second.isClanRoom()) 
+			bool isClanRoom = it->second.isClanRoom();
+
+			if (isClanRoom)
 			{
 				Main::Classes::RoomNumberGenerator<Main::Enums::RoomType::Clan>::getInstance().release(roomNum);
 			}
@@ -27,8 +34,9 @@ namespace Main
 			{
 				Main::Classes::RoomNumberGenerator<Main::Enums::RoomType::Room>::getInstance().release(roomNum);
 			}
-			it->second.removeAllPlayers(extra);  
-			m_roomByNumber.erase(it);  
+
+			it->second.removeAllPlayers(extra);
+			m_roomByNumber.erase(it);
 		}
 
 		std::size_t RoomsManager::getTotalRooms() const
@@ -65,6 +73,34 @@ namespace Main
 			return roomsList;
 		}
 
+		std::vector<Main::Structures::SingleRoom> RoomsManager::getClanRoomsList()
+		{
+			std::vector<Main::Structures::SingleRoom> clanRoomsList;
+			clanRoomsList.reserve(m_roomByNumber.size());
+
+			for (auto it = m_roomByNumber.begin(); it != m_roomByNumber.end(); )
+			{
+				auto& room = it->second;
+
+				if (room.getPlayersSize() == 0)
+				{
+					room.removeAllPlayers();
+					it = m_roomByNumber.erase(it);
+					continue;
+				}
+
+				if (room.getRoomNumber() < Common::Constants::clanRoomNumberStart)
+				{
+					++it;
+					continue;
+				}
+
+				clanRoomsList.emplace_back(room.getRoomInfo());
+				++it;
+			}
+
+			return clanRoomsList;
+		}
 
 		Main::Classes::Room* RoomsManager::getRoomByNumber(std::uint16_t roomNumber)
 		{

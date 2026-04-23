@@ -42,6 +42,12 @@ namespace Main
                     session->sendMessage("parse error");
                     return;
                 }
+                if (session->getPlayer().getRoomNumber() >= Common::Constants::clanRoomNumberStart)
+                {
+                    session->sendMessage("Error: changing title in clan war rooms is currently disabled!");
+                    return;
+                }
+
                 if (m_title.size() >= 30)
                 {
                     session->sendMessage("error: the message must be smaller than 30 characters");

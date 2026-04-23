@@ -4,7 +4,7 @@
 #define OTHER_CLAN_JOIN_HANDLER_H
 
 #include "Network/Packet.h"
-#include "../../Classes/ClansManager.h"
+#include "../../Classes/PartiesManager.h"
 #include "../Room/ClanRoomCreation.h"
 #include "../../Network/MainSession.h"
 #include "../../Classes/RoomsManager.h"
@@ -52,7 +52,7 @@ namespace Main
 				}
 
 				// Extra + Option = uint16_t = Room Number
-				response.setCommand(RoomJoinOrder::RoomInfo, room->getRoomInfo().hasPassword, room->getRoomInfo().roomNumber, Common::Constants::maxPassword * 2);
+				response.setCommand(RoomJoinOrder::RoomInfo, room->getRoomInfo().hasPassword, room->getRoomInfo().roomNumber, 0);
 				response.setData(reinterpret_cast<std::uint8_t*>(&roomInfo), sizeof(roomInfo));
 				session->asyncWrite(response);
 
@@ -111,28 +111,7 @@ namespace Main
 				// Check if this is needed for clan-room join
 				response.setCommand(RoomJoinOrder::RoomLatestInfo, 0, 0, roomSettings.mode);
 				response.setData(nullptr, 0);
-				if (roomSettings.mode == Common::Enums::FreeForAll || roomSettings.mode == Common::Enums::ArmsRace
-					|| roomSettings.mode == Common::Enums::SquareMode)
-				{
-					Main::Structures::ModeInfoFFA info;
-					info.state = room->hasMatchStarted() ? 3 : 0;
-					info.timelimited = roomSettings.time;
-					info.weaponlimited = roomSettings.weaponRestriction;
-					info.winrule = room->getSpecificSetting();
-					info.team_balance = false;
-					response.setData(reinterpret_cast<std::uint8_t*>(&info), sizeof(info));
-					session->asyncWrite(response);
-				}
-				else if (roomSettings.mode == Common::Enums::Scrimmage)
-				{
-					Main::Structures::ModeInfoScrimmage info;
-					info.state = room->hasMatchStarted() ? 3 : 0;
-					info.timelimited = roomSettings.time;
-					info.weaponlimited = roomSettings.weaponRestriction;
-					response.setData(reinterpret_cast<std::uint8_t*>(&info), sizeof(info));
-					session->asyncWrite(response);
-				}
-				else if (roomSettings.mode == Common::Enums::TeamDeathMatch || roomSettings.mode == Common::Enums::ItemMatch
+				if (roomSettings.mode == Common::Enums::TeamDeathMatch || roomSettings.mode == Common::Enums::ItemMatch
 					|| roomSettings.mode == Common::Enums::CloseCombat || roomSettings.mode == Common::Enums::SuperItemMatch
 					|| roomSettings.mode == Common::Enums::SniperMode || roomSettings.mode == Common::Enums::AiBattle
 					|| roomSettings.mode == Common::Enums::Clan_CaptureTheBattery || roomSettings.mode == Common::Enums::CaptureTheBattery
@@ -200,43 +179,42 @@ namespace Main
 			}
 		}
 
+		// Reviewed 22.04.2026
 		inline void handleOtherClanJoin(const Common::Network::Packet& request, std::shared_ptr<Main::Network::Session> session,
-			Main::Classes::ClansManager& clansManager, Main::Classes::RoomsManager& roomsManager)
+			Main::Classes::PartiesManager& partiesManager, Main::Classes::RoomsManager& roomsManager)
 		{
-			START_BENCHMARK;
-
 			Common::Network::Packet response = request;
 			response.setTcpHeader(request.getSession(), Common::Enums::NO_ENCRYPTION);
 
 			const Main::ClientData::ClanRoomInfo requestStructure = Details::parseData<Main::ClientData::ClanRoomInfo>(request); 
 			const auto& ainfo = session->getAccountInfo();
-			const std::uint16_t selfClanRoomNumber = session->getPlayer().getClanRoomNumber();
+			const std::uint16_t selfPartyRoomNumber = session->getPlayer().getPartyRoomNumber();
 
-			if (auto* targetClanRoom = clansManager.getExactRoomFor(requestStructure.clanId, requestStructure.roomNumber);
-				auto* selfClanRoom = clansManager.getExactRoomFor(ainfo.clanId, selfClanRoomNumber))
+			if (auto targetPartyRoom = partiesManager.getExactRoomFor(requestStructure.clanId, requestStructure.roomNumber);
+				auto selfPartyRoom = partiesManager.getExactRoomFor(ainfo.clanId, selfPartyRoomNumber))
 			{
-				if (targetClanRoom->getClanId() == session->getAccountInfo().clanId)
+				if (targetPartyRoom->getClanId() == session->getAccountInfo().clanId)
 				{
 					response.setExtra(OtherClanJoinExtra::ERROR1);
 					session->asyncWrite(response);
 				}
-				else if (!targetClanRoom->isRegistered())
+				else if (!targetPartyRoom->isRegistered() || targetPartyRoom->getClanMatchRoomNumber() >= Common::Constants::clanRoomNumberStart)
 				{
 					response.setExtra(OtherClanJoinExtra::TARGET_CLAN_IN_BATTLE);
 					session->asyncWrite(response);
 				}
-				else if (targetClanRoom->getWaitingPlayers().size() > selfClanRoom->getWaitingPlayers().size())
+				else if (targetPartyRoom->getPlayersSize() > selfPartyRoom->getPlayersSize())
 				{
 					response.setExtra(OtherClanJoinExtra::ERROR4);
 					session->asyncWrite(response);
 				}
-				else if (auto otherTargetLeader = targetClanRoom->getLeaderSession())
+				else if (auto otherTargetLeader = targetPartyRoom->getLeaderSession())
 				{ 
 					// the target leader will host the new room where clan vs clan happens
-					Main::Structures::CompleteRoomInfo completeRoomInfo{ targetClanRoom->getRoomSettings(), "" /* title, unused */ };
+					Main::Structures::CompleteRoomInfo completeRoomInfo{ targetPartyRoom->getRoomSettings(), "" /* title, unused */ };
 					Common::Network::Packet roomCreationRequest;
 					roomCreationRequest.setTcpHeader(otherTargetLeader->getId(), Common::Enums::NO_ENCRYPTION);
-					roomCreationRequest.setCommand(138, 0, targetClanRoom->getSpecificSetting(), 0);
+					roomCreationRequest.setCommand(138, 0, targetPartyRoom->getSpecificSetting(), 0);
 					roomCreationRequest.setData(reinterpret_cast<std::uint8_t*>(&completeRoomInfo), sizeof(completeRoomInfo));
 					if (!Main::Handlers::handleRoomCreationClan(roomCreationRequest, otherTargetLeader, roomsManager))
 					{
@@ -254,36 +232,45 @@ namespace Main
 
 					if (Main::Classes::Room* room = roomsManager.getRoomByNumber(roomNumber))
 					{
-						for (auto currentWaitingTargetPlayer : targetClanRoom->getWaitingPlayerSessions())
-						{
-							if (currentWaitingTargetPlayer->getId() == otherTargetLeader->getId()) continue; // the target leader is already in the room
+						std::string targetClanName = "";
+						std::string selfClanName = "";
 
-							Main::Handlers::handleClanRoomJoin(response, currentWaitingTargetPlayer, roomsManager, Common::Enums::TEAM_BLUE);
-						}
-						targetClanRoom->setTeam(Common::Enums::TEAM_BLUE);
-						targetClanRoom->switchRegistered();
-
-						for (auto currentWaitingPlayer : selfClanRoom->getWaitingPlayerSessions())
+						for (auto targetPlayer : targetPartyRoom->getPlayerSessions())
 						{
-							Main::Handlers::handleClanRoomJoin(response, currentWaitingPlayer, roomsManager, Common::Enums::TEAM_RED);
+							if (targetClanName.empty()) targetClanName = targetPlayer->getAccountInfo().clanName;
+							if (targetPlayer->getId() == otherTargetLeader->getId()) continue; // the target leader is already in the room
+							Main::Handlers::handleClanRoomJoin(response, targetPlayer, roomsManager, Common::Enums::TEAM_BLUE);
 						}
-						selfClanRoom->setTeam(Common::Enums::TEAM_RED);
+						targetPartyRoom->setTeam(Common::Enums::TEAM_BLUE);
+
+						for (auto player : selfPartyRoom->getPlayerSessions())
+						{
+							if (selfClanName.empty()) selfClanName = player->getAccountInfo().clanName;
+							Main::Handlers::handleClanRoomJoin(response, player, roomsManager, Common::Enums::TEAM_RED);
+						}
+						selfPartyRoom->setTeam(Common::Enums::TEAM_RED);
+
+						auto result = partiesManager.addClanMatch(roomNumber, selfPartyRoom, targetPartyRoom);
+						if (!result)
+						{
+							room->broadcastMessage("ERROR: " + result.error() + " - Continuing this clan match may result in crashes! Report this issue!");
+						}
+						room->setRoomTitle(std::string{ "CW: " + targetClanName + " VS " + selfClanName });
 					}
 					else
 					{
-						session->sendMessage("Server error: target leader session was not found. Please report this issue if it persists");
+						session->sendMessage("Server error: the room that was just created was not found. Please report this issue.");
 						response.setExtra(OtherClanJoinExtra::TARGET_CLAN_NOT_FOUND);
 						session->asyncWrite(response);
 					}
 				}
 				else
 				{
+					session->sendMessage("Server error: target leader session was not found. Please report this issue if it persists");
 					response.setExtra(OtherClanJoinExtra::TARGET_CLAN_NOT_FOUND);
 					session->asyncWrite(response);
 				}
 			}
-
-			END_BENCHMARK(handleOtherClanJoin, session)
 		}
 	}
 }

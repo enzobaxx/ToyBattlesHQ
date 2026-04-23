@@ -5,7 +5,7 @@
 
 #include "../../Network/MainSession.h"
 #include "Network/Packet.h"
-#include "../../Classes/ClansManager.h"
+#include "../../Classes/PartiesManager.h"
 
 namespace Main
 {
@@ -13,7 +13,7 @@ namespace Main
 	{
 		template<std::size_t OrderId>
 		inline void handleActiveClansList(const Common::Network::Packet& request, std::shared_ptr<Main::Network::Session> session,
-			Main::Classes::ClansManager& clansManager)
+			Main::Classes::PartiesManager& clansManager)
 		{
 			const auto& ainfo = session->getAccountInfo();
 
@@ -23,14 +23,14 @@ namespace Main
 				response.setExtra(6);
 				response.setData(nullptr, 0);
 
-				if (auto* clanRoom = clansManager.getExactRoomFor(ainfo.clanId, session->getPlayer().getClanRoomNumber()))
+				if (auto clanRoom = clansManager.getExactRoomFor(ainfo.clanId, session->getPlayer().getPartyRoomNumber()))
 				{
-					clanRoom->broadcastToWaitingPlayers(response);
+					clanRoom->broadcast(response);
 				}
 			}
 			else if constexpr (OrderId == 113)
 			{
-				if (auto* clanRoom = clansManager.getExactRoomFor(ainfo.clanId, session->getPlayer().getClanRoomNumber()))
+				if (auto clanRoom = clansManager.getExactRoomFor(ainfo.clanId, session->getPlayer().getPartyRoomNumber()))
 				{
 					auto response = request;
 					const auto allRegisteredClans = clansManager.getAllRegisteredClans();
@@ -38,7 +38,7 @@ namespace Main
 					response.setOption(allRegisteredClans.size()); // num of clans waiting for a pairing
 					response.setData(reinterpret_cast<const std::uint8_t*>(allRegisteredClans.data()), allRegisteredClans.size() *
 						sizeof(Main::Structures::RegisteredClanInfo));
-					clanRoom->broadcastToWaitingPlayers(response);
+					clanRoom->broadcast(response);
 				}
 			}
 		}

@@ -3,8 +3,9 @@
 
 #include "../../Network/MainSession.h"
 #include "Network/Packet.h"
-#include "../../Classes/ClansManager.h"
+#include "../../Classes/PartiesManager.h"
 #include "../../Structures/Clan/ClanStructures.h"
+#include "../../Classes/PartyRoom.h"
 
 namespace Main
 {
@@ -17,29 +18,29 @@ namespace Main
 			CLAN_MATCH_CREATE_FAIL = 7,  // nothing happens, use 6 
 		};
 
-        // Reviewed 6/02/2025
-        inline void handlePartyCreation(const Common::Network::Packet& request, std::shared_ptr<Main::Network::Session> session, Main::Classes::ClansManager& clansManager)
+        // Reviewed and tested 20.04.2026
+        inline void handlePartyCreation(const Common::Network::Packet& request, std::shared_ptr<Main::Network::Session> session, Main::Classes::PartiesManager& partiesManager)
         {
             Main::ClientData::ClanRoomSettings clientReq = Details::parseData<Main::ClientData::ClanRoomSettings>(request);
 
             Common::Network::Packet response = request;
             response.setTcpHeader(request.getSession(), Common::Enums::NO_ENCRYPTION);
 
-            if (const std::optional<std::uint16_t> nextRoomNumberOpt = clansManager.getNextAvailableRoomNumberFor(session->getAccountInfo().clanId))
+            if (const std::optional<std::uint16_t> nextRoomNumberOpt = partiesManager.getNextAvailableRoomNumberFor(session->getAccountInfo().clanId))
             {
-                session->sendMessage("Created party room number: " + std::to_string(*nextRoomNumberOpt), Main::Enums::TIP);
-
+                auto createdRoom = std::make_shared<Main::Classes::PartyRoom>(session, *nextRoomNumberOpt, clientReq);
+                const auto roomIdPair = createdRoom->getRoomId();
+                partiesManager.addRoom(createdRoom);
                 response.setExtra(ClanMatchCreationExtra::CLAN_MATCH_CREATE_SUCCESS);
-                Main::Classes::ClanRoom createdRoom{ session, *nextRoomNumberOpt, clientReq };
-                const auto roomIdPair = createdRoom.getRoomId();
-                clansManager.addRoom(createdRoom);
                 response.setData(reinterpret_cast<const std::uint8_t*>(&roomIdPair), sizeof(roomIdPair));
             }
             else
             {
                 session->sendMessage("Error: Only 4 simultaneous clan matches per clan are allowed");
                 response.setExtra(ClanMatchCreationExtra::CLAN_MATCH_CREATE_EMPTY);
+                response.setData(nullptr, 0);
             }
+
             session->asyncWrite(response);
         }
 	}

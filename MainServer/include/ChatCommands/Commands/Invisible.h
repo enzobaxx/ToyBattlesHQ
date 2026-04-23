@@ -22,6 +22,11 @@ namespace Main
 				MP::MainScheduler&, std::uint32_t roomNumber,
 				Main::MainServer& mainSv) override
 			{
+				if (roomNumber >= Common::Constants::clanRoomNumberStart)
+				{
+					session->sendMessage("Error: this command is currently disabled for clanwars!");
+					return;
+				}
 				if (Main::Classes::Room* room = roomsManager.getRoomByNumber(roomNumber))
 				{
 					if (!room->hasMatchStarted())

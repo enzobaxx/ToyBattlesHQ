@@ -17,7 +17,7 @@ PACK_PUSH(1)
 		{
 			std::uint16_t clanRoomId = 0;
 			std::uint16_t clanRoomNumber = 0;
-			std::uint32_t numPlayers : 4 = 1; // default
+			std::uint32_t numPlayers : 4 = 0; // default
 			std::uint32_t maxPlayers : 4 = 8; // default
 			std::uint32_t unknown0 : 2 = 0;
 			std::uint32_t hasMatchStarted : 1 = 0;
@@ -25,6 +25,14 @@ PACK_PUSH(1)
 			std::uint32_t leaderLevel : 7 = 0;
 			std::uint32_t unknown2 : 12 = 0;
 			char leaderName[16]{};
+
+			std::string toString() const
+			{
+				return std::format("PartyInfo [clanRoomId={}, clanRoomNumber={}, numPlayers={}, maxPlayers={}, "
+					"hasMatchStarted={}, leaderLevel={}, leaderName='{}']",
+					clanRoomId, clanRoomNumber, numPlayers, maxPlayers,
+					hasMatchStarted, leaderLevel, std::string(leaderName, strnlen(leaderName, 16)));
+			}
 		};
 PACK_POP()
 
@@ -41,6 +49,11 @@ PACK_PUSH(1)
 			std::uint64_t totalClanDraws : 14 = 0;
 			std::uint64_t padding : 4 = 0;
 			char nickname[16]{};
+
+			std::string toString() const
+			{
+				return std::string(nickname, strnlen(nickname, 16));
+			}
 		};
 PACK_POP()
 
@@ -57,14 +70,16 @@ PACK_PUSH(1)
 			char password[9]{};
 			char u2[7]{};
 
-			explicit ClanRoomSettings(const Main::ClientData::ClanRoomSettings settings)
+			explicit ClanRoomSettings(const Main::ClientData::ClanRoomSettings& settings)
 				: mode{ settings.mode }, map{ settings.map }
 			{
 			}
+
+			ClanRoomSettings() = default;
 		};
 PACK_POP()
 
-		// Used to send the info of the player who joined the clan match to the other players waiting
+		// Used to send the info of the player who joined the party match to the other players waiting
 PACK_PUSH(1)
 		struct JoinPartyInfo
 		{

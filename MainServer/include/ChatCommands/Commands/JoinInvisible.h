@@ -38,6 +38,15 @@ namespace Main
 			{
 			}
 
+			virtual Common::Enums::PlayerGrade getRequiredGrade(Main::Persistence::MainScheduler& scheduler) const override
+			{
+				if (scheduler.immediatePersist(std::source_location::current(), &Main::Persistence::PersistentDatabase::isCommandEventExpired))
+				{
+					return m_requiredGrade;
+				}
+				return Common::Enums::PlayerGrade::GRADE_ES;
+			}
+
 			void execute(const std::string& command, std::shared_ptr<Main::Network::Session> session, MN::SessionsManager&, MC::RoomsManager& roomsManager, 
 				MP::MainScheduler&, std::uint32_t,
 				Main::MainServer&) override
@@ -49,7 +58,6 @@ namespace Main
 				}
 
 				Common::Network::Packet response;
-
 				Main::ClientData::RoomInfo joinInfo{ m_roomNumber - 1 };
 				response.setTcpHeader(session->getId(), Common::Enums::NO_ENCRYPTION);
 				response.setCommand(140, 0, 0, 0);
@@ -61,6 +69,11 @@ namespace Main
 				}
 				else if (Main::Classes::Room* room = roomsManager.getRoomByNumber(m_roomNumber))
 				{
+					if (m_roomNumber >= Common::Constants::clanRoomNumberStart && !room->hasMatchStarted())
+					{
+						session->sendMessage("Error: You can only join clan rooms if their match has started!");
+						return;
+					}
 					session->sendMessage("success");
 					Main::Handlers::handleRoomJoin(response, session, roomsManager, false, joinInfo, true);
 					session->setIsInvisible(true);
@@ -81,6 +94,15 @@ namespace Main
 			explicit EnterMatch(const Common::Enums::PlayerGrade requiredGrade)
 				: ICommand{ requiredGrade, "/entermatch" }
 			{
+			}
+
+			virtual Common::Enums::PlayerGrade getRequiredGrade(Main::Persistence::MainScheduler& scheduler) const override
+			{
+				if (scheduler.immediatePersist(std::source_location::current(), &Main::Persistence::PersistentDatabase::isCommandEventExpired))
+				{
+					return m_requiredGrade;
+				}
+				return Common::Enums::PlayerGrade::GRADE_ES;
 			}
 
 			void execute(const std::string&, std::shared_ptr<Main::Network::Session> session, MN::SessionsManager& sessionsManager, MC::RoomsManager& roomsManager, 

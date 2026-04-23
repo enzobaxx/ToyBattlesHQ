@@ -14,6 +14,7 @@ namespace Main
 {
 	namespace Handlers
 	{
+		// Reviewed 22.04.2026
 		inline bool handleRoomCreationClan(const Common::Network::Packet& request, std::shared_ptr<Main::Network::Session> session,
 			Main::Classes::RoomsManager& roomsManager)
 		{
@@ -46,7 +47,7 @@ namespace Main
 			response.setOrder(request.getOrder());
 			room.setStateFor(session->getAccountInfo().uniqueId, Common::Enums::STATE_WAITING);
 			session->setRoomNumber(room.getRoomNumber());
-			const std::pair<std::uint16_t, std::uint16_t> roomNum{ room.getRoomNumber() - 1, 1 }; // {roomNum, unk}
+			const std::pair<std::uint16_t, std::uint16_t> roomNum{ room.getRoomNumber() - 1, 2 }; // {roomNum, unk}
 			response.setExtra(1);
 			response.setData(reinterpret_cast<const std::uint8_t*>(&roomNum), sizeof(roomNum));
 			session->asyncWrite(response);
