@@ -391,6 +391,31 @@ namespace Main
 			return m_settings.map;
 		}
 
+		bool Room::areAllPlayersInSameTeam() const
+		{
+			if (m_players.empty())
+				return false;
+
+			Common::Enums::Team firstTeam = Common::Enums::TEAM_ZOMBIE;
+
+			for (const auto& [player, weakSession] : m_players)
+			{
+				auto session = weakSession.lock();
+				if (!session) continue;
+
+				if (firstTeam == Common::Enums::TEAM_ZOMBIE)
+				{
+					firstTeam = static_cast<Common::Enums::Team>(player.team);
+				}
+				else if (static_cast<Common::Enums::Team>(player.team) != firstTeam)
+				{
+					return false;
+				}
+			}
+
+			return true;
+		}
+
 		// Refactored
 		bool Room::removePlayer(std::shared_ptr<Main::Network::Session> session, std::uint32_t extra)
 		{

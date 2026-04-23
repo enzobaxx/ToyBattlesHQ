@@ -319,6 +319,7 @@ namespace Main
 			// Other
 			void generateMapIfRandom();
 			std::uint32_t getActualMap();
+			bool areAllPlayersInSameTeam() const;
 			void votekickVoteYes();
 			std::pair<std::uint32_t, std::string> getVotekickResultDetails();
 			void resetVotekick();

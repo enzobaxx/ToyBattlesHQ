@@ -57,7 +57,8 @@ namespace Main
         }
 
         // Reviewed 20.04.2026
-        inline void handlePartyRoomLeave(const Common::Network::Packet& request, std::shared_ptr<Main::Network::Session> session, 
+        // Reviewed 20.04.2026
+        inline void handlePartyRoomLeave(const Common::Network::Packet& request, std::shared_ptr<Main::Network::Session> session,
             Main::Classes::PartiesManager& partiesManager,
             Main::Classes::RoomsManager& roomsManager, bool isLeaderLeaving = false)
         {
@@ -71,8 +72,8 @@ namespace Main
             if (auto selfPartyRoom = partiesManager.getExactRoomFor(ainfo.clanId, selfPartyRoomNumber))
             {
                 const std::uint16_t roomNumber = selfPartyRoom->getClanMatchRoomNumber();
-
                 auto targetPlayerIndex = selfPartyRoom->getPlayerIndex(ainfo.uniqueId.session);  // on purpose here - removePlayer invalidates targetPlayerIndex otherwise!
+
                 if (std::optional<bool> res = selfPartyRoom->removePlayer(ainfo.uniqueId.session); res)
                 {
                     session->asyncWrite(response);
@@ -80,53 +81,49 @@ namespace Main
                     if (*res)
                     { // the party must be closed since the only player that was in it left
                         partiesManager.removeExactRoom(ainfo.clanId, selfPartyRoomNumber);
-                        auto* room = roomsManager.getRoomByNumber(roomNumber);
-                        if (room && room->removePlayer(session, 27))
+                        if (auto* room = roomsManager.getRoomByNumber(roomNumber))
                         {
-                            roomsManager.removeRoom(room->getRoomNumber(), 27);
-                        }
-                        else if (room && room->hasObserverPlayers())
-                        {
-                            auto obsPlayers = room->getObserverPlayers();
-                            roomsManager.removeRoom(room->getRoomNumber(), 27);
-
-                            for (auto& [info, ws] : obsPlayers)
+                            bool closeRoom = room->removePlayer(session, 27);
+                            bool removeOppositeParty = false;
+                            if (room->areAllPlayersInSameTeam())
                             {
-                                if (auto s = ws.lock())
+                                closeRoom = true;
+                                removeOppositeParty = true;
+                            }
+                            if (closeRoom)
+                            {
+                                roomsManager.removeRoom(room->getRoomNumber(), 27);
+
+                                if (removeOppositeParty)
                                 {
-                                    if (s->getPlayer().getPartyRoomNumber())
+                                    auto matchResult = partiesManager.getClanMatch(roomNumber);
+                                    if (matchResult)
                                     {
-                                        Common::Network::Packet leavePartyReq;
-                                        leavePartyReq.setCommand(111, 0, 0, 0);
-                                        Main::Handlers::handlePartyRoomLeave(leavePartyReq, s, partiesManager, roomsManager);
+                                        auto& [partyRoomA, partyRoomB] = *matchResult;
+                                        auto processPartyRoom = [&](std::shared_ptr<Main::Classes::PartyRoom> partyRoom)
+                                            {
+                                                if (!partyRoom) return;
+
+                                                std::uint16_t clanId = partyRoom->getClanId();
+                                                std::uint16_t partyRoomNumber = partyRoom->getRoomNumber();
+
+                                                partyRoom->updatePartyStatus(false);
+                                                partyRoom->broadcast(response);
+
+                                                for (auto partySession : partyRoom->getPlayerSessions())
+                                                {
+                                                    Common::Network::Packet req;
+                                                    req.setCommand(111, 0, 0, 0);
+                                                    handlePartyRoomLeave(req, partySession, partiesManager, roomsManager, true);
+                                                }
+                                            };
+                                        processPartyRoom(partyRoomA);
+                                        processPartyRoom(partyRoomB);
+                                        partiesManager.removeClanMatch(roomNumber, true);
                                     }
                                 }
                             }
-                            // If we dont close the room when a MOD is spectating, then the last client bugs out - that's why we're removing the room here in that case
-                            auto matchResult = partiesManager.getClanMatch(roomNumber);
-                            if (matchResult)
-                            {
-                                auto& [partyRoomA, partyRoomB] = *matchResult;
-                                auto processPartyRoom = [&](std::shared_ptr<Main::Classes::PartyRoom> partyRoom)
-                                    {
-                                        if (!partyRoom) return;
 
-                                        std::uint16_t clanId = partyRoom->getClanId();
-                                        std::uint16_t partyRoomNumber = partyRoom->getRoomNumber();
-
-                                        partyRoom->updatePartyStatus(false);
-                                        partyRoom->broadcast(response);
-
-                                        for (auto partySession : partyRoom->getPlayerSessions())
-                                        {
-                                            Common::Network::Packet req;
-                                            req.setCommand(111, 0, 0, 0);
-                                            handlePartyRoomLeave(req, partySession, partiesManager, roomsManager, true);
-                                        }
-                                    };
-                                processPartyRoom(partyRoomA);
-                                processPartyRoom(partyRoomB);
-                            }
                         }
                         return;
                     }
