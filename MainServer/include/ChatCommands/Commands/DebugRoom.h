@@ -61,8 +61,34 @@ namespace Main
 				}
 			}
 		};
-
 		REGISTER_CMD(DebugRoom, Common::Enums::PlayerGrade::GRADE_NORMAL)
+
+		struct DebugParty final : public ICommand
+		{
+			explicit DebugParty(const Common::Enums::PlayerGrade requiredGrade)
+				: ICommand{ requiredGrade, "/debugparty: shows info of the current party room" }
+			{
+			}
+
+			void execute(const std::string&, std::shared_ptr<Main::Network::Session> session, MN::SessionsManager&, MC::RoomsManager& roomsManager,
+				MP::MainScheduler&, std::uint32_t roomNum,
+				Main::MainServer& srv) override
+			{
+				const auto& ainfo = session->getAccountInfo();
+				auto partiesManager = srv.getPartiesManager();
+				if (auto partyRoom = partiesManager.getExactRoomFor(ainfo.clanId, session->getPlayer().getPartyRoomNumber()))
+				{
+					session->sendMessage(partyRoom->getPlayersNicknames());
+					session->sendMessage(partyRoom->getFormattedPartyInfo());
+				}
+				else
+				{
+					session->sendMessage("Error: Not in a party");
+				}
+			}
+		};
+
+		REGISTER_CMD(DebugParty, Common::Enums::PlayerGrade::GRADE_NORMAL)
 
 
 		class PlayerInfo final : public ICommand

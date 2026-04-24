@@ -54,11 +54,11 @@ namespace Main
 				{
 					packet.setTcpHeader(session->getId(), Common::Enums::NO_ENCRYPTION);
 					packet.setCommand(256, 0, 0, 0);
-					Main::Handlers::handleMatchLeave(packet, session, *this, *roomsManager, *m_clansManager);
+					Main::Handlers::handleMatchLeave(packet, session, *this, *roomsManager, *m_partiesManager);
 				}
 
 				packet.setCommand(141, 0, 0, 0);
-				Main::Handlers::handleRoomLeave(packet, session, *this, *roomsManager, *m_clansManager, session->getAccountInfo().uniqueId);
+				Main::Handlers::handleRoomLeave(packet, session, *this, *roomsManager, *m_partiesManager, session->getAccountInfo().uniqueId);
 			}
 
 			// 2. remove them from the party
@@ -68,7 +68,7 @@ namespace Main
 			{
 				Common::Network::Packet leavePartyReq;
 				leavePartyReq.setCommand(111, 0, 0, 0);
-				Main::Handlers::handlePartyRoomLeave(leavePartyReq, session, *m_clansManager, *roomsManager);
+				Main::Handlers::handlePartyRoomLeave(leavePartyReq, session, *m_partiesManager, *roomsManager);
 			}
 
 			it->second->persistNow();
@@ -91,7 +91,7 @@ namespace Main
 
 		void SessionsManager::setClansManager(Main::Classes::PartiesManager* clansManager)
 		{
-			m_clansManager = clansManager;
+			m_partiesManager = clansManager;
 		}
 
 		const std::unordered_map<std::uint64_t, std::shared_ptr<Main::Network::Session>>& SessionsManager::getAllSessions() const

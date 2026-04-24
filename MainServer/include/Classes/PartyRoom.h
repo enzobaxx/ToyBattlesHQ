@@ -18,6 +18,12 @@ namespace Main
 {
 	namespace Classes
 	{
+		struct RemovePlayerResult 
+		{
+			bool roomEmpty;
+			size_t originalIndex;
+		};
+
 		class PartyRoom
 		{
 		private:
@@ -55,7 +61,6 @@ namespace Main
 				session->setPartyRoomNumber(m_partyInfo.clanRoomNumber);
 
 				session->sendMessage("Created party room number: " + std::to_string(clanRoomNumber), Main::Enums::TIP);
-				sendDebugMessage();
 				//logPartyState("Party Created");
 			}
 
@@ -77,7 +82,6 @@ namespace Main
 				session->setPartyRoomNumber(m_partyInfo.clanRoomNumber);
 
 				session->sendMessage("Joined party room number: " + std::to_string(m_partyInfo.clanRoomNumber), Main::Enums::TIP);
-				sendDebugMessage();
 				//logPartyState("Player Added");
 			}
 
@@ -183,33 +187,45 @@ namespace Main
 				return std::nullopt;
 			}
 
-			std::optional<bool> removePlayer(std::uint32_t sessionId)
+			std::expected<RemovePlayerResult, std::string> removePlayer(std::uint32_t sessionId)
 			{
 				auto it = findPlayer(sessionId);
 				if (it == m_players.end())
 				{
 					broadcastMessage("Player to be removed was not found in the room, please report this issue with steps-to-reproduce");
-					return std::nullopt;
+					return std::unexpected("Player not found");
 				}
 
 				auto lockedSession = it->second.lock();
 				const auto sessionToRemove = lockedSession->getAccountInfo().uniqueId.session;
+				size_t originalIndex = std::distance(m_players.begin(), it);
+				size_t lastIndex = m_players.size() - 1;
 
-				if (isLeader(sessionToRemove))
+				if (isLeader(sessionToRemove) && m_players.size() > 1)
 				{
 					auto newLeaderIdxOpt = changeLeaderToFirstAvailable();
 					if (!newLeaderIdxOpt)
 					{
 						broadcastMessage("newLeaderIdxOpt nullopt - New leader could not be chosen, please report this issue with steps-to-reproduce");
-						return std::nullopt;
+						return std::unexpected("Failed to find new leader");
 					}
 
-					if (*newLeaderIdxOpt != 0)
+					if (*newLeaderIdxOpt != lastIndex)
 					{
-						Common::Network::Packet response;
-						response.setTcpHeader(0, Common::Enums::NO_ENCRYPTION);
-						response.setCommand(114, 0, 0, *newLeaderIdxOpt);
-						broadcast(response);
+						std::swap(m_players[*newLeaderIdxOpt], m_players[lastIndex]); // Leaving player always swapped with last player in the list client side
+					}
+					originalIndex = *newLeaderIdxOpt;  // The old leader is now in this index
+
+					Common::Network::Packet response;
+					response.setTcpHeader(0, Common::Enums::NO_ENCRYPTION);
+					response.setCommand(114, 0, 0, *newLeaderIdxOpt); 
+					broadcast(response);
+				}
+				else if (!isLeader(sessionToRemove) && m_players.size() > 1)
+				{
+					if (originalIndex != lastIndex)
+					{
+						std::swap(m_players[originalIndex], m_players[lastIndex]); // Leaving player always swapped with last player in the list client side
 					}
 				}
 
@@ -217,7 +233,7 @@ namespace Main
 				if (it == m_players.end())
 				{
 					broadcastMessage("[2] Player to be removed was not found in the room, please report this issue with steps-to-reproduce");
-					return std::nullopt;
+					return std::unexpected("Player disappeared during swap");
 				}
 
 				if (auto session = it->second.lock())
@@ -230,11 +246,8 @@ namespace Main
 				if (m_partyInfo.numPlayers)
 					--m_partyInfo.numPlayers;
 
-				sendDebugMessage();
-
 				m_players.erase(it);
-				//logPartyState("Player Removed");
-				return m_players.empty();
+				return RemovePlayerResult{ m_players.empty(), originalIndex };
 			}
 
 			std::uint32_t getRoomNumber() const noexcept
@@ -316,9 +329,6 @@ namespace Main
 
 			std::optional<std::size_t> changeLeaderToFirstAvailable()
 			{
-				if (m_players.size() <= 1)
-					return 0;
-
 				for (std::size_t idx = 1; idx < m_players.size(); ++idx)
 				{
 					if (auto session = m_players[idx].second.lock())
@@ -492,17 +502,16 @@ namespace Main
 				//logPartyState("Stats Stored");
 			}
 
-		private:
 			/********** DEBUG PURPOSES /**********/
-			std::string getWaitingPlayersNicknames() const
+			std::string getPlayersNicknames() const
 			{
 				if (m_players.empty())
-					return "Waiting Players: None";
+					return "Players: None";
 
 				std::string result = "Waiting Players: ";
 				for (const auto& [playerInfo, weakSession] : m_players)
 				{
-					if (result != "Waiting Players: ")
+					if (result != "Players: ")
 						result += ", ";
 
 					result += playerInfo.toString();
@@ -527,7 +536,7 @@ namespace Main
 
 			void sendDebugMessage()
 			{
-				broadcastMessage(getWaitingPlayersNicknames());
+				broadcastMessage(getPlayersNicknames());
 				broadcastMessage(getFormattedPartyInfo());
 			}
 

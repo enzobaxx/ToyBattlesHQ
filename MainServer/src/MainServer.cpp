@@ -234,7 +234,7 @@ namespace Main
 		CN::Session::addCallback<CN::PacketType::ENCRYPTED, MN::Session>(106, [&](const Common::Network::Packet& request,
 			std::shared_ptr<Main::Network::Session> session) { session->displayMailboxes(static_cast<Main::Enums::MailboxMission>(request.getMission())); });
 		CN::Session::addCallback<CN::PacketType::ENCRYPTED, MN::Session>(107, [&](const Common::Network::Packet& request,
-			std::shared_ptr<Main::Network::Session> session) { Main::Handlers::handleRoomStart(request, session, m_roomsManager, m_clansManager, m_timeSinceLastRestart); });
+			std::shared_ptr<Main::Network::Session> session) { Main::Handlers::handleRoomStart(request, session, m_roomsManager, m_partiesManager, m_timeSinceLastRestart); });
 		CN::Session::addCallback<CN::PacketType::ENCRYPTED, MN::Session>(108, [&](const Common::Network::Packet& request,
 			std::shared_ptr<Main::Network::Session> session) { Main::Handlers::handleEliminationNextRound2(request, session, m_roomsManager); });
 		CN::Session::addCallback<CN::PacketType::ENCRYPTED, MN::Session>(124, [&](const Common::Network::Packet& request,
@@ -266,7 +266,7 @@ namespace Main
 		CN::Session::addCallback<CN::PacketType::ENCRYPTED, MN::Session>(140, [&](const Common::Network::Packet& request,
 			std::shared_ptr<Main::Network::Session> session) { Main::Handlers::handleRoomJoin(request, session, m_roomsManager); });
 				CN::Session::addCallback<CN::PacketType::ENCRYPTED, MN::Session>(141, [&](const Common::Network::Packet& request,
-					std::shared_ptr<Main::Network::Session> session) { Main::Handlers::handleRoomLeave(request, session, m_sessionsManager, m_roomsManager, m_clansManager,
+					std::shared_ptr<Main::Network::Session> session) { Main::Handlers::handleRoomLeave(request, session, m_sessionsManager, m_roomsManager, m_partiesManager,
 				Details::parseData<Main::Structures::UniqueId, false>(request)); });
 		CN::Session::addCallback<CN::PacketType::ENCRYPTED, MN::Session>(142, [&](const Common::Network::Packet& request,
 			std::shared_ptr<Main::Network::Session> session) { Main::Handlers::handleRoomsList(request, session, m_roomsManager); });
@@ -280,7 +280,7 @@ namespace Main
 			std::shared_ptr<Main::Network::Session> session) { Main::Handlers::handleRoomChatMessage(request, session, m_sessionsManager, m_chatCommands, m_roomsManager, m_scheduler, *this); });
 		CN::Session::addCallback<CN::PacketType::ENCRYPTED, MN::Session>(200, Main::Handlers::handleGambleItem);
 		CN::Session::addCallback<CN::PacketType::ENCRYPTED, MN::Session>(256, [&](const Common::Network::Packet& request,
-			std::shared_ptr<Main::Network::Session> session) { Main::Handlers::handleMatchLeave(request, session, m_sessionsManager, m_roomsManager, m_clansManager); });
+			std::shared_ptr<Main::Network::Session> session) { Main::Handlers::handleMatchLeave(request, session, m_sessionsManager, m_roomsManager, m_partiesManager); });
 		
 		
 		CN::Session::addCallback<CN::PacketType::ENCRYPTED, MN::Session>(259, [&](const Common::Network::Packet& request,
@@ -300,7 +300,7 @@ namespace Main
 		
 		// This handler also needs to refactored + checked (not fully working, e.g. for level up, different match ending scoreboards, etc)
 		CN::Session::addCallback<CN::PacketType::ENCRYPTED, MN::Session>(254, [&](const Common::Network::Packet& request,
-			std::shared_ptr<Main::Network::Session> session) { Main::Handlers::handleMatchEnding(request, session, m_roomsManager, m_clansManager, m_scheduler, m_expMpEvent,
+			std::shared_ptr<Main::Network::Session> session) { Main::Handlers::handleMatchEnding(request, session, m_roomsManager, m_partiesManager, m_scheduler, m_expMpEvent,
 				m_eventMissionInfo); });
 
 		// CTB respawn 
@@ -319,45 +319,45 @@ namespace Main
 
 
 		CN::Session::addCallback<CN::PacketType::ENCRYPTED, MN::Session>(58, [&](const Common::Network::Packet& request,
-			std::shared_ptr<Main::Network::Session> session) { Main::Handlers::handlePartyList(request, session, m_clansManager); });
+			std::shared_ptr<Main::Network::Session> session) { Main::Handlers::handlePartyList(request, session, m_partiesManager); });
 
 		CN::Session::addCallback<CN::PacketType::ENCRYPTED, MN::Session>(109, [&](const Common::Network::Packet& request,
-			std::shared_ptr<Main::Network::Session> session) { Main::Handlers::handlePartyCreation(request, session, m_clansManager); });
+			std::shared_ptr<Main::Network::Session> session) { Main::Handlers::handlePartyCreation(request, session, m_partiesManager); });
 
 		CN::Session::addCallback<CN::PacketType::ENCRYPTED, MN::Session>(110, [&](const Common::Network::Packet& request,
-			std::shared_ptr<Main::Network::Session> session) { Main::Handlers::handlePartyJoin(request, session, m_clansManager, m_roomsManager); });
+			std::shared_ptr<Main::Network::Session> session) { Main::Handlers::handlePartyJoin(request, session, m_partiesManager, m_roomsManager); });
 
 		CN::Session::addCallback<CN::PacketType::ENCRYPTED, MN::Session>(111, [&](const Common::Network::Packet& request,
-			std::shared_ptr<Main::Network::Session> session) { Main::Handlers::handlePartyRoomLeave(request, session, m_clansManager, m_roomsManager); });
+			std::shared_ptr<Main::Network::Session> session) { Main::Handlers::handlePartyRoomLeave(request, session, m_partiesManager, m_roomsManager); });
 
 		// this shows all clans inside "Quick Match"
 		CN::Session::addCallback<CN::PacketType::ENCRYPTED, MN::Session>(112, [&](const Common::Network::Packet& request,
-			std::shared_ptr<Main::Network::Session> session) { Main::Handlers::handleActiveClansList<112>(request, session, m_clansManager); });
+			std::shared_ptr<Main::Network::Session> session) { Main::Handlers::handleActiveClansList<112>(request, session, m_partiesManager); });
 
 		// this shows all clans inside "Match Lobby"
 		CN::Session::addCallback<CN::PacketType::ENCRYPTED, MN::Session>(113, [&](const Common::Network::Packet& request,
-			std::shared_ptr<Main::Network::Session> session) { Main::Handlers::handleActiveClansList<113>(request, session, m_clansManager); });
+			std::shared_ptr<Main::Network::Session> session) { Main::Handlers::handleActiveClansList<113>(request, session, m_partiesManager); });
 
 		CN::Session::addCallback<CN::PacketType::ENCRYPTED, MN::Session>(114, [&](const Common::Network::Packet& request,
-			std::shared_ptr<Main::Network::Session> session) { Main::Handlers::handlePartyLeaderChange(request, session, m_clansManager); });
+			std::shared_ptr<Main::Network::Session> session) { Main::Handlers::handlePartyLeaderChange(request, session, m_partiesManager); });
 
 		CN::Session::addCallback<CN::PacketType::ENCRYPTED, MN::Session>(115, [&](const Common::Network::Packet& request,
-			std::shared_ptr<Main::Network::Session> session) { Main::Handlers::handleClanRegister<115>(request, session, m_clansManager); });
+			std::shared_ptr<Main::Network::Session> session) { Main::Handlers::handleClanRegister<115>(request, session, m_partiesManager); });
 
 		CN::Session::addCallback<CN::PacketType::ENCRYPTED, MN::Session>(116, [&](const Common::Network::Packet& request,
-			std::shared_ptr<Main::Network::Session> session) { Main::Handlers::handlePartySettings<116>(request, session, m_clansManager); });
+			std::shared_ptr<Main::Network::Session> session) { Main::Handlers::handlePartySettings<116>(request, session, m_partiesManager); });
 
 		CN::Session::addCallback<CN::PacketType::ENCRYPTED, MN::Session>(117, [&](const Common::Network::Packet& request,
-			std::shared_ptr<Main::Network::Session> session) { Main::Handlers::handlePartySettings<117>(request, session, m_clansManager); });
+			std::shared_ptr<Main::Network::Session> session) { Main::Handlers::handlePartySettings<117>(request, session, m_partiesManager); });
 
 		CN::Session::addCallback<CN::PacketType::ENCRYPTED, MN::Session>(120, [&](const Common::Network::Packet& request,
-			std::shared_ptr<Main::Network::Session> session) { Main::Handlers::handleClanRegister<120>(request, session, m_clansManager); });
+			std::shared_ptr<Main::Network::Session> session) { Main::Handlers::handleClanRegister<120>(request, session, m_partiesManager); });
 
 		CN::Session::addCallback<CN::PacketType::ENCRYPTED, MN::Session>(121, [&](const Common::Network::Packet& request,
-			std::shared_ptr<Main::Network::Session> session) { Main::Handlers::handleOtherClanJoin(request, session, m_clansManager, m_roomsManager); });
+			std::shared_ptr<Main::Network::Session> session) { Main::Handlers::handleOtherClanJoin(request, session, m_partiesManager, m_roomsManager); });
 
 		CN::Session::addCallback<CN::PacketType::ENCRYPTED, MN::Session>(122, [&](const Common::Network::Packet& request,
-			std::shared_ptr<Main::Network::Session> session) { Main::Handlers::handleClanRoomLeave(request, session, m_clansManager, m_roomsManager); });
+			std::shared_ptr<Main::Network::Session> session) { Main::Handlers::handleClanRoomLeave(request, session, m_partiesManager, m_roomsManager); });
 
 
 		// Trade system
@@ -390,7 +390,7 @@ namespace Main
 		m_acceptor.async_accept(*m_socket, [&](asio::error_code error)
 			{
 				m_sessionsManager.setRoomsManager(&m_roomsManager);
-				m_sessionsManager.setClansManager(&m_clansManager);
+				m_sessionsManager.setClansManager(&m_partiesManager);
 
 				auto client = std::make_shared<Main::Network::Session>(m_scheduler, std::move(*m_socket),
 					std::bind(&Main::Network::SessionsManager::removeSession, &m_sessionsManager, std::placeholders::_1), m_acManager);

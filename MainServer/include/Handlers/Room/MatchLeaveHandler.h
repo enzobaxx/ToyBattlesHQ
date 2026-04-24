@@ -48,7 +48,7 @@ namespace Main
 
                 Common::Network::Packet req;
                 req.setCommand(111, 0, 0, 0);
-                handlePartyRoomLeave(req, session, partiesManager, roomsManager, true);
+                handlePartyRoomLeave(req, session, partiesManager, roomsManager);
             }
         }
 

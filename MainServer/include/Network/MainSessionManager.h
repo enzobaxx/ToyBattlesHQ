@@ -18,7 +18,7 @@ namespace Main
 			std::unordered_map<std::uint64_t, std::shared_ptr<Main::Network::Session>> m_sessionsBySessionId;
 			std::vector<std::shared_ptr<Main::Network::Session>> m_sessionsVector;
 			Main::Classes::RoomsManager* roomsManager;
-			Main::Classes::PartiesManager* m_clansManager;
+			Main::Classes::PartiesManager* m_partiesManager;
 
 			Common::Network::Packet prepareMessage(const std::string& message) const;
 

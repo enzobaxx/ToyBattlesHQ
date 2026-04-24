@@ -42,7 +42,7 @@ namespace Main
 		Main::Persistence::MainScheduler m_scheduler;
 		Main::Network::SessionsManager m_sessionsManager;
 		Main::Classes::RoomsManager m_roomsManager;
-		Main::Classes::PartiesManager m_clansManager;
+		Main::Classes::PartiesManager m_partiesManager;
 		Main::Command::ChatCommands m_chatCommands;
 		Main::Classes::ReportManager m_reportManager;
 		std::unordered_map<std::uint32_t, std::function<void(std::shared_ptr<Main::Network::Session>)>> m_generalItemCallbacks;
@@ -77,6 +77,7 @@ namespace Main
 		constexpr void setRoomCreationTo(bool v) { m_roomCreationEnabled = v; }
 		constexpr bool getRoomCreation() const noexcept { return m_roomCreationEnabled; };
 		Main::Classes::ReportManager& getReportManager() { return m_reportManager; }
+		Main::Classes::PartiesManager getPartiesManager() const noexcept { return m_partiesManager; }
 
 		// Emails
 		Common::Utils::EmailDispatcher emailDispatcher;
