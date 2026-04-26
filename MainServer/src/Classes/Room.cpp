@@ -197,17 +197,10 @@ namespace Main
 				session->asyncWrite(playerLeavePacket); // this must go after sending 422, otherwise messages such as "kicked" aren't shown
 			}
 
-			if (&container == &m_players)
-			{
-				// Resort the vector as the client does (the host remains at index 0)
-				// => just swap the position of the player that must be removed with the highest indexed player
-				std::swap(container.back(), container[targetPlayerIdx]);
-				container.pop_back();
-			}
-			else
-			{
-				container.erase(container.begin() + targetPlayerIdx);
-			}
+			// Resort the vector as the client does (the host remains at index 0)
+			// => just swap the position of the player that must be removed with the highest indexed player
+			std::swap(container.back(), container[targetPlayerIdx]);
+			container.pop_back();
 		}
 
 		// Refactored
