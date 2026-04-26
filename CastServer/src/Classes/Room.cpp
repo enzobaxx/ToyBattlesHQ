@@ -191,7 +191,6 @@ namespace Cast
 				if (auto player = currentPlayer.lock())
 				{
 					if (!player->m_isInMatch || player->getId() == selfId || player->m_team != team) continue;
-					std::cout << "broadcastToMatchTeamExceptSelf  SENT\n";
 					packet.setTcpHeader(selfId);
 					player->asyncWrite(packet);
 				}
