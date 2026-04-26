@@ -89,11 +89,13 @@ namespace Cast
 			}
 			auto& room = *roomOpt;
 
+
 			const auto attackerUid = Cast::Details::parseData<Main::Structures::UniqueId>(request, 16);
 			const auto targetUid = Cast::Details::parseData<Main::Structures::UniqueId>(request, 20);
 			const std::uint16_t targetHp = Cast::Details::parseData<std::uint16_t>(request, 24);
 
-			if (room->getMode() == Common::Enums::AiBattle || room->getMode() == Common::Enums::BossBattle)
+			if (room->getMode() == Common::Enums::AiBattle || room->getMode() == Common::Enums::BossBattle
+				|| request.getDataSize() == 12 /* special grenade damage */)
 			{
 				roomsManager.broadcastToMatch(session->getId(), const_cast<Common::Network::UnecryptedPacket&>(request));
 				return;
@@ -111,7 +113,9 @@ namespace Cast
 				if (targetHp)
 				{
 					if (!targetSession->isDead)
+					{
 						roomsManager.broadcastToMatch(session->getId(), const_cast<Common::Network::UnecryptedPacket&>(request));
+					}
 				}
 				else
 				{
@@ -122,7 +126,7 @@ namespace Cast
 					}
 					else
 					{
-						if (!targetSession->isDead) roomsManager.broadcastToMatch(session->getId(), const_cast<Common::Network::UnecryptedPacket&>(request));
+						if (!targetSession->isDead) { std::cout << "IF 3\n"; roomsManager.broadcastToMatch(session->getId(), const_cast<Common::Network::UnecryptedPacket&>(request)); }
 						targetSession->isDead = true;
 
 						if (room->isArenaMode())
