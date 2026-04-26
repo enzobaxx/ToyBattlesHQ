@@ -126,7 +126,7 @@ namespace Cast
 					}
 					else
 					{
-						if (!targetSession->isDead) { std::cout << "IF 3\n"; roomsManager.broadcastToMatch(session->getId(), const_cast<Common::Network::UnecryptedPacket&>(request)); }
+						if (!targetSession->isDead) roomsManager.broadcastToMatch(session->getId(), const_cast<Common::Network::UnecryptedPacket&>(request)); 
 						targetSession->isDead = true;
 
 						if (room->isArenaMode())
