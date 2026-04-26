@@ -1990,8 +1990,6 @@ namespace Main
 				m_scheduler.addRepetitiveCallback(std::source_location::current(), 
 					ainfo.accountID, &Main::Persistence::PersistentDatabase::updateClanContribution, ainfo.clanId,
 					stats.newTotalClanContribution - ainfo.clanContribution);
-
-
 				ainfo.clanContribution = stats.newTotalClanContribution;
 			}
 			if (hasLeveledUp) ainfo.playerLevel += 1;

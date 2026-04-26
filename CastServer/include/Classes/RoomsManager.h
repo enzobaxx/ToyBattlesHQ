@@ -35,6 +35,7 @@ namespace Cast
 			void broadcastToMatch(std::uint64_t sessionId, Common::Network::UnecryptedPacket& packet);
 
 			void broadcastToMatchExceptSelf(std::uint64_t sessionId, Common::Network::UnecryptedPacket& packet);
+			void broadcastToMatchTeamExceptSelf(std::uint64_t sessionId, Common::Network::UnecryptedPacket& packet, Common::Enums::Team team);
 
 			void playerForwardToHost(std::uint64_t hostSessionId, std::uint64_t senderSessionId, Common::Network::UnecryptedPacket& packet);
 

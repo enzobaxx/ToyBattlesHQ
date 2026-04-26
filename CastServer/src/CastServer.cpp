@@ -65,6 +65,24 @@ namespace Cast
 				m_roomsManager.playerForwardToHost(request.getSession(), session->getId(), const_cast<Common::Network::UnecryptedPacket&>(request));
 			});
 
+		// Automatic chat messages to the team
+		Common::Network::Session::addCallback<CN::PacketType::UNECRYPTED, Session>(280, [&](const Common::Network::UnecryptedPacket& request,
+			std::shared_ptr<Cast::Network::Session> session) { 
+				auto response = request;
+				response.setOrder(273);
+				struct VoiceMessageData
+				{
+					Main::Structures::UniqueId uid;
+					std::uint32_t voiceId;
+				} voiceMessageData;
+
+				voiceMessageData.uid = Main::Structures::UniqueId{ static_cast<std::uint32_t>(session->getId()), m_serverId, 0 };
+				voiceMessageData.voiceId = Cast::Details::parseData<std::uint32_t>(request);
+				response.setData(reinterpret_cast<std::uint8_t*>(&voiceMessageData), sizeof(voiceMessageData));
+
+				m_roomsManager.broadcastToMatchTeamExceptSelf(session->getId(), response, session->m_team);
+			});
+
 		// Room creation
 		Common::Network::Session::addCallback<CN::PacketType::UNECRYPTED, Session>(277, [&](const Common::Network::UnecryptedPacket& request,
 			std::shared_ptr<Cast::Network::Session> session) {	m_roomsManager.addRoom(std::make_shared<Cast::Classes::Room>(session->getId(), session),
@@ -101,12 +119,7 @@ namespace Cast
 		Common::Network::Session::addCallback<CN::PacketType::UNECRYPTED, Session>(275, [&](const Common::Network::UnecryptedPacket& request,
 			std::shared_ptr<Cast::Network::Session> session) {	session->asyncWrite(const_cast<Common::Network::UnecryptedPacket&>(request)); });
 
-		// Unknown
-		Common::Network::Session::addCallback<CN::PacketType::UNECRYPTED, Session>(280, [&](const Common::Network::UnecryptedPacket& request,
-			std::shared_ptr<Cast::Network::Session> session) {
-				m_roomsManager.playerForwardToHost(request.getSession(), session->getId(), const_cast<Common::Network::UnecryptedPacket&>(request));
-			});
-
+		
 		// AI Battle
 		Common::Network::Session::addCallback<CN::PacketType::UNECRYPTED, Session>(286, [&](const Common::Network::UnecryptedPacket& request,
 			std::shared_ptr<Cast::Network::Session> session) {
@@ -153,8 +166,7 @@ namespace Cast
 		Common::Network::Session::addCallback<CN::PacketType::UNECRYPTED, Session>(284, [&](const Common::Network::UnecryptedPacket& request,
 			std::shared_ptr<Cast::Network::Session> session)
 			{
-				// Not sure what this is for -- each player in the room sends this to host (through request.getSession())
-				//m_roomsManager.broadcastToMatch(session->getId(), const_cast<Common::Network::UnecryptedPacket&>(request));
+				m_roomsManager.broadcastToMatch(session->getId(), const_cast<Common::Network::UnecryptedPacket&>(request));
 			});
 
 		// Player sync (needed because otherwise the player: 1. does not get the time left of the match, and 2. they don't respawn at all)

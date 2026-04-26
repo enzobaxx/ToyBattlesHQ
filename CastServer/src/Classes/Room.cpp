@@ -184,6 +184,20 @@ namespace Cast
 			}
 		}
 
+		void Room::broadcastToMatchTeamExceptSelf(Common::Network::UnecryptedPacket& packet, std::uint32_t selfId, Common::Enums::Team team)
+		{
+			for (auto& currentPlayer : m_playersVec)
+			{
+				if (auto player = currentPlayer.lock())
+				{
+					if (!player->m_isInMatch || player->getId() == selfId || player->m_team != team) continue;
+					std::cout << "broadcastToMatchTeamExceptSelf  SENT\n";
+					packet.setTcpHeader(selfId);
+					player->asyncWrite(packet);
+				}
+			}
+		}
+
 
 		bool Room::isInMatch(std::uint64_t playerSessionId) const
 		{
