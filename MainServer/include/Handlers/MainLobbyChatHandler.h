@@ -116,14 +116,14 @@ namespace Main
 			Main::Command::ChatCommands& chatCommands, Main::Classes::RoomsManager& roomsManager, Main::Persistence::MainScheduler& scheduler,
 			const Main::Network::Session::AccountInfo& accountInfo, Common::Network::Packet& response, Main::MainServer& mainSv)
 		{
-			if (session->getPlayer().isMuted())
-			{
-				session->sendMessage("you have been muted by a moderator.");
-				return true;
-			}
-			else if (request.getExtra() == Enums::ChatExtra::COMMAND)
+			if (request.getExtra() == Enums::ChatExtra::COMMAND)
 			{
 				executeCommand(session, request, response, roomsManager, chatCommands, sessionsManager, scheduler, accountInfo, mainSv);
+				return true;
+			}
+			else if (session->getPlayer().isMuted())
+			{
+				session->sendMessage("you have been muted by a moderator.");
 				return true;
 			}
 			else if (request.getExtra() == Enums::ChatExtra::WHISPER)
