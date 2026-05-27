@@ -1947,10 +1947,10 @@ namespace Main
 						m_player.getAccountID(), &Main::Persistence::PersistentDatabase::updatePlayerMissionProgress, m_player.getAccountID(),
 						eventIndex, Common::Constants::eventMissionTotal);
 
-					sendRt(10'000);
-					spawnItemCommand(4811300, "Item spawned automatically - event mission rewards");
-					spawnItemCommand(4306004, "Coupon item spawned automatically - event mission rewards");
-					sendMessage("You obtained 10'000 RT, 15 coupons and a Boss Battle ticket!", Main::Enums::TIP);
+					sendRt(20'000);
+					spawnItemCommand(4306005, "Coupon item spawned automatically - event mission rewards");
+					spawnItemCommand(4308105, "Coin item spawned automatically - event mission rewards");
+					sendMessage("You additionally obtained 20'000 RT, 20 coupons and 20 coins!", Main::Enums::TIP);
 				}
 				else
 				{

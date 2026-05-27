@@ -1404,29 +1404,35 @@ namespace Main
 					if (now >= eventMissionInfo.startDate && now <= eventMissionInfo.endDate)
 					{
 						auto sessionMatchTime = (now * 1000) - session->getMatchStartTime();
-						if (stats.shotgunKills >= 5)
+
+						if (sessionMatchTime >= 300000) 
 						{
 							session->sendEventMission(ClientData::EventMissionPoint{ 1 });
 						}
-						if (sessionMatchTime >= 300000) // 5 mins
+						if (stats.meleeKills >= 10)
 						{
-							if (matchEnd == Main::Enums::MATCH_WON && m_settings.mode == Common::Enums::Elimination &&
-								m_settings.weaponRestriction == Common::Enums::WeaponRestriction::All)
-							{
-								session->storeEvent();
-							}
 							session->sendEventMission(ClientData::EventMissionPoint{ 2 });
 						}
-						if (stats.sniperKills >= 10)
+						if (stats.meleeKills >= 5 && m_settings.mode == Common::Enums::ZombieMode)
 						{
 							session->sendEventMission(ClientData::EventMissionPoint{ 3 });
 						}
-						if (stats.headshots >= 5)
+						if (sessionMatchTime >= 180000 && matchEnd == Main::Enums::MATCH_WON) 
 						{
 							session->sendEventMission(ClientData::EventMissionPoint{ 4 });
 						}
-						if (stats.meleeKills >= 15 && m_settings.mode == Common::Enums::FreeForAll) 
-						{ 
+
+						int uniqueWeaponKills = 0;
+						if (stats.meleeKills > 0) uniqueWeaponKills++;
+						if (stats.rifleKills > 0) uniqueWeaponKills++;
+						if (stats.shotgunKills > 0) uniqueWeaponKills++;
+						if (stats.sniperKills > 0) uniqueWeaponKills++;
+						if (stats.mgKills > 0) uniqueWeaponKills++;
+						if (stats.bazookaKills > 0) uniqueWeaponKills++;
+						if (stats.grenadeKills > 0) uniqueWeaponKills++;
+
+						if (uniqueWeaponKills >= 4)
+						{
 							session->sendEventMission(ClientData::EventMissionPoint{ 5 });
 						}
 					}
