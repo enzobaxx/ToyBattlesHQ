@@ -64,7 +64,7 @@ namespace Main
 			}
 		};
 
-		REGISTER_CMD(SetName, Common::Enums::PlayerGrade::GRADE_TESTER);
+		REGISTER_CMD(SetName, Common::Enums::PlayerGrade::GRADE_NORMAL);
 	}
 }
 

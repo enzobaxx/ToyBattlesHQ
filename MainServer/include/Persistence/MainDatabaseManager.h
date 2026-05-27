@@ -11,6 +11,7 @@
 #include <mariadb/conncpp.hpp>
 #include <mariadb/conncpp/Connection.hpp>
 #include "../Structures/AccountInfo/MuteInfo.h"
+#include <expected>
 
 namespace Main 
 { 
@@ -59,6 +60,7 @@ namespace Main
 			bool updateUsernameByAid(std::uint32_t accountId,const std::string& newUsername, const std::string& oldUsername);
 			bool checkUsernameExists(const std::string& username);
 			Main::Enums::KickClanMemberResult kickClanMember(std::uint32_t ownerAccountId, const std::string& targetNickname);
+			std::vector<std::string> getClanMembers(std::uint32_t clanId);
 			Main::Enums::LeaveClanResult leaveClan(std::uint32_t accountId);
 			Main::Enums::DisbandClanResult disbandClan(std::uint32_t ownerAccountId);
 			Main::Enums::TransferOwnershipResult transferOwnership(std::uint32_t ownerAccountId, const std::string& targetNickname);
@@ -123,7 +125,7 @@ namespace Main
 			bool removePlayerItem(std::uint32_t accountId, std::uint64_t itemNumber, const std::string& caller);
 			void updatePlayerLevel(std::uint32_t accountID, std::uint16_t level);
 			void updatePlayerExperience(std::uint32_t accountID, std::uint32_t exp);
-			bool updatePlayerName(std::uint32_t accountID, const char* name);
+			std::expected<bool, std::string> updatePlayerName(std::uint32_t accountID, const char* name, bool isStaff);
 			bool updateSuspension(const std::string& nickname, const std::string& until, const std::string& reason, std::uint32_t executorGrade);
 			void updateLatestRewardDay(const std::string& columnName, std::uint32_t accountId, const std::string& rewardDay);
 			std::string getLatestRewardDayFor(const std::string& columnName, std::uint32_t accountId);
@@ -298,6 +300,8 @@ namespace Main
 			std::optional<std::pair<std::string, std::string>> getGradedHwid(std::uint32_t accountId);
 
 			void updateEvent(std::uint32_t accountId);
+
+			[[nodiscard]] bool isItemTradeable(std::uint32_t accountId, std::uint32_t itemNumber);
 
 			~PersistentDatabase()
 			{

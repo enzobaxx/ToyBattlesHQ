@@ -51,13 +51,16 @@ namespace Main
             try { stmt->execute("ALTER TABLE Clans ADD CONSTRAINT uq_clan_name UNIQUE (ClanName)"); } catch (...) {}       
             try { stmt->execute("ALTER TABLE Users ADD CONSTRAINT uq_users_username UNIQUE (Username)"); } catch (...) {}
             try { stmt->execute("ALTER TABLE Users ADD CONSTRAINT uq_users_nickname UNIQUE (Nickname)"); } catch (...) {}
-
             try { stmt->execute("ALTER TABLE Users ADD COLUMN IF NOT EXISTS LastIpSalt VARCHAR(128) NULL DEFAULT NULL"); } catch (...) {}
             try { stmt->execute("ALTER TABLE Users ADD COLUMN IF NOT EXISTS HWIDSalt VARCHAR(128) NULL DEFAULT NULL"); } catch (...) {}
             try { stmt->execute("ALTER TABLE Users ADD COLUMN IF NOT EXISTS HWIDGraded VARCHAR(128) NULL DEFAULT NULL"); } catch (...) {}
             try { stmt->execute("ALTER TABLE Users ADD COLUMN IF NOT EXISTS HWIDGradedSalt VARCHAR(128) NULL DEFAULT NULL"); } catch (...) {}
-
             try { stmt->execute("ALTER TABLE Users ADD COLUMN IF NOT EXISTS EventEliminationWins INT NOT NULL DEFAULT 0"); } catch (...) {}
+            try { stmt->execute("ALTER TABLE UserItems ADD COLUMN IF NOT EXISTS IsTradeable INT NOT NULL DEFAULT 1"); } catch (...) {}
+            try { stmt->execute("CREATE INDEX IF NOT EXISTS idx_useritems_account_item ON UserItems(AccountID, ItemNumber)"); }catch (...) {}
+
+            try { stmt->execute("ALTER TABLE Users ADD COLUMN IF NOT EXISTS CanUpdateNickname BOOLEAN NOT NULL DEFAULT 0"); } catch (...) {}
+            try { stmt->execute("UPDATE Users SET CanUpdateNickname = 1 WHERE CanUpdateNickname = 0 AND AccountID IS NOT NULL"); } catch (...) {}
         }
 
         void PersistentDatabase::connectWithRetry()
@@ -710,6 +713,33 @@ namespace Main
                 ::Utils::Logger::log("MariaDB exception in kickClanMember: " + std::string(e.what()),
                     Utils::LogType::Error, "PersistentDatabase::kickClanMember");
                 return Main::Enums::KickClanMemberResult::DB_ERROR;
+            }
+        }
+
+        std::vector<std::string> PersistentDatabase::getClanMembers(std::uint32_t clanId)
+        {
+            std::vector<std::string> members;
+
+            try
+            {
+                std::unique_ptr<sql::PreparedStatement> stmt(m_con->prepareStatement(
+                    "SELECT Nickname FROM Users WHERE ClanID = ?"));
+
+                stmt->setUInt(1, clanId);
+                std::unique_ptr<sql::ResultSet> result(stmt->executeQuery());
+
+                while (result->next())
+                {
+                    members.push_back(result->getString("Nickname").c_str());
+                }
+
+                return members;
+            }
+            catch (const sql::SQLException& e)
+            {
+                ::Utils::Logger::log("MariaDB exception in getClanMembers: " + std::string(e.what()),
+                    Utils::LogType::Error, "PersistentDatabase::getClanMembers");
+                return {};
             }
         }
 
@@ -2606,10 +2636,40 @@ namespace Main
             }
         }
 
-        bool PersistentDatabase::updatePlayerName(std::uint32_t accountID, const char* name)
+        std::expected<bool, std::string> PersistentDatabase::updatePlayerName(std::uint32_t accountID, const char* name, bool isStaff)
         {
             try
             {
+                std::unique_ptr<sql::PreparedStatement> checkDuplicateStmt(m_con->prepareStatement(
+                    "SELECT AccountID FROM Users WHERE Nickname = ? AND AccountID != ?"));
+                checkDuplicateStmt->setString(1, name);
+                checkDuplicateStmt->setUInt(2, accountID);
+
+                std::unique_ptr<sql::ResultSet> duplicateResult(checkDuplicateStmt->executeQuery());
+
+                if (duplicateResult->next())
+                {
+                    return std::unexpected("There's already a player with this nickname");
+                }
+
+                if (!isStaff)
+                {
+                    std::unique_ptr<sql::PreparedStatement> checkStmt(m_con->prepareStatement(
+                        "SELECT CanUpdateNickname FROM Users WHERE AccountID = ?"));
+                    checkStmt->setUInt(1, accountID);
+                    std::unique_ptr<sql::ResultSet> result(checkStmt->executeQuery());
+
+                    if (!result->next())
+                    {
+                        return std::unexpected("User not found");
+                    }
+
+                    if (!result->getBoolean("CanUpdateNickname"))
+                    {
+                        return std::unexpected("You cannot change your nickname right now");
+                    }
+                }
+
                 std::string updateNameQuery = "UPDATE Users SET Nickname = ? WHERE AccountID = ?";
                 std::unique_ptr<sql::PreparedStatement> stmt(m_con->prepareStatement(updateNameQuery));
 
@@ -2619,15 +2679,24 @@ namespace Main
                 if (stmt->executeUpdate() == 0)
                 {
                     ::Utils::Logger::log("No rows changed with query", Utils::LogType::Warning, "PersistentDatabase::updatePlayerName");
-                    return false;
+                    return std::unexpected("Failed to update nickname");
+                }
+
+                if (!isStaff)
+                {
+                    std::unique_ptr<sql::PreparedStatement> resetStmt(m_con->prepareStatement(
+                        "UPDATE Users SET CanUpdateNickname = 0 WHERE AccountID = ?"));
+                    resetStmt->setUInt(1, accountID);
+                    resetStmt->executeUpdate();
                 }
             }
             catch (const sql::SQLException& e)
             {
                 ::Utils::Logger::log(std::string("MariaDB exception: ") + e.what(), Utils::LogType::Error, "PersistentDatabase::updatePlayerName");
-                return false;
+                return std::unexpected("Database error occurred");
             }
-            return true;
+
+            return true; 
         }
 
         bool PersistentDatabase::updateSuspension(const std::string& nickname, const std::string& until, const std::string& reason, std::uint32_t executorGrade)
@@ -4418,5 +4487,33 @@ namespace Main
                 ::Utils::Logger::log("MariaDB exception in updateEvent: " + std::string(e.what()), ::Utils::LogType::Error);
             }
         }
+
+        [[nodiscard]] bool PersistentDatabase::isItemTradeable(std::uint32_t accountId, std::uint32_t itemNumber)
+        {
+            try
+            {
+                std::unique_ptr<sql::PreparedStatement> stmt(m_con->prepareStatement(
+                    "SELECT IsTradeable FROM UserItems WHERE AccountID = ? AND ItemNumber = ?"));
+
+                stmt->setUInt(1, accountId);
+                stmt->setUInt(2, itemNumber);
+
+                std::unique_ptr<sql::ResultSet> result(stmt->executeQuery());
+
+                if (result->next())
+                {
+                    return result->getInt("IsTradeable") == 1;
+                }
+
+                return false; 
+            }
+            catch (const sql::SQLException& e)
+            {
+                ::Utils::Logger::log("MariaDB exception in isItemTradeable: " + std::string(e.what()),
+                    Utils::LogType::Error, "PersistentDatabase::isItemTradeable");
+                return false;
+            }
+        }
+
     } // end namespace Main
 } // end namespace Persistence

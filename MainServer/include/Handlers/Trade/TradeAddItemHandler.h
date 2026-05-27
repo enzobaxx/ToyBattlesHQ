@@ -63,6 +63,12 @@ namespace Main
 					session->closeSocket();
 					return;
 				}
+				else if (!session->canTradeItem(itemSerialInfo.itemNumber))
+				{
+					response.setExtra(Enums::TradeSystemExtra::MAX_NUM_OF_ITEMS_AT_ONCE_REACHED);
+					session->sendMessage("[ERROR] This item cannot be traded!");
+					return;
+				}
 				else if (session->addTradedItem(itemID, itemSerialInfo))
 				{
 					response.setExtra(Enums::TradeSystemExtra::TRADE_SUCCESS);

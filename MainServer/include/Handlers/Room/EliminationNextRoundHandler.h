@@ -71,13 +71,9 @@ namespace Main
 				auto data = response.getData();
 				isFarm = (response.getDataSize() > 8) ? (data[8] == 5) : true;
 			}
-			
+
 			const std::uint32_t totalPlayers = room->getPlayersCount();
 			enum Rewards { GoldPveBox = 4801012, SilverPveBox = 4801013, BronzePveBox = 4801014 };
-
-			static std::random_device rd;
-			static std::mt19937 gen(rd());
-			static std::uniform_int_distribution<int> dist(0, 2);
 
 			struct PlayerInfo
 			{
@@ -93,15 +89,23 @@ namespace Main
 				if (roomInfo.team == Common::Enums::TEAM_OBSERVER || !session->getPlayer().isInMatch()) continue;
 
 				std::uint32_t reward;
-				switch (dist(gen)) {
-				case 0: reward = GoldPveBox; break;
-				case 1: reward = SilverPveBox; break;
-				default: reward = BronzePveBox; break;
+
+				if (session->m_totalBossBattleRespawnsLeft == 3)
+				{
+					reward = GoldPveBox;
 				}
+				else if (session->m_totalBossBattleRespawnsLeft == 2)
+				{
+					reward = SilverPveBox;
+				}
+				else 
+				{
+					reward = BronzePveBox;
+				}
+
 				playerInfos.push_back({ session->getAccountInfo().uniqueId, reward });
 			}
 
-			// self rewards
 			struct PveResponseSelf
 			{
 				std::uint32_t totMP;
@@ -117,7 +121,7 @@ namespace Main
 				pveRespSelf.totMP = session->getAccountInfo().microPoints;
 				pveRespSelf.totEXP = session->getAccountInfo().experience;
 				auto it = std::find_if(playerInfos.begin(), playerInfos.end(), [&](const PlayerInfo& info) {
-					return info.uid == session->getAccountInfo().uniqueId;});
+					return info.uid == session->getAccountInfo().uniqueId; });
 				pveRespSelf.rewardId = (it != playerInfos.end()) ? it->wonBoxId : 0;
 				response.setData(reinterpret_cast<const std::uint8_t*>(&pveRespSelf), sizeof(pveRespSelf));
 				session->asyncWrite(response);
@@ -132,7 +136,6 @@ namespace Main
 			if (isFarm) return;
 			response.setData(nullptr, 0);
 
-			// others' rewards
 			response.setExtra(41);
 			for (auto& [roomInfo, session] : room->getAllPlayersWithSessions())
 			{

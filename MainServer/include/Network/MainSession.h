@@ -418,6 +418,8 @@ namespace Main
 
 			bool addTradedItem(std::uint32_t itemId, const Main::Structures::ItemSerialInfo& serialInfo);
 
+			bool canTradeItem(std::uint32_t itemNumber);
+
 			void removeTradedItem(const Main::Structures::ItemSerialInfo& serialInfo);
 
 			void resetTradedItems();

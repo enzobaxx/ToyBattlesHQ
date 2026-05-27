@@ -930,27 +930,43 @@ namespace Main
 		// This function is exclusively used for /setnickname cmd
 		bool Session::setPlayerName(const std::string& playerName)
 		{
-		    if (playerName.size() >= 16)
-		    {
-		        sendMessage("error: the nickname cannot have more than 16 characters");
-		        return false;
-		    }
-		
-		    const bool changed = m_scheduler.immediatePersist(
-		        std::source_location::current(),
-		        &Main::Persistence::PersistentDatabase::updatePlayerName,
-		        m_player.getAccountID(),
-		        playerName.c_str()
-		    );
-		
-		    if (!changed) 
-		    {
-		        sendMessage("error: there's already a player with this nickname");
-		        return false;
-		    }
-		
-		    m_player.setPlayerName(playerName.c_str());
-		    return true;
+			if (playerName.size() > 16)
+			{
+				sendMessage("error: the nickname cannot have more than 16 characters");
+				return false;
+			}
+			if (playerName.size() < 4)
+			{
+				sendMessage("error: the nickname cannot have less than 4 characters");
+				return false;
+			}
+
+			const bool isStaff = (getAccountInfo().playerGrade >= Common::Enums::PlayerGrade::GRADE_MOD);
+
+			if (!isStaff)
+			{
+				if (!std::ranges::all_of(playerName, [](char c) { return std::isalnum(static_cast<unsigned char>(c)); }))
+				{
+					sendMessage("error: the nickname can only contain letters and numbers");
+					return false;
+				}
+			}
+
+			auto result = m_scheduler.immediatePersist(std::source_location::current(),
+				&Main::Persistence::PersistentDatabase::updatePlayerName,
+				m_player.getAccountID(),
+				playerName.c_str(),
+				isStaff);
+
+			if (!result)
+			{
+				sendMessage("error: " + result.error());
+				return false;
+			}
+
+			m_player.setPlayerName(playerName.c_str());
+			sendMessage("success: Your nickname has been changed to " + playerName);
+			return true;
 		}
 
 		// option and mission are probably related to the upgrade type (power, firing rate, etc)
@@ -2077,6 +2093,12 @@ PACK_POP()
 		bool Session::addTradedItem(std::uint32_t itemId, const Main::Structures::ItemSerialInfo& serialInfo)
 		{
 			return m_player.addTradedItem(itemId, serialInfo);
+		}
+
+		bool Session::canTradeItem(std::uint32_t itemNumber)
+		{
+			return m_scheduler.immediatePersist(std::source_location::current(), &Main::Persistence::PersistentDatabase::isItemTradeable,
+				m_player.getAccountID(), itemNumber);
 		}
 
 		void Session::removeTradedItem(const Main::Structures::ItemSerialInfo& serialInfo)

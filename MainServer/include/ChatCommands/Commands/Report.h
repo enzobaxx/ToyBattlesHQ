@@ -43,12 +43,11 @@ namespace Main
 				MP::MainScheduler& scheduler, std::uint32_t roomNumber,
 				Main::MainServer& mainServer) override
 			{
-				START_BENCHMARK
-					if (!parseCommand(command))
-					{
-						session->sendMessage("error: parsing error, see /? for command usage");
-						return;
-					}
+				if (!parseCommand(command))
+				{
+					session->sendMessage("error: parsing error, see /? for command usage");
+					return;
+				}
 
 				if (m_reportReason.empty())
 				{
@@ -78,14 +77,12 @@ namespace Main
 					targetGrade == Common::Enums::PlayerGrade::GRADE_TESTER ||
 					targetGrade == Common::Enums::PlayerGrade::GRADE_GM)
 				{
-					session->sendMessage("error: you cannot report staff members or high-ranking players");
+					session->sendMessage("error: you cannot report staff members. Use a ticket instead.");
 					return;
 				}
 
 				std::uint32_t currentRoomNumber = session->getPlayer().getRoomNumber();
-				std::string roomInfo = currentRoomNumber > 0 ?
-					"Room ID: " + std::to_string(currentRoomNumber) :
-					"Lobby";
+				std::string roomInfo = currentRoomNumber > 0 ? "Room ID: " + std::to_string(currentRoomNumber) : "Lobby";
 
 				Main::Structures::ReportInfo reportInfo(
 					0,
@@ -105,22 +102,17 @@ namespace Main
 					" in " + roomInfo +
 					". Reason: " + m_reportReason;
 
-				const auto& allSessions = sessionsManager.getAllSessions();
-				std::uint32_t moderatorsNotified = 0;
-
-				for (const auto& sessionPair : allSessions)
+				for (const auto& [unused, target] : sessionsManager.getAllSessions())
 				{
-					auto modSession = sessionPair.second;
-					const auto& modAccountInfo = modSession->getAccountInfo();
+					const auto& ainfo = target->getAccountInfo();
 
-					if (modAccountInfo.playerGrade == Common::Enums::PlayerGrade::GRADE_MOD ||
-						modAccountInfo.playerGrade == Common::Enums::PlayerGrade::GRADE_TESTER ||
-						modAccountInfo.playerGrade == Common::Enums::PlayerGrade::GRADE_GM)
+					if (ainfo.playerGrade == Common::Enums::PlayerGrade::GRADE_MOD ||
+						ainfo.playerGrade == Common::Enums::PlayerGrade::GRADE_TESTER ||
+						ainfo.playerGrade == Common::Enums::PlayerGrade::GRADE_GM)
 					{
-						modSession->sendMessage(reportMessage, Main::Enums::TIP);
-						modSession->sendMessage("Use /reports to see all reports or /rr " +
+						target->sendMessage(reportMessage, Main::Enums::TIP);
+						target->sendMessage("Use /reports to see all reports or /rr " +
 							std::to_string(reportId) + " to acknowledge this report", Main::Enums::INFO);
-						moderatorsNotified++;
 					}
 				}
 
@@ -129,8 +121,6 @@ namespace Main
 				Utils::Logger::log("REPORT: " + std::string(reporterInfo.nickname) + " -> " +
 					std::string(targetInfo.nickname) + " | Room: " + roomInfo +
 					" | Reason: " + m_reportReason, Utils::LogType::Info, "ReportCommand");
-
-				END_BENCHMARK(Report::execute, session)
 			}
 		};
 
