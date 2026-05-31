@@ -145,12 +145,6 @@ namespace Common
                 return false;
             }
 
-            if (!authServer.contains("GradedPort") || authServer["GradedPort"].as<std::uint32_t>() == 0)
-            {
-                ::Utils::Logger::log("Missing or invalid GradedPort in 'AuthServer' section", ::Utils::LogType::Error, "SetupParser::checkAuthSection");
-                return false;
-            }
-
             if (!authServer.contains("EnhancedSecurity"))
             {
                 ::Utils::Logger::log("Missing EnhancedSecurity parameter in 'AuthServer' section", ::Utils::LogType::Error, "SetupParser::checkAuthSection");
@@ -159,6 +153,12 @@ namespace Common
 
             if (authServer["EnhancedSecurity"].as<bool>())
             {
+                if (!authServer.contains("GradedPort") || authServer["GradedPort"].as<std::uint32_t>() == 0)
+                {
+                    ::Utils::Logger::log("Missing or invalid GradedPort in 'AuthServer' section while EnhancedSecurity is true", ::Utils::LogType::Error, "SetupParser::checkAuthSection");
+                    return false;
+                }
+
                 if (!authServer.contains("VpnIp") || authServer["VpnIp"].as<std::string>().empty())
                 {
                     ::Utils::Logger::log("Missing or empty VpnIp in 'AuthServer' section while EnhancedSecurity is true", ::Utils::LogType::Error, "SetupParser::checkAuthSection");
@@ -262,6 +262,9 @@ namespace Common
         {
             GeneralSetup generalSetup;
 
+            if (!m_authSetup.enhancedSecurity)
+                return generalSetup;
+
             ini::IniSection& section = m_iniFile["General"];
 
             const std::string emailSecretEnv = section["EmailSecret"].as<std::string>();
@@ -319,6 +322,12 @@ namespace Common
 
         bool SetupParser::checkGeneralConfig()
         {
+            if (m_iniFile.contains("AuthServer") && m_iniFile["AuthServer"].contains("EnhancedSecurity")
+                && !m_iniFile["AuthServer"]["EnhancedSecurity"].as<bool>())
+            {
+                return true;
+            }
+
             if (!m_iniFile.contains("General"))
             {
                 ::Utils::Logger::log("[General] section missing in config.ini",::Utils::LogType::Error,"SetupParser::checkGeneralConfig");
@@ -426,14 +435,16 @@ namespace Common
 
         AuthSetup SetupParser::getAuthSetupImpl()
         {
-            AuthSetup auth;
+            AuthSetup auth{};
             auth.ip = m_iniFile["AuthServer"]["Ip"].as<std::string>();
             auth.port = m_iniFile["AuthServer"]["Port"].as<std::uint32_t>();
-            auth.gradedPort = m_iniFile["AuthServer"]["GradedPort"].as<std::uint32_t>();
             auth.enhancedSecurity = m_iniFile["AuthServer"]["EnhancedSecurity"].as<bool>();
 
             if (auth.enhancedSecurity)
+            {
+                auth.gradedPort = m_iniFile["AuthServer"]["GradedPort"].as<std::uint32_t>();
                 auth.vpnIp = m_iniFile["AuthServer"]["VpnIp"].as<std::string>();
+            }
 
             return auth;
         }

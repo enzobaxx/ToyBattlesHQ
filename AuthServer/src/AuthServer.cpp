@@ -1,4 +1,5 @@
 #include "../include/AuthServer.h"
+#include "Utils/SetupParser.h"
 #include "../include/AuthSession.h"
 #include "../include/Handlers/AuthAuthorizationHandler.h"
 #include "../include/Handlers/AuthChannelsHandler.h"
@@ -9,10 +10,14 @@ namespace Auth
 	AuthServer::AuthServer(ioContext& io_context, const std::string& ip, const std::string& vpnIp, std::uint16_t port, std::uint16_t gradedPort)
 		: m_io_context(io_context)
 		, m_acceptor(io_context, tcp::endpoint(asio::ip::address::from_string(ip), port))
-		, m_gradedAcceptor(io_context, tcp::endpoint(asio::ip::address::from_string(vpnIp.empty() ? ip : vpnIp), gradedPort))
 		, m_database()
 		, m_authService{ m_database, m_emailDispatcher }
 	{
+		if (Common::Utils::SetupParser::getInstance().getAuthSetup().enhancedSecurity)
+		{
+			m_gradedAcceptor.emplace(io_context, tcp::endpoint(asio::ip::address::from_string(vpnIp.empty() ? ip : vpnIp), gradedPort));
+		}
+
 		Common::Network::Session::addCallback<Common::Network::PacketType::ENCRYPTED, Auth::Network::Session>(22, [&](const Common::Network::Packet& request,
 			std::shared_ptr<Auth::Network::Session> session) { Auth::Handlers::handleAuthUserInformation(request, session, m_authService); });
 
@@ -23,7 +28,8 @@ namespace Auth
 
 	void AuthServer::asyncAccept()
 	{
-		asyncAcceptGraded();
+		if (m_gradedAcceptor.has_value())
+			asyncAcceptGraded();
 		asyncAcceptUngraded();
 	}
 
@@ -42,7 +48,7 @@ namespace Auth
 	void AuthServer::asyncAcceptGraded()
 	{
 		m_gradedSocket.emplace(m_io_context);
-		m_gradedAcceptor.async_accept(*m_gradedSocket, [&](asio::error_code error)
+		m_gradedAcceptor->async_accept(*m_gradedSocket, [&](asio::error_code error)
 			{
 				auto client = std::make_shared<Auth::Network::Session>(std::move(*m_gradedSocket), nullptr);
 				client->m_checkValidSession = false;

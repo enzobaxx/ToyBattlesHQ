@@ -49,6 +49,20 @@ namespace Main
                 return false;
             }
 
+            bool parseCommandNo2fa(const std::string& providedCommand)
+            {
+                static const std::regex pattern(R"(^(\S+)\s*(\S+)\s*(\S+)\s*$)");
+                std::smatch match;
+                if (std::regex_match(providedCommand, match, pattern))
+                {
+                    m_password = match[2].str();
+                    m_2faToken.clear();
+                    m_newUsername = match[3].str();
+                    return true;
+                }
+                return false;
+            }
+
             bool verifyToken(const std::string& encryptedSecret, const std::optional<std::string>& token)
             {
                 if (encryptedSecret.empty() || !token.has_value()) return false;
@@ -120,9 +134,13 @@ namespace Main
                     return;
                 }
 
-                if (!parseCommand(command))
+                const bool enhancedSecurity = Common::Utils::SetupParser::getInstance().getAuthSetup().enhancedSecurity;
+
+                if (!(enhancedSecurity ? parseCommand(command) : parseCommandNo2fa(command)))
                 {
-                    session->sendMessage("error: invalid command format. Usage: /changeusername <Password> <2faToken> <NewUsername>");
+                    session->sendMessage(enhancedSecurity
+                        ? "error: invalid command format. Usage: /changeusername <Password> <2faToken> <NewUsername>"
+                        : "error: invalid command format. Usage: /changeusername <Password> <NewUsername>");
                     return;
                 }
 
@@ -132,22 +150,26 @@ namespace Main
                     return;
                 }
 
-                auto encryptedEmail = scheduler.immediatePersist(std::source_location::current(),
-                    &Main::Persistence::PersistentDatabase::getColumnByAid, "Email", ainfo.accountID);
-
-                if (!encryptedEmail || encryptedEmail->empty())
+                std::optional<std::string> decryptedEmail;
+                if (enhancedSecurity)
                 {
-                    session->sendMessage("error: account does not have a registered email. Username change not allowed.");
-                    return;
-                }
+                    auto encryptedEmail = scheduler.immediatePersist(std::source_location::current(),
+                        &Main::Persistence::PersistentDatabase::getColumnByAid, "Email", ainfo.accountID);
 
-                auto decryptedEmail = Common::Utils::decryptEmail(encryptedEmail.value(),
-                    Common::Utils::SetupParser::getInstance().getGeneralSetup().emailSecret);
+                    if (!encryptedEmail || encryptedEmail->empty())
+                    {
+                        session->sendMessage("error: account does not have a registered email. Username change not allowed.");
+                        return;
+                    }
 
-                if (!decryptedEmail)
-                {
-                    session->sendMessage("error: failed to fetch email from database.");
-                    return;
+                    decryptedEmail = Common::Utils::decryptEmail(encryptedEmail.value(),
+                        Common::Utils::SetupParser::getInstance().getGeneralSetup().emailSecret);
+
+                    if (!decryptedEmail)
+                    {
+                        session->sendMessage("error: failed to fetch email from database.");
+                        return;
+                    }
                 }
 
                 bool usernameExists = scheduler.immediatePersist(std::source_location::current(),
@@ -182,7 +204,7 @@ namespace Main
                         {
                             session->sendMessage("error: unknown error");
                         }
-                        else
+                        else if (enhancedSecurity)
                         {
                             auto subject = "Your TB Account Was Banned";
                             auto body = "Hello " + std::string(ainfo.nickname) +
@@ -207,6 +229,8 @@ namespace Main
                     return;
                 }
 
+                if (enhancedSecurity)
+                {
                 auto encryptedSecret = scheduler.immediatePersist(std::source_location::current(),
                     &Main::Persistence::PersistentDatabase::getColumnByAid, "Secret", ainfo.accountID);
 
@@ -252,10 +276,11 @@ namespace Main
                     session->sendMessage("error: invalid 2FA token");
                     return;
                 }
+                }
 
                 bool success = scheduler.immediatePersist(std::source_location::current(),
                     &Main::Persistence::PersistentDatabase::updateUsernameByAid,
-                    ainfo.accountID, m_newUsername, ainfo.nickname); 
+                    ainfo.accountID, m_newUsername, ainfo.nickname);
 
                 if (!success)
                 {
@@ -266,23 +291,25 @@ namespace Main
                 session->m_totalWrongUsernameChange = 0;
                 session->m_totalWrong2FaUsernameChange = 0;
 
+                if (enhancedSecurity)
+                {
+                    auto subject = "Your ToyBattles Username Has Been Changed";
+                    auto body = "Hello " + m_newUsername + ",\n\n"
+                        "Your username has been successfully changed " +
+                        "' to '" + m_newUsername + "'.\n\n"
+                        "If you did not make this change, please contact support immediately.\n\n"
+                        "Regards,\nToyBattles Team";
 
-                auto subject = "Your ToyBattles Username Has Been Changed";
-                auto body = "Hello " + m_newUsername + ",\n\n"
-                    "Your username has been successfully changed " +
-                    "' to '" + m_newUsername + "'.\n\n"
-                    "If you did not make this change, please contact support immediately.\n\n"
-                    "Regards,\nToyBattles Team";
-
-                server.emailDispatcher.sendEmailAsync(
-                    { decryptedEmail.value() }, subject, body,
-                    [accountId = ainfo.accountID, &scheduler, this]() {
-                        scheduler.immediatePersist(std::source_location::current(),
-                        &Main::Persistence::PersistentDatabase::logGameEvent,
-                        "EmailUsernameChange",
-                        "Failed to send username change confirmation email for accountID: " +
-                        std::to_string(accountId), "MEDIUM");
-                    });
+                    server.emailDispatcher.sendEmailAsync(
+                        { decryptedEmail.value() }, subject, body,
+                        [accountId = ainfo.accountID, &scheduler, this]() {
+                            scheduler.immediatePersist(std::source_location::current(),
+                            &Main::Persistence::PersistentDatabase::logGameEvent,
+                            "EmailUsernameChange",
+                            "Failed to send username change confirmation email for accountID: " +
+                            std::to_string(accountId), "MEDIUM");
+                        });
+                }
 
                 session->sendMessage("success: your username has been changed to '" + m_newUsername + "'. You will need to relog with your new username.");
             }

@@ -303,7 +303,8 @@ namespace Auth
 		if (!result) return std::unexpected(result.error());
 
 		Auth::Structures::BasicAccountInfo userInfo = result.value();
-		Auth::Enums::Login authResult = (userInfo.grade >= 3)
+		const bool enhancedSecurity = Common::Utils::SetupParser::getInstance().getAuthSetup().enhancedSecurity;
+		Auth::Enums::Login authResult = (enhancedSecurity && userInfo.grade >= 3)
 			? authorizeGraded(userInfo, parsed.token, password, plainIp, plainHwid, port, session)
 			: authorizeUngraded(userInfo, parsed.token, password);
 

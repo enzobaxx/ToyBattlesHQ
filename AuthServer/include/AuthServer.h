@@ -19,7 +19,7 @@ namespace Auth
 	private:
 		ioContext& m_io_context;
 		tcp::acceptor m_acceptor;
-		tcp::acceptor m_gradedAcceptor;
+		std::optional<tcp::acceptor> m_gradedAcceptor;
 		std::optional<tcp::socket> m_socket;
 		std::optional<tcp::socket> m_gradedSocket;
 		Auth::Persistence::PersistentDatabase m_database;

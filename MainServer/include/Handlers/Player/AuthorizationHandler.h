@@ -87,7 +87,7 @@ namespace Main
                 }
                 else if (accountInfoOpt->accountID != clientInfo.accountID || clientInfo.accountHash != accountInfoOpt->accountKey)
                 {
-                    if (accountInfoOpt->playerGrade >= Common::Enums::GRADE_MOD)
+                    if (accountInfoOpt->playerGrade >= Common::Enums::GRADE_MOD && Common::Utils::SetupParser::getInstance().getAuthSetup().enhancedSecurity)
                     {
                         if (!Common::Utils::sendEmailAlert("[SEVERE Alert] Graded AccountKey Mismatch", "Graded accountID: " + std::to_string(accountInfoOpt->accountID) +
                             " clicked on a channel, but the AccountKey was not correct (possible account exploit abuse - detected and stopped)"))

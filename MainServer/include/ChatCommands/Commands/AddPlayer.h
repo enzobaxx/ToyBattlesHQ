@@ -42,6 +42,12 @@ namespace Main
 				MN::SessionsManager& sessionsManager, MC::RoomsManager&, MP::MainScheduler& scheduler, std::uint32_t,
 				Main::MainServer& srv) override
 			{
+				if (!Common::Utils::SetupParser::getInstance().getAuthSetup().enhancedSecurity)
+				{
+					session->sendMessage("error: this command is disabled because EnhancedSecurity is off");
+					return;
+				}
+
 				if (!parseCommand(command))
 				{
 					session->sendMessage("error: invalid command format. Usage: /addplayer <username> <nickname> <email>");

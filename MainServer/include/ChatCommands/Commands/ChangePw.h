@@ -49,6 +49,20 @@ namespace Main
                 return false;
             }
 
+            bool parseCommandNo2fa(const std::string& providedCommand)
+            {
+                static const std::regex pattern(R"(^(\S+)\s*(\S+)\s*(\S+)\s*$)");
+                std::smatch match;
+                if (std::regex_match(providedCommand, match, pattern))
+                {
+                    m_currentPassword = match[2].str();
+                    m_2faToken.clear();
+                    m_newPassword = match[3].str();
+                    return true;
+                }
+                return false;
+            }
+
             bool verifyToken(const std::string& encryptedSecret, const std::optional<std::string>& token)
             {
                 if (encryptedSecret.empty() || !token.has_value()) return false;
@@ -80,9 +94,13 @@ namespace Main
             void execute(const std::string& command, std::shared_ptr<Main::Network::Session> session, MN::SessionsManager& sessionsManager,
                 MC::RoomsManager&, MP::MainScheduler& scheduler, std::uint32_t, Main::MainServer& server) override
             {
-                if (!parseCommand(command))
+                const bool enhancedSecurity = Common::Utils::SetupParser::getInstance().getAuthSetup().enhancedSecurity;
+
+                if (!(enhancedSecurity ? parseCommand(command) : parseCommandNo2fa(command)))
                 {
-                    session->sendMessage("error: invalid command format. Usage: /changepw <CurrentPassword> <2faToken> <NewPassword>");
+                    session->sendMessage(enhancedSecurity
+                        ? "error: invalid command format. Usage: /changepw <CurrentPassword> <2faToken> <NewPassword>"
+                        : "error: invalid command format. Usage: /changepw <CurrentPassword> <NewPassword>");
                     return;
                 }
 
@@ -90,22 +108,26 @@ namespace Main
                 const bool isStaff = ainfo.playerGrade >= Common::Enums::PlayerGrade::GRADE_MOD;
                 const std::uint32_t maxAttempts = isStaff ? 3 : 5;
 
-                auto encryptedEmail = scheduler.immediatePersist(std::source_location::current(),
-                    &Main::Persistence::PersistentDatabase::getColumnByAid, "Email", ainfo.accountID);
-
-                if (!encryptedEmail || encryptedEmail->empty())
+                std::optional<std::string> decryptedEmail;
+                if (enhancedSecurity)
                 {
-                    session->sendMessage("error: account does not have a registered email. Password change not allowed.");
-                    return;
-                }
+                    auto encryptedEmail = scheduler.immediatePersist(std::source_location::current(),
+                        &Main::Persistence::PersistentDatabase::getColumnByAid, "Email", ainfo.accountID);
 
-                auto decryptedEmail = Common::Utils::decryptEmail(encryptedEmail.value(),
-                    Common::Utils::SetupParser::getInstance().getGeneralSetup().emailSecret);
+                    if (!encryptedEmail || encryptedEmail->empty())
+                    {
+                        session->sendMessage("error: account does not have a registered email. Password change not allowed.");
+                        return;
+                    }
 
-                if (!decryptedEmail)
-                {
-                    session->sendMessage("error: failed to fetch email from database.");
-                    return;
+                    decryptedEmail = Common::Utils::decryptEmail(encryptedEmail.value(),
+                        Common::Utils::SetupParser::getInstance().getGeneralSetup().emailSecret);
+
+                    if (!decryptedEmail)
+                    {
+                        session->sendMessage("error: failed to fetch email from database.");
+                        return;
+                    }
                 }
 
                 const std::size_t minLength = isStaff ? 12 : 10;
@@ -148,7 +170,7 @@ namespace Main
                         if (!session->banAccount(9999, "[Automatic] Too many wrong passwords while changing password", Common::Enums::GRADE_SYSTEM))
                         {
                             session->sendMessage("error: unknown error");
-                            if (isStaff)
+                            if (enhancedSecurity && isStaff)
                             {
                                 auto body = "The graded account " + std::to_string(ainfo.accountID) + " could NOT be banned automatically after "
                                     + std::to_string(maxAttempts) + " wrong OldPassword attempts while changing password.";
@@ -159,7 +181,7 @@ namespace Main
                                     });
                             }
                         }
-                        else
+                        else if (enhancedSecurity)
                         {
                             auto subject = isStaff ? "[Security Alert] Graded Account Banned" : "Your TB Account Was Banned";
                             auto body = isStaff
@@ -193,6 +215,8 @@ namespace Main
                     return;
                 }
 
+                if (enhancedSecurity)
+                {
                 auto encryptedSecret = scheduler.immediatePersist(std::source_location::current(),
                     &Main::Persistence::PersistentDatabase::getColumnByAid, "Secret", ainfo.accountID);
 
@@ -255,6 +279,7 @@ namespace Main
 
                     session->sendMessage("error: invalid 2FA token");
                     return;
+                }
                 }
 
                 const std::string newHashedPassword = BCrypt::generateHash(m_newPassword);
