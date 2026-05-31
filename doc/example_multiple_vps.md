@@ -9,7 +9,7 @@ Assume that:
    - The second VPS public address is 182.243.34.5
    - The second  VPS local IP is 987.543.21.1 (you can find this by opening a command prompt and using `ipconfig`)
 
-- My client version is 1.1.1 (i.e. I did not modify it through the client tools as explained in the next chapters)
+- My client version is 0.0.3 (i.e. I did not modify it through the client tools as explained in the next chapters)
 - The database is placed inside the first VPS, and is named microvolts-db 
 - My database username is root
 - My database password is stored in the environment variable named "MV_DB_PW" (inside the first VPS)
@@ -102,8 +102,8 @@ SecurityNotificationReceiver = receiver1@gmail.com,  receiver2@gmail.com  # who 
 ## Setup (config.ini) for the seoond VPS
 ```cpp
 [AuthServer]
-LocalIp = 123.456.78.9      # First VPS ip on purpose
-Ip = 199.222.32.3           # First VPS local ip on purpose
+LocalIp = 123.456.78.9      # First VPS local ip on purpose
+Ip = 199.222.32.3           # First VPS public ip on purpose
 Port = 13000
 GradedPort = 13001 # Block this port on firewall and only allow Wireguard peers to use it!
 VpnIp = 127.0.0.1  # Use e.g. Wireguard IP (server side) - server will listen to this IP + GradedPort for graded access

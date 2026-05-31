@@ -2,10 +2,9 @@
 
 Since version 2.0 you are now able to set up your own external admin panel to monitor the game servers from it. This requires using the game server's API.
 
-You will need to set up a JWT secret and modifiying the CORS allowed origins in the main server.
-- Once you have created a JWT secret, go to `MainServer/include/Network/HttpSession.h`. Then CTRL + F and search `YOUR_SECRET_TOKEN_GOES_HERE`, replace it with your JWT secret.
-- Once you know your CORS origins to allow, just add all of them in the code. CTRL + F and search `YOUR_ALLOWED_ORIGINS_GO_HERE`. Add all your origins to allow there.
-- Finally, rebuild the main server.
+You will need to set up a JWT secret and the allowed CORS origins. Both are configured in the `[Website]` section of `config.ini` (no code editing or rebuild required):
+- **JWT secret**: store it in the environment variable named by `JwtTokenEnvironmentName` (e.g. `MV_JWT`). The server uses this value (HS256) to verify incoming admin-panel tokens.
+- **CORS origins**: list every allowed origin, comma-separated, in `AllowedOrigins`.
 
 ## API
 Note: your JWT token must contain a claim named `role`, which is an integer that represents the grade of whoever is using the admin panel.

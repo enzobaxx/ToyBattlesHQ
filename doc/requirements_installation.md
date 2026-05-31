@@ -2,7 +2,7 @@
 
 ## 3.1.1 Requirements
 - Python >= 3.10
-- CMake >= 4.3.2
+- CMake >= 3.26
 - GCC >= 14 or MSVC >= 14.10 (Clang: untested)
 - C++23 standard or newer
 
@@ -20,8 +20,8 @@ If you want an easy setup for Linux (based on Docker), then [this repository](ht
 6) Output (exes) inside Release folder
 
 ### 3.1.2.3 Manual setup (Linux)
-1) Clone this repository then go to its folder: `cd <YourEmulatorProjectPath` - make sure you are inside the ToyBattlesHQ folder (root of this repository)
-2) Clone vcpkg inside ExternalLibraries: `git clone https://github.com/microsoft/vcpkg.git`
+1) Clone this repository then go to its folder: `cd <YourEmulatorProjectPath>` - make sure you are inside the ToyBattlesHQ folder (root of this repository)
+2) Clone vcpkg inside ExternalLibraries: `git clone https://github.com/microsoft/vcpkg.git ExternalLibraries/vcpkg`
 3) Bootstrap it: `./ExternalLibraries/vcpkg/bootstrap-vcpkg.sh`
 4) Generate build files: `cmake -B build -S . -DCMAKE_TOOLCHAIN_FILE=ExternalLibraries/vcpkg/scripts/buildsystems/vcpkg.cmake`
 5) Build the project: `cmake --build build --config Release`

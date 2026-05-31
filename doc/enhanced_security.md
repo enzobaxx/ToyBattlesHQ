@@ -7,6 +7,8 @@ You can now enable advanced protection mechanisms for moderator and administrato
 EnhancedSecurity = true
 ```
 
+The default value is `false`. When it is `false`, none of the mechanisms described below are active, and no VPN, email/SMTP, or 2FA configuration is required (see **When Enhanced Security Is Disabled** further below).
+
 
 This flag activates **Graded Access**, a multi-layer security system designed specifically to protect privileged (mod/admin) accounts from unauthorized access, credential leaks, and brute-force attempts.
 
@@ -61,9 +63,25 @@ The alert system will trigger when:
 
 To mitigate brute-force attacks:
 
-- Graded accounts are automatically locked after **5 failed login attempts**.
+- Graded accounts are automatically locked after **3 failed login attempts** (counted separately for wrong passwords and wrong 2FA codes).
 - A security notification email is immediately sent to the configured recipients.
 - Manual administrative action is required to unlock the account.
+
+---
+
+## When Enhanced Security Is Disabled (`EnhancedSecurity = false`)
+
+This is the default mode. None of the Graded Access layers are used, and the server can run without any VPN, email/SMTP, or 2FA setup. Specifically:
+
+- **Graded (mod/admin) accounts log in exactly like regular accounts** — only the correct username and password are required. There is no separate graded authentication port/server, no HWID check, no VPN requirement, and no 2FA.
+- **`GradedPort` and `VpnIp` are not used** and are not required in `config.ini`.
+- **No emails or security notifications are ever sent.** The entire `[General]` section (`EmailSecret`, `2faSecret`, `SmtpServer`, `EmailSender`, `EmailUsername`, `EmailToken`, `SecurityNotificationReceiver`) is not required and is ignored.
+- **No 2FA anywhere.** `/changepw` and `/changeusername` work with just the password (no 2FA token, no confirmation email):
+  - `/changepw <CurrentPassword> <NewPassword>`
+  - `/changeusername <Password> <NewUsername>`
+- **`/addplayer` and account recovery are disabled**, because they rely on email and a 2FA secret. Create accounts another way (for example, directly in the database).
+
+To use any of the protections described above, set `EnhancedSecurity = true`.
 
 ---
 
@@ -152,6 +170,8 @@ Without VPN connectivity, login attempts will fail.
 
 # Two-Factor Authentication & Email Requirements
 
+> This section applies only when `EnhancedSecurity = true`. When it is `false`, 2FA and email are not used at all (see **When Enhanced Security Is Disabled** above).
+
 ## Mandatory for Graded Accounts
 
 Graded accounts now require:
@@ -184,6 +204,8 @@ For regular users:
 ---
 
 ## Account Creation: `/addplayer`
+
+> Available only when `EnhancedSecurity = true`. With Enhanced Security disabled, `/addplayer` is turned off (it depends on email and a 2FA secret).
 
 A new administrative command is available: `/addplayer`
 

@@ -15,8 +15,8 @@ As the name suggests, this is the server responsible for handling user authentic
 
 It connects with any MainServer defined in the config file (we’ll go over this setup later) to fetch the current player count from each server. These counts are shown in the channel list during login.
 
-**⚠️ An important note**: accounts with elevated privileges (Moderator and above) are required to have 2FA enabled for security reasons.
-This setting can be configured directly in the database (we’ll cover how later), but you’re also free to modify the AuthServer code if you want to disable this requirement.
+**⚠️ An important note**: when `EnhancedSecurity = true`, accounts with elevated privileges (Moderator and above) are required to have 2FA enabled for security reasons.
+This (and the other graded protections) can be turned off by setting `EnhancedSecurity = false` in `config.ini`, in which case graded accounts log in just like normal accounts. See the Enhanced Security chapter for details.
 
 
 ## Main Server

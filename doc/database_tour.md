@@ -21,8 +21,8 @@ This table contains all information regarding a specific player: accountID, user
 - You can convert your plain-text password to bcrypt (12 rounds) by using any online tool.
 - To give yourself ingame currency: `UPDATE Users SET MicroPoints=50000, RockTotens=50000, Coupons=250 WHERE Username="test"`
 
-#### Graded accounts require mandatory 2FA. To enable it:
-Log in the game via a graded account. Generate a new account through it with `/addplayer NewUsername NewNickname Email`. You will receive a random password and 2FA code (to setup 2FA). Then, you can simply update the new user's grade via the database.
+#### Graded accounts require mandatory 2FA (when `EnhancedSecurity = true`). To enable it:
+Log in the game via a graded account. Generate a new account through it with `/addplayer NewUsername NewNickname Email` (this command is only available when `EnhancedSecurity = true`). You will receive a random password and 2FA code (to setup 2FA). Then, you can simply update the new user's grade via the database.
    
 **Note** The following is what each user grade is.
 - Grade 1: Normal users - 2fa not mandatory. (lowest grade)
@@ -31,7 +31,7 @@ Log in the game via a graded account. Generate a new account through it with `/a
 - Grade 4: Game Master (GM)
 - Grade 7: Developer
 
-All grades above 2 require mandatory 2FA. You won't be able to login otherwise since the server checks this. (This may be added as an optional feature that can be disabled in the future).
+When `EnhancedSecurity = true`, all grades above 2 require mandatory 2FA (you won't be able to login otherwise, since the server checks this). When `EnhancedSecurity = false` (the default), 2FA is not used and graded accounts log in like normal accounts. See the Enhanced Security chapter for details.
 To login with 2FA, you need this format instead of your usual username when logging in: `Username+6digitcode` (with the `+` in between).
 
 Notes:

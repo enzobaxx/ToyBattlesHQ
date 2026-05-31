@@ -2,7 +2,7 @@
 Assume that:
 - I have a VPS whose public address is 199.222.32.3
 - The VPS local IP is 123.456.78.9 (you can find this by opening a command prompt and using `ipconfig`)
-- My client version is 1.1.1 (i.e. I did not modify it through the client tools as explained in the next chapters)
+- My client version is 0.0.3 (i.e. I did not modify it through the client tools as explained in the next chapters)
 - The database inside the VPS is named microvolts-db
 - My database username is root
 - My database password is stored in the environment variable named "MV_DB_PW" (inside the VPS)

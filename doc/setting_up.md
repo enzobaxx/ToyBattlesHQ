@@ -16,7 +16,7 @@ This section configures your authentication server, which handles player logins.
 
 **Port**: The port used by the Auth Server, default is 13000.
 
-**GradedPort**: The port used by the Auth Server for moderator/administrator login, default is 13001. This is required, but will only be used if `EnhancedSecurity = true`.
+**GradedPort**: The port used by the Auth Server for moderator/administrator login, default is 13001. This is only required (and only used) when `EnhancedSecurity = true`.
 
 **VpnIp**: VPN that the servers will listen to on port `GradedPort` for graded access. For more info, see the Enhanced Security section in this documentation.
 
@@ -49,7 +49,7 @@ These handle all in-match/gameplay logic like damage, position updates, match ru
 
 **IpcPort**: Used for inter-server communication
 
-**EnableDeadBroadcast**: This setting is particularly important in multi-region server deployments. For instance, if you run a NA VPS hosting a cast server, while your EU VPS hosts all main servers along with the EU cast server, you should set EnableDeadBroadcast to false on the NA server. Otherwise, every time a player dies, the NA cast server would need to communicate with the NA main server located on the EU VPS. This cross-region communication can introduce unnecessary delays and increase latency.
+**IPC_EnableDeadBroadcast**: This setting is particularly important in multi-region server deployments. For instance, if you run a NA VPS hosting a cast server, while your EU VPS hosts all main servers along with the EU cast server, you should set EnableDeadBroadcast to false on the NA server. Otherwise, every time a player dies, the NA cast server would need to communicate with the NA main server located on the EU VPS. This cross-region communication can introduce unnecessary delays and increase latency.
 
 
 ### [Database]
@@ -74,6 +74,10 @@ Defines the API endpoint used for admin panel or external requests.
 
 **Port**: Port your panel or API runs on (e.g., 8080).
 
+**JwtTokenEnvironmentName**: Name of the environment variable (not the token itself) holding the JWT secret the server uses to verify admin-panel requests (HS256).
+
+**AllowedOrigins**: Comma-separated list of CORS origins allowed to call the API.
+
 ### [Client]
 Used for version checking during client login.
 
@@ -87,6 +91,8 @@ Note that for ToyBattles Client (on the Release section on this Repository), the
 
 
 ### [General]
+This section is only required when `EnhancedSecurity = true`. When it is `false`, the whole section is ignored and can be left as-is.
+
 **EmailSecret**: environment variable containing email encryption key (in hex form without 0x, 32 bytes) 
 
 **2faSecret**: environment variable containing game 2FA encryption key (in hex form without 0x, 32 bytes) 

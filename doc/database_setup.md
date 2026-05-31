@@ -47,7 +47,7 @@ CREATE DATABASE `microvolts-db`;
 
 
 ### Step 3: Import the Tables
-You’ve been provided with a file called `microvolts-db.` This file contains the entire database structure and necessary insertions. You can find it in the root directory.
+You’ve been provided with a file called `microvolts-db.sql`. This file contains the entire database structure and necessary insertions. You can find it in the root directory.
 
 To import it:
 #### Option A – Using Command Line
@@ -61,13 +61,13 @@ To import it:
 - Run the resulting queries.
 - If any message asks you to auto-detect file encoding, select Yes.
 
-This will create all tables and insert initial data (like items, s`hop content, etc.).
+This will create all tables and insert initial data (like items, shop content, etc.).
 You can check if it was successful by trying the query `SELECT * FROM Users`. There should be exactly 1 resulting row.
 
 ### Step 4: Set the Password via Environment Variable
 For security, the server expects your database password to be stored in an environment variable (not directly in the config).
 
-For example, if in `setup.ini` you wrote: `PasswordEnvironmentName = MICRO_DB_PW`
+For example, if in `config.ini` you wrote: `PasswordEnvironmentName = MICRO_DB_PW`
 
 On Windows:
 - Press Win + S → Search for “Environment Variables”
@@ -129,7 +129,7 @@ And finally `EXIT;`
 
 If you want it to be permanent:
 - For bash: `echo 'export MICRO_DB_PW=your_db_password_here' >> ~/.bashrc`
-- For zsh: `echo 'export MICRO_DB_PW=your_db_password_here' >> ~/.zshsrc` 
+- For zsh: `echo 'export MICRO_DB_PW=your_db_password_here' >> ~/.zshrc` 
 
 
 ## Next
