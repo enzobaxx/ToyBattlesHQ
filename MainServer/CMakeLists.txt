@@ -47,12 +47,17 @@ target_include_directories(AuthServer PRIVATE
     ${CURL_INCLUDE_DIRS}
 )
 
+target_precompile_headers(MainServer
+    PRIVATE
+        ${CMAKE_CURRENT_LIST_DIR}/include/pch.h
+)
+
 if (WIN32)
     target_link_libraries(MainServer PUBLIC wsock32 ws2_32)
 endif()
 
 if (MSVC)
-    target_compile_options(MainServer PUBLIC /W0)
+    target_compile_options(MainServer PUBLIC /W0 /MP /bigobj)
 else()
     target_compile_options(MainServer PUBLIC -w)
 endif()
@@ -69,14 +74,4 @@ add_custom_command(
     COMMAND ${CMAKE_COMMAND} -E echo "Running generate_command_includes.py..."
     COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_LIST_DIR}/generate_command_includes.py
     WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-)
-
-if (MSVC)
-    target_compile_options(MainServer PUBLIC /W0)
-else()
-    target_compile_options(MainServer PUBLIC -w)
-endif()
-
-set_target_properties(MainServer PROPERTIES
-    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}
 )

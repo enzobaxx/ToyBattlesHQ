@@ -22,16 +22,21 @@ def generate_includes():
                       "Note: Commands should be written inside the include/ChatCommands/Commands folder")
         sys.exit(1)
 
-    headers = [
+    headers = sorted(
         f for f in os.listdir(command_headers_dir)
         if os.path.isfile(os.path.join(command_headers_dir, f)) and f.endswith('.h')
-    ]
-    
-    with open(generated_file_path, "w") as output_file:
-        for header in headers:
-            include_line = f'#include "../{command_headers_dir}/{header}"\n'
-            output_file.write(include_line)
+    )
 
+    new_content = "".join(
+        f'#include "../{command_headers_dir}/{header}"\n' for header in headers
+    )
+
+    existing_content = generated_commands_path.read_text() if generated_commands_path.is_file() else None
+    if existing_content == new_content:
+        logging.info(f"{generated_file_path} already up to date ({len(headers)} headers)")
+        return
+
+    generated_commands_path.write_text(new_content)
     logging.info(f"Generated includes for {len(headers)} headers in {generated_file_path}")
 
 def ensure_commands_registration():

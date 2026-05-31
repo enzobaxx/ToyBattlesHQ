@@ -49,3 +49,7 @@ target_link_libraries(Common
 if(WIN32)
     target_link_libraries(Common PUBLIC "bcrypt.lib" ws2_32 wsock32)
 endif()
+
+if (MSVC)
+    target_compile_options(Common PUBLIC /MP)
+endif()

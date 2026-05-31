@@ -16,7 +16,12 @@
 #include "../../include/Handlers/Room/RoomLeaveHandler.h"
 #include <Enums/PlayerEnums.h>
 #include <Utils/Logger.h>
-#include <range/v3/all.hpp>
+#include <range/v3/view/concat.hpp>
+#include <range/v3/algorithm/find_if.hpp>
+#include <range/v3/algorithm/copy.hpp>
+#include <range/v3/algorithm/count_if.hpp>
+#include <range/v3/algorithm/transform.hpp>
+#include <range/v3/algorithm/all_of.hpp>
 #include "../../include/Detail/Utilities.h"
 #include "../../include/Classes/RoomNumberManager.h"
 

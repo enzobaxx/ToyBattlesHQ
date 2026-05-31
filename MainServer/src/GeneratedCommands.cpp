@@ -11,6 +11,7 @@
 #include "../include/ChatCommands/Commands/ClanAccept.h"
 #include "../include/ChatCommands/Commands/ClanDeny.h"
 #include "../include/ChatCommands/Commands/ClanKick.h"
+#include "../include/ChatCommands/Commands/ClanMembers.h"
 #include "../include/ChatCommands/Commands/Close.h"
 #include "../include/ChatCommands/Commands/ConvertRtToCoins.h"
 #include "../include/ChatCommands/Commands/ConvertRtToCoupons.h"
