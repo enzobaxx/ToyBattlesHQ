@@ -140,7 +140,7 @@ namespace Cast
 						}
 						if (attackerSession)
 						{
-							acManager.submitEvent(std::make_unique<Ac::PacketFloodingEvent>(attackerSession, 4, 1000, "Room Rape (flooding)", 265));
+							//acManager.submitEvent(std::make_unique<Ac::PacketFloodingEvent>(attackerSession, 4, 1000, "Room Rape (flooding)", 265));
 						}
 					}
 				}
@@ -208,7 +208,7 @@ namespace Cast
 						}
 						if (attackerSession)
 						{
-							acManager.submitEvent(std::make_unique<Ac::PacketFloodingEvent>(attackerSession, 4, 1000, "Room Rape (flooding)", 265));
+							//acManager.submitEvent(std::make_unique<Ac::PacketFloodingEvent>(attackerSession, 4, 1000, "Room Rape (flooding)", 265));
 						}
 					}
 				}

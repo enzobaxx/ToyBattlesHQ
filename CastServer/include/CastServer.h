@@ -30,7 +30,7 @@ namespace Cast
 		tcp::acceptor m_mainServerAcceptor;
 		std::optional<tcp::socket> m_mainSocket;
 
-		Ac::AntiCheatManager m_acManager;
+		Ac::AntiCheatManager m_acManager{ false };
 
 	public:
 		CastServer(ioContext& io_context, const std::string& serverIp, std::uint16_t port, std::uint16_t mainPort, std::uint16_t serverId);

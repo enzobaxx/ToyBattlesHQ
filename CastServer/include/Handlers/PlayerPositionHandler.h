@@ -49,7 +49,7 @@ namespace Cast
             }
             else
             {
-                acManager.submitEvent(std::make_unique<Ac::PacketFloodingEvent>(session, 20, 1000, "Speed hack (Cheat Engine)", 281));
+                //acManager.submitEvent(std::make_unique<Ac::PacketFloodingEvent>(session, 20, 1000, "Speed hack (Cheat Engine)", 281));
             }
 
             static Common::Network::UnecryptedPacket response{ 1440, 322, 1 };

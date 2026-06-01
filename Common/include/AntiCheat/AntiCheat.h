@@ -17,7 +17,7 @@ namespace Ac
     class AntiCheatManager
     {
     private:
-        sql::Connection* m_con;
+        sql::Connection* m_con{ nullptr };
         ACEventQueue m_eventQueue;
         std::vector<std::unique_ptr<IACCheckerBase>> m_checkers;
         std::thread m_thread;
@@ -50,13 +50,12 @@ namespace Ac
                 if (!m_con)
                     connectToDb();
 
-                const std::string createTableQuery =
-                    "CREATE TABLE IF NOT EXISTS CheatFlags ("
-                    "ID INT AUTO_INCREMENT PRIMARY KEY, "
-                    "Description TEXT NOT NULL"
-                    ")";
-                std::unique_ptr<sql::Statement> createStmt(m_con->createStatement());
-                createStmt->execute(createTableQuery);
+                if (!m_con)
+                {
+                    ::Utils::Logger::log("Cannot log cheat flag: no database connection available",
+                        Utils::LogType::Error, "AntiCheat::handleFlag");
+                    return;
+                }
 
                 const std::string insertQuery = "INSERT INTO CheatFlags (Description) VALUES (?)";
                 std::unique_ptr<sql::PreparedStatement> insertStmt(m_con->prepareStatement(insertQuery));
@@ -73,6 +72,8 @@ namespace Ac
             {
                 ::Utils::Logger::log(std::string("MariaDB exception while logging cheat flag: ") + e.what(),
                     Utils::LogType::Error, "AntiCheat::handleFlag");
+                delete m_con;
+                m_con = nullptr;
             }
         }
 
@@ -85,22 +86,35 @@ namespace Ac
                     dbSetup.username, dbSetup.password);
                 m_con->setSchema(dbSetup.databaseName);
                 m_con->setAutoCommit(true);
+
+                const std::string createTableQuery =
+                    "CREATE TABLE IF NOT EXISTS CheatFlags ("
+                    "ID INT AUTO_INCREMENT PRIMARY KEY, "
+                    "Description TEXT NOT NULL"
+                    ")";
+                std::unique_ptr<sql::Statement> createStmt(m_con->createStatement());
+                createStmt->execute(createTableQuery);
             }
             catch (const sql::SQLException& e)
             {
                 ::Utils::Logger::log("Error connecting to MariaDB: " + std::string(e.what()),
                     Utils::LogType::Error, "AntiCheat::connectToDb");
+                delete m_con;
+                m_con = nullptr;
             }
         }
 
     public:
-        AntiCheatManager()
+        AntiCheatManager(bool startWorker = true)
         {
             //registerChecker<PacketFloodChecker>();
             registerChecker<PacketReplicationChecker>();
 
-            m_isRunning = true;
-           // m_thread = std::thread(&AntiCheatManager::worker, this);
+            if (startWorker)
+            {
+                m_isRunning = true;
+                m_thread = std::thread(&AntiCheatManager::worker, this);
+            }
         }
 
 
@@ -109,6 +123,8 @@ namespace Ac
             m_isRunning = false;
             m_eventQueue.shutdown();
             if (m_thread.joinable()) m_thread.join();
+            delete m_con;
+            m_con = nullptr;
         }
 
         template<typename CheckerT>

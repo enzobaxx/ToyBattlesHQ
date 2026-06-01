@@ -99,7 +99,9 @@ namespace Cast
 		for (std::size_t order : {146, 147, 149, 151, 152, 153, 154})
 		{
 			Common::Network::Session::addCallback<CN::PacketType::UNECRYPTED, Session>(order, [&](const Common::Network::UnecryptedPacket& request,
-				std::shared_ptr<Cast::Network::Session> session) { m_roomsManager.playerForwardToHost(request.getSession(), session->getId(),
+				std::shared_ptr<Cast::Network::Session> session) {
+					if (session->m_team == Common::Enums::TEAM_OBSERVER) return;
+					m_roomsManager.playerForwardToHost(request.getSession(), session->getId(),
 					const_cast<Common::Network::UnecryptedPacket&>(request));
 				});
 		}
@@ -110,7 +112,7 @@ namespace Cast
 				const auto targetUid = Cast::Details::parseDataFromEnd<Main::Structures::UniqueId>(request, 4);
 				if (auto targetSession = m_sessionsManager.getSession(targetUid.session))
 				{
-					m_acManager.submitEvent(std::make_unique<Ac::PacketFloodingEvent>(targetSession, 5, 1000, "Bazooka/Grenade flooding", 272));
+					//m_acManager.submitEvent(std::make_unique<Ac::PacketFloodingEvent>(targetSession, 5, 1000, "Bazooka/Grenade flooding", 272));
 				}
 				m_roomsManager.broadcastToMatch(session->getId(), const_cast<Common::Network::UnecryptedPacket&>(request));
 			});

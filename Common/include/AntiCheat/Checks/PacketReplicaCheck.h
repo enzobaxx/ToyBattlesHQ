@@ -15,7 +15,8 @@ namespace Ac
     private:
         // [SEID] -> [PacketHash] -> [timestamps...]
         std::unordered_map<uint32_t, std::unordered_map<size_t, std::vector<std::uint64_t>>> playerData;
-        static inline std::uint64_t analysisWindowMs = 120000;
+        static inline std::uint64_t analysisWindowMs = 20000;
+        static inline std::size_t replicaThreshold = 5;
 
         std::string floatToString(float value, int precision = 2)
         {
@@ -48,7 +49,7 @@ namespace Ac
             auto& timestamps = playerPackets[packetHash];
             timestamps.push_back(event.eventTime);
 
-            if (timestamps.size() >= 4)
+            if (timestamps.size() >= replicaThreshold)
             {
                 const ACFlag flag{
                     event.session->getAccountId(),
