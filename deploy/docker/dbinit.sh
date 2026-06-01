@@ -28,7 +28,7 @@ else
     echo "[dbinit] Creating database 'microvolts-db'..."
     "${CLIENT[@]}" -e "CREATE DATABASE IF NOT EXISTS \`microvolts-db\`;"
     echo "[dbinit] Importing schema and seed data..."
-    sed -E '/\/\*![0-9]+ SET (@OLD_TIME_ZONE|TIME_ZONE)/d' /app/emu/microvolts-db.sql | "${CLIENT[@]}" microvolts-db
+    sed -E '/\/\*![0-9]+ SET [A-Za-z_]+[[:space:]]*=[[:space:]]*@OLD_/d' /app/emu/microvolts-db.sql | "${CLIENT[@]}" microvolts-db
     echo "[dbinit] Setting root password and TCP access..."
     "${CLIENT[@]}" <<SQL
 ALTER USER 'root'@'localhost' IDENTIFIED BY '${DB_PW}';
