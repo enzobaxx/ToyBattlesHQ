@@ -92,4 +92,4 @@ Everything is protected with proper authentication, including user grades and JW
 
 
 ## Next
-[3.1 Requirements & Installation](https://github.com/DownWithTheFallen/MicrovoltsEmulator/blob/mv1.1_2.0/doc/requirements_installation.md)
+[3.1 Requirements & Installation](https://github.com/DownWithTheFallen/ToyBattlesHQ/blob/mv1.1_2.0/doc/requirements_installation.md)

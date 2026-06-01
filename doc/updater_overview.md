@@ -157,4 +157,4 @@ Before deploying:
 
 
 ## Next
-[7.2 Changing the client version (using the client version tool)](https://github.com/DownWithTheFallen/MicrovoltsEmulator/blob/mv1.1_2.0/doc/client_version_tool.md)
+[7.2 Changing the client version (using the client version tool)](https://github.com/DownWithTheFallen/ToyBattlesHQ/blob/mv1.1_2.0/doc/client_version_tool.md)

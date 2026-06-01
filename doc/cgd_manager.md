@@ -74,5 +74,5 @@ The CapsuleManager makes it really easy to edit existing capsules, remove them, 
   
 
 ## Next
-[8.1 How to create bug reports via GitHub Issues](https://github.com/DownWithTheFallen/MicrovoltsEmulator/blob/mv1.1_2.0/doc/reporting_issues.md)
+[8.1 How to create bug reports via GitHub Issues](https://github.com/DownWithTheFallen/ToyBattlesHQ/blob/mv1.1_2.0/doc/reporting_issues.md)
 

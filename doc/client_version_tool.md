@@ -17,4 +17,4 @@ Once you have the executable ready, start it and it will prompt you to enter the
 
 
 ## Next
-[7.3 Changing the CGD password (using the password tool)](https://github.com/DownWithTheFallen/MicrovoltsEmulator/blob/mv1.1_2.0/doc/password_updater.md)
+[7.3 Changing the CGD password (using the password tool)](https://github.com/DownWithTheFallen/ToyBattlesHQ/blob/mv1.1_2.0/doc/password_updater.md)

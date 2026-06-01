@@ -419,4 +419,4 @@ POST: /updatetradesystem
 
 
 # Next
-[7.1 The Updater: How the launcher retrieves updates](https://github.com/DownWithTheFallen/MicrovoltsEmulator/blob/mv1.1_2.0/doc/updater_overview.md)
+[7.1 The Updater: How the launcher retrieves updates](https://github.com/DownWithTheFallen/ToyBattlesHQ/blob/mv1.1_2.0/doc/updater_overview.md)

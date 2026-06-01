@@ -65,4 +65,4 @@ There were a lot of progresses. You can find out many videos on youtube by searc
 - https://www.youtube.com/watch?v=qme0okRUlwE
 
 ## Next
-[1.2 Overview of the different projects (MainServer, CastServer, AuthServer, Common)](https://github.com/DownWithTheFallen/MicrovoltsEmulator/blob/mv1.1_2.0/doc/intro2.md)
+[1.2 Overview of the different projects (MainServer, CastServer, AuthServer, Common)](https://github.com/DownWithTheFallen/ToyBattlesHQ/blob/mv1.1_2.0/doc/intro2.md)
