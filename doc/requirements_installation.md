@@ -8,7 +8,7 @@
 
 ## 3.1.2 Installation
 ### 3.1.2.1 Automatic Linux Setup
-This repository ships an automated installer at `deploy/setup.py`. On a Linux host it installs the prerequisites (Docker, plus WireGuard/fail2ban for later use), auto-detects your local/public IP and asks you to confirm, generates `Setup/config.ini`, builds a Docker image that contains the three servers **and** MariaDB, initializes the database (with the default `test` account), runs everything in one container, and — on a VPS — opens the required firewall ports. Run it with:
+This repository ships an automated installer at `deploy/setup.py`. On a Linux host it installs the prerequisites (Docker, plus WireGuard/fail2ban for later use), auto-detects your local/public IP and asks you to confirm, generates `Setup/config.ini`, builds a Docker image that contains the three servers **and** MariaDB, initializes the database (with the default `test` account), runs everything in one container, and on a VPS it opens the required firewall ports. Run it with:
 
 ```bash
 python3 deploy/setup.py
