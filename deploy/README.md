@@ -60,7 +60,7 @@ Flags:
 ## VPS vs local: what differs
 
 The installer asks whether the host is a VPS (reachable from the internet) or a local
-machine. Most steps run identically either way; only the network-facing steps change.
+machine. Most steps run identically either way; only the network related steps change.
 
 | Step | VPS | Not a VPS (local) |
 | --- | --- | --- |
