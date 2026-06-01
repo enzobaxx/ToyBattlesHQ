@@ -70,4 +70,4 @@ So always make sure you’re using the most up-to-date and correctly unpacked ve
 **Note**: This repository already provides a server-sided `cgd_original` folder, along with the corresponding client `cgd.dip` which it was extracted from. All the links to the client & `cgd.dip` folder are given in the next chapters.
 
 ## Next
-[2.1 Changelog from version 1.0 to version 2.0](https://github.com/DownWithTheFallen/ToyBattlesHQ/blob/mv1.1_2.0/doc/changelog1.md)
+[2.1 Changelog from version 1.0 to version 2.0](https://github.com/DownWithTheFallen/ToyBattlesHQ/blob/toybattles_mvsurge/doc/changelog1.md)

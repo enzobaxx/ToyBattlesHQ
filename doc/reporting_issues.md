@@ -55,4 +55,4 @@ Be sure your PR references the issue number (e.g. `Fixes #42`) so everything sta
 
 
 ## Next
-[9.1 Credits and community contributions](https://github.com/DownWithTheFallen/ToyBattlesHQ/blob/mv1.1_2.0/doc/thanks.md)
+[9.1 Credits and community contributions](https://github.com/DownWithTheFallen/ToyBattlesHQ/blob/toybattles_mvsurge/doc/thanks.md)

@@ -46,4 +46,4 @@ And finally, a big **thanks** to the whole **ToyBattles community** that helped 
 
 
 # Next
-[10. What's next?](https://github.com/DownWithTheFallen/ToyBattlesHQ/blob/mv1.1_2.0/doc/whats_next.md)
+[10. What's next?](https://github.com/DownWithTheFallen/ToyBattlesHQ/blob/toybattles_mvsurge/doc/whats_next.md)

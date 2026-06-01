@@ -81,5 +81,5 @@ The items that are sent through both Monthly and Weekly reward systems can be fo
 
 
 ## Next
-[6.1 Website API overview and communication with MainServer](https://github.com/DownWithTheFallen/ToyBattlesHQ/blob/mv1.1_2.0/doc/website_info.md)
+[6.1 Website API overview and communication with MainServer](https://github.com/DownWithTheFallen/ToyBattlesHQ/blob/toybattles_mvsurge/doc/website_info.md)
 

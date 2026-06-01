@@ -225,5 +225,5 @@ For production environments, it is strongly recommended to:
 
 ---
 
-[3.3 Setting up the database](https://github.com/DownWithTheFallen/ToyBattlesHQ/blob/mv1.1_2.0/doc/database_setup.md)
+[3.3 Setting up the database](https://github.com/DownWithTheFallen/ToyBattlesHQ/blob/toybattles_mvsurge/doc/database_setup.md)
 

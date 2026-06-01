@@ -64,4 +64,4 @@ SecurityNotificationReceiver = receiver1@gmail.com,  receiver2@gmail.com  # who 
 
 
 ## Next
-[4.3 Config setup for multiple servers across different VPSs](https://github.com/DownWithTheFallen/ToyBattlesHQ/blob/mv1.1_2.0/doc/example_multiple_vps.md)
+[4.3 Config setup for multiple servers across different VPSs](https://github.com/DownWithTheFallen/ToyBattlesHQ/blob/toybattles_mvsurge/doc/example_multiple_vps.md)

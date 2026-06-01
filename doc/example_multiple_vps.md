@@ -171,6 +171,6 @@ SecurityNotificationReceiver = receiver1@gmail.com,  receiver2@gmail.com  # who 
 
 
 ## Next
-[5.1 Tour of database tables](https://github.com/DownWithTheFallen/ToyBattlesHQ/blob/mv1.1_2.0/doc/database_tour.md)
+[5.1 Tour of database tables](https://github.com/DownWithTheFallen/ToyBattlesHQ/blob/toybattles_mvsurge/doc/database_tour.md)
 
 
