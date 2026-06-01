@@ -2357,7 +2357,7 @@ namespace Main
                         else
                         {
                             Utils::Logger::log("Logic error: Player with AID " + std::to_string(playerID) +
-                                " got an equipped item that is not allowed (type: " + std::to_string((uint32_t)equippedItem.type)
+                                " got an equipped item that is not allowed (itemId: " + std::to_string((uint32_t)equippedItem.id) + ", type: " + std::to_string((uint32_t)equippedItem.type)
                                 + ")", Utils::LogType::Error, "PersistentDatabase::getPlayerItems");
 
                             nonEquippedItems.push_back(std::move(item));
