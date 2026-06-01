@@ -184,7 +184,7 @@ namespace Common
 			const std::uint16_t callbackNum = incomingPacket.getOrder();
 			if (!Common::Network::Session::callbacks<Common::Network::PacketType::UNECRYPTED, Session>.contains(callbackNum))
 			{
-				std::cout << "[IPC] No callback for order: " << callbackNum << "\n";
+				::Utils::Logger::log("[default IPC] No callback for order: " + std::to_string(callbackNum), ::Utils::LogType::Warning);
 				return;
 			}
 			Common::Network::Session::callbacks<Common::Network::PacketType::UNECRYPTED, Session>[callbackNum](incomingPacket, shared_from_this());

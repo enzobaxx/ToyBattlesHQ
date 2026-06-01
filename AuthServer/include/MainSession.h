@@ -4,6 +4,7 @@
 #include <asio.hpp>
 #include <unordered_map>
 #include "Network/Session.h"
+#include <Logger.h>
 
 // Used for Main<=>Auth IPC communication
 // (MainServer acts as a client here, retrieves certain info, and MainServer responds to its requests)
@@ -30,7 +31,7 @@ namespace Auth
                 const std::uint16_t callbackNum = incomingPacket.getOrder();
                 if (!Common::Network::Session::callbacks<Common::Network::PacketType::UNECRYPTED, MainSession>.contains(callbackNum))
                 {
-                    std::cout << "[IPC Auth<=>Main] No callback for order: " << callbackNum << "\n";
+                    Utils::Logger::log("[IPC Auth <=> Main] No callback for order: " + std::to_string(callbackNum), Utils::LogType::Warning);
                     return;
                 }
 

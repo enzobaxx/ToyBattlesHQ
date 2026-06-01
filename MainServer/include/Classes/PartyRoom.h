@@ -540,39 +540,7 @@ namespace Main
 				broadcastMessage(getFormattedPartyInfo());
 			}
 
-			void logPartyState(const std::string& action)
-			{
-				std::cout << "\n========== " << action << " ==========\n";
-
-				if (m_players.empty())
-				{
-					std::cout << "Players: (none)\n";
-				}
-				else
-				{
-					std::cout << "Players (first = Leader):\n";
-					for (size_t i = 0; i < m_players.size(); ++i)
-					{
-						if (auto session = m_players[i].second.lock())
-						{
-							std::cout << "  ";
-							if (i == 0) std::cout << "[LEADER] ";
-							std::cout << session->getAccountInfo().nickname;
-							std::cout << "\n";
-						}
-					}
-				}
-
-				std::cout << "\nParty Info:\n";
-				std::cout << "  Room Number: " << m_partyInfo.clanRoomNumber << "\n";
-				std::cout << "  Clan ID: " << m_partyInfo.clanRoomId << "\n";
-				std::cout << "  Num Players: " << m_partyInfo.numPlayers << "\n";
-				std::cout << "  Max Players: " << m_partyInfo.maxPlayers << "\n";
-				std::cout << "  Leader: " << m_partyInfo.leaderName << " (Level " << m_partyInfo.leaderLevel << ")\n";
-				std::cout << "  Match Started: " << (m_partyInfo.hasMatchStarted ? "Yes" : "No") << "\n";
-
-				std::cout << "=========================================\n\n";
-			}
+			
 			/******** DEBUG PURPOSES END /********/
 		};
 	}
