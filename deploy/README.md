@@ -57,6 +57,27 @@ Flags:
 - `--skip-firewall`: don't touch `ufw`.
 - `--skip-host-tools`: don't install docker/wireguard/fail2ban.
 
+## VPS vs local: what differs
+
+The installer asks whether the host is a VPS (reachable from the internet) or a local
+machine. Most steps run identically either way; only the network-facing steps change.
+
+| Step | VPS | Not a VPS (local) |
+| --- | --- | --- |
+| Install Docker | Yes | Yes |
+| Install WireGuard + fail2ban (enables default `sshd` jail) | Yes | Yes |
+| Generate `config.ini` / `.env`, build image, init DB, run container | Yes | Yes |
+| `ufw` firewall rules (allow SSH + game ports) | Yes | No |
+| Enable `ufw` | Yes | No |
+| Detect/confirm SSH port before enabling firewall | Yes | No |
+
+Notes:
+- Host-tool installation (Docker, WireGuard, fail2ban) happens in **both** modes — even
+  on a local machine fail2ban is installed and its default `sshd` jail is enabled. Use
+  `--skip-host-tools` to skip this entirely.
+- Firewall changes are **VPS-only**; `--skip-firewall` is effectively a no-op locally.
+- WireGuard is only installed, never configured, in either mode.
+
 ## What gets created
 
 - `Setup/config.ini` => generated from your answers (existing one is backed up)
