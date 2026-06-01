@@ -14,7 +14,7 @@ This repository ships an automated installer at `deploy/setup.py`. On a Linux ho
 python3 deploy/setup.py
 ```
 
-See `deploy/README.md` for full details and flags. Alternatively, [this external repository](https://github.com/ToyBattles/MicroVolts-Server-Docker) provides another Docker-based setup.
+See `deploy/README.md` for full details and flags. Alternatively, [this external repository](https://github.com/ToyBattles/MicroVolts-Server-Docker) provides another Docker-based setup (but may be outdated).
 
 
 ### 3.1.2.2 Manual setup (Windows)
