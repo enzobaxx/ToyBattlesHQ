@@ -20,7 +20,7 @@ python3 deploy/setup.py
 
 - **You already cloned the repo** (you have this `deploy/` folder): run
   `python3 deploy/setup.py` from inside the checkout. It detects the repo and **skips
-  cloning** — that is expected, not wasted work.
+  cloning** (this is expected)
 - **Fresh machine, nothing cloned yet**: download only `setup.py` and run it; it will
   clone the full repo for you (this is what brings the `Dockerfile` and the rest):
 
