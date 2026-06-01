@@ -16,6 +16,11 @@ Run on the target Linux machine (needs `sudo` for package installs and firewall)
 python3 deploy/setup.py
 ```
 
+Flags:
+- `--repo-path PATH`: use an existing checkout instead of cloning.
+- `--skip-firewall`: don't touch `ufw`.
+- `--skip-host-tools`: don't install docker/wireguard/fail2ban.
+  
 ### Two ways to run it
 
 - **You already cloned the repo** (you have this `deploy/` folder): run
@@ -51,11 +56,6 @@ automated. Just follow the instructions.
 - **Build verification**: confirms the image was actually produced before starting it.
 - **Firewall**: detects your real SSH port and confirms before enabling `ufw`, so you
   can't lock yourself out unintentionally
-
-Flags:
-- `--repo-path PATH`: use an existing checkout instead of cloning.
-- `--skip-firewall`: don't touch `ufw`.
-- `--skip-host-tools`: don't install docker/wireguard/fail2ban.
 
 ## VPS vs local: what differs
 
