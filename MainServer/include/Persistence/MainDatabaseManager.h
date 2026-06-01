@@ -3,6 +3,8 @@
 
 #include <string>
 #include <thread>
+#include <mutex>
+#include <utility>
 #include "../MainEnums.h"
 #include "Utils/SetupParser.h"
 #include "Utils/Logger.h"
@@ -33,6 +35,8 @@ namespace Main
 			std::unique_ptr<sql::Connection> m_con; // only for functions that need autocommit=true (already atomic)
 			std::unique_ptr<sql::Connection> m_transactionalCon; // only for functions that need autocommit=false (manual management)
 
+			std::recursive_mutex m_mutex;
+
 			std::atomic<bool> m_running{ true };
 			std::thread m_pingThread;
 
@@ -49,6 +53,22 @@ namespace Main
 		public:
 			PersistentDatabase();
 			void ensureConnections();
+
+			template<typename F>
+			decltype(auto) withGuard(F&& func)
+			{
+				std::lock_guard<std::recursive_mutex> lock(m_mutex);
+				try
+				{
+					ensureConnections();
+				}
+				catch (const std::exception& e)
+				{
+					::Utils::Logger::log(std::string("ensureConnections failed, proceeding: ") + e.what(),
+						::Utils::LogType::Error, "PersistentDatabase::withGuard");
+				}
+				return std::forward<F>(func)();
+			}
 			void updatePlayerCurrencyByType(std::uint32_t accountID, std::uint32_t newAmount, Main::Enums::ItemCurrencyType currencyType);
 			void addPlayerAchievement(std::uint32_t accountID, std::uint32_t achievementIndex);
 			std::optional<std::string> getColumnByAid(const std::string& columnName, std::uint32_t accountID);

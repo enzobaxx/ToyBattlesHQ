@@ -25,26 +25,37 @@ namespace Main
 
         MainScheduler::~MainScheduler()
         {
+            {
+                std::lock_guard<std::mutex> lock(m_wakeupMutex);
+                m_stopRequested = true;
+            }
+            m_wakeupCv.notify_all();
             if (m_schedulerThread.joinable())
             {
-                m_stopRequested = true;
                 m_schedulerThread.join();
             }
         }
 
         void MainScheduler::schedulerLoop()
         {
-            try
+            while (!m_stopRequested)
             {
-                while (!m_stopRequested)
                 {
-                    std::this_thread::sleep_for(std::chrono::seconds(m_wakeupFrequency));
+                    std::unique_lock<std::mutex> lock(m_wakeupMutex);
+                    m_wakeupCv.wait_for(lock, std::chrono::seconds(m_wakeupFrequency), [this] { return m_stopRequested.load(); });
+                }
+
+                if (m_stopRequested) break;
+
+                try
+                {
                     persist();
                 }
-            }
-            catch (const std::exception& e)
-            {
-                ::Utils::Logger::log("Fatal database failure in scheduler: " + std::string(e.what()), Utils::LogType::Error,"MainScheduler::schedulerLoop");
+                catch (const std::exception& e)
+                {
+                    ::Utils::Logger::log("Database failure during persist, scheduler continues: " + std::string(e.what()),
+                        Utils::LogType::Error, "MainScheduler::schedulerLoop");
+                }
             }
         }
 
@@ -64,13 +75,28 @@ namespace Main
                 m_databaseCallbacksIncremental.clear();
             }
 
-            for (const auto& [accountId, callbacks] : incremental)
-                for (const auto& [updateType, callback] : callbacks)
-                    callback();
+            m_database.withGuard([&]() {
+                for (const auto& [accountId, callbacks] : incremental)
+                    for (const auto& [updateType, callback] : callbacks)
+                        runCallback(callback);
 
-            for (const auto& [accountId, callbacks] : normal)
-                for (const auto& [updateType, callback] : callbacks)
-                    callback();
+                for (const auto& [accountId, callbacks] : normal)
+                    for (const auto& [updateType, callback] : callbacks)
+                        runCallback(callback);
+            });
+        }
+
+        void MainScheduler::runCallback(const std::function<void()>& callback)
+        {
+            try
+            {
+                callback();
+            }
+            catch (const std::exception& e)
+            {
+                ::Utils::Logger::log("A persistence callback threw, skipping it: " + std::string(e.what()),
+                    Utils::LogType::Error, "MainScheduler::runCallback");
+            }
         }
 
         void MainScheduler::persistFor(std::uint32_t accountId)
@@ -88,11 +114,13 @@ namespace Main
                 m_databaseCallbacksIncremental.erase(accountId);
             }
 
-            for (const auto& [updateType, callback] : incremental)
-                callback();
+            m_database.withGuard([&]() {
+                for (const auto& [updateType, callback] : incremental)
+                    runCallback(callback);
 
-            for (const auto& [updateType, callback] : normal)
-                callback();
+                for (const auto& [updateType, callback] : normal)
+                    runCallback(callback);
+            });
         }
     };
 }

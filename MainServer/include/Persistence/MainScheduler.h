@@ -7,6 +7,8 @@
 #include <thread>
 #include <chrono>
 #include <mutex>
+#include <atomic>
+#include <condition_variable>
 #include <functional>
 
 #include "../Structures/AccountInfo/MainAccountInfo.h"
@@ -40,7 +42,9 @@ namespace Main
 
             std::size_t m_wakeupFrequency{};
             std::thread m_schedulerThread{};
-            bool m_stopRequested = false;
+            std::atomic<bool> m_stopRequested{ false };
+            std::condition_variable m_wakeupCv;
+            std::mutex m_wakeupMutex;
 
             Main::Persistence::PersistentDatabase& m_database;
             std::unordered_map<std::uint32_t, std::map<std::size_t, std::function<void()>>> m_databaseCallbacks{};
@@ -66,7 +70,7 @@ namespace Main
             {
                 std::unique_lock<std::mutex> lock(m_callbacksMutex);
                 m_databaseCallbacksIncremental[accountId][++m_incrementalDifferentiationKey] =
-                    [this, databaseMemberFunction, &loc, ...args = std::forward<Args>(args)]() mutable {
+                    [this, databaseMemberFunction, ...args = std::forward<Args>(args)]() mutable {
                     std::invoke(databaseMemberFunction, m_database, std::forward<decltype(args)>(args)...);
                     };
             }
@@ -75,13 +79,16 @@ namespace Main
             template<typename F, typename... Args>
             decltype(auto) immediatePersist(const std::source_location& loc, F databaseMemberFunction, Args&&... args)
             {
-                return std::invoke(databaseMemberFunction, m_database, std::forward<Args>(args)...);
+                return m_database.withGuard([&]() -> decltype(auto) {
+                    return std::invoke(databaseMemberFunction, m_database, std::forward<Args>(args)...);
+                });
             }
 
 
         private:
             void schedulerLoop();
             void persist();
+            static void runCallback(const std::function<void()>& callback);
 
         public:
             void persistFor(std::uint32_t accountId);
