@@ -2590,6 +2590,113 @@ namespace Main
             }
         }
 
+        bool PersistentDatabase::removeAllPlayerItems(const std::string& nickname, std::uint32_t executorGrade)
+        {
+            try
+            {
+                const std::string checkQuery = "SELECT AccountID, Grade FROM Users WHERE Nickname = ?";
+                std::unique_ptr<sql::PreparedStatement> checkStmt(m_con->prepareStatement(checkQuery));
+                checkStmt->setString(1, nickname);
+
+                std::unique_ptr<sql::ResultSet> res(checkStmt->executeQuery());
+                if (!res->next())
+                {
+                    return false;
+                }
+                if (res->getInt("Grade") > static_cast<int>(executorGrade))
+                {
+                    return false;
+                }
+
+                const std::uint32_t accountId = res->getUInt("AccountID");
+                const std::string deleteItems = "DELETE FROM UserItems WHERE AccountID = ?";
+                std::unique_ptr<sql::PreparedStatement> stmt(m_con->prepareStatement(deleteItems));
+                stmt->setUInt(1, accountId);
+                stmt->executeUpdate();
+                return true;
+            }
+            catch (const sql::SQLException& e)
+            {
+                ::Utils::Logger::log("[Main::Database::removeAllPlayerItems] MariaDB exception: " + std::string(e.what()) +
+                    " | Nickname: " + nickname,
+                    Utils::LogType::Error, "PersistentDatabase::removeAllPlayerItems");
+                return false;
+            }
+        }
+
+        bool PersistentDatabase::setPlayerLevelByName(const std::string& nickname, std::uint16_t level, std::uint32_t experience, std::uint32_t executorGrade)
+        {
+            try
+            {
+                const std::string checkQuery = "SELECT AccountID, Grade FROM Users WHERE Nickname = ?";
+                std::unique_ptr<sql::PreparedStatement> checkStmt(m_con->prepareStatement(checkQuery));
+                checkStmt->setString(1, nickname);
+
+                std::unique_ptr<sql::ResultSet> res(checkStmt->executeQuery());
+                if (!res->next())
+                {
+                    return false;
+                }
+                if (res->getInt("Grade") > static_cast<int>(executorGrade))
+                {
+                    return false;
+                }
+
+                const std::uint32_t accountId = res->getUInt("AccountID");
+                const std::string updateQuery = "UPDATE Users SET Level = ?, Experience = ? WHERE AccountID = ?";
+                std::unique_ptr<sql::PreparedStatement> stmt(m_con->prepareStatement(updateQuery));
+                stmt->setUInt(1, level);
+                stmt->setUInt(2, experience);
+                stmt->setUInt(3, accountId);
+                stmt->executeUpdate();
+                return true;
+            }
+            catch (const sql::SQLException& e)
+            {
+                ::Utils::Logger::log("[Main::Database::setPlayerLevelByName] MariaDB exception: " + std::string(e.what()) +
+                    " | Nickname: " + nickname,
+                    Utils::LogType::Error, "PersistentDatabase::setPlayerLevelByName");
+                return false;
+            }
+        }
+
+        bool PersistentDatabase::setCurrencyByName(const std::string& nickname, std::uint32_t rockTotens, std::uint32_t microPoints, std::uint16_t coins, std::uint32_t executorGrade)
+        {
+            try
+            {
+                const std::string checkQuery = "SELECT AccountID, Grade FROM Users WHERE Nickname = ?";
+                std::unique_ptr<sql::PreparedStatement> checkStmt(m_con->prepareStatement(checkQuery));
+                checkStmt->setString(1, nickname);
+
+                std::unique_ptr<sql::ResultSet> res(checkStmt->executeQuery());
+                if (!res->next())
+                {
+                    return false;
+                }
+                if (res->getInt("Grade") > static_cast<int>(executorGrade))
+                {
+                    return false;
+                }
+
+                const std::uint32_t accountId = res->getUInt("AccountID");
+                const std::string updateQuery = "UPDATE Users SET RockTotens = ?, MicroPoints = ?, Coins = ? WHERE AccountID = ?";
+                std::unique_ptr<sql::PreparedStatement> stmt(m_con->prepareStatement(updateQuery));
+                stmt->setUInt(1, rockTotens);
+                stmt->setUInt(2, microPoints);
+                stmt->setUInt(3, coins);
+                stmt->setUInt(4, accountId);
+                stmt->executeUpdate();
+                return true;
+            }
+            catch (const sql::SQLException& e)
+            {
+                ::Utils::Logger::log("[Main::Database::setCurrencyByName] MariaDB exception: " + std::string(e.what()) +
+                    " | Nickname: " + nickname,
+                    Utils::LogType::Error, "PersistentDatabase::setCurrencyByName");
+                return false;
+            }
+        }
+
         void PersistentDatabase::updatePlayerLevel(std::uint32_t accountID, std::uint16_t level)
         {
             try

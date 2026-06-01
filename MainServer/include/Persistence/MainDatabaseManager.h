@@ -123,6 +123,9 @@ namespace Main
 
 			void addPlayerItem(const Item& item, std::uint32_t accountID, std::uint32_t latestCharacterSelected = -1);
 			bool removePlayerItem(std::uint32_t accountId, std::uint64_t itemNumber, const std::string& caller);
+			bool removeAllPlayerItems(const std::string& nickname, std::uint32_t executorGrade);
+			bool setPlayerLevelByName(const std::string& nickname, std::uint16_t level, std::uint32_t experience, std::uint32_t executorGrade);
+			bool setCurrencyByName(const std::string& nickname, std::uint32_t rockTotens, std::uint32_t microPoints, std::uint16_t coins, std::uint32_t executorGrade);
 			void updatePlayerLevel(std::uint32_t accountID, std::uint16_t level);
 			void updatePlayerExperience(std::uint32_t accountID, std::uint32_t exp);
 			std::expected<bool, std::string> updatePlayerName(std::uint32_t accountID, const char* name, bool isStaff);
