@@ -72,11 +72,11 @@ machine. Most steps run identically either way; only the network related steps c
 | Detect/confirm SSH port before enabling firewall | Yes | No |
 
 Notes:
-- Host-tool installation (Docker, WireGuard, fail2ban) happens in **both** modes — even
+- Host-tool installation (Docker, WireGuard, fail2ban) happens in **both** modes, even
   on a local machine fail2ban is installed and its default `sshd` jail is enabled. Use
-  `--skip-host-tools` to skip this entirely.
-- Firewall changes are **VPS-only**; `--skip-firewall` is effectively a no-op locally.
-- WireGuard is only installed, never configured, in either mode.
+  `--skip-host-tools` to skip this entirely (see flags above)
+- Firewall changes are **VPS-only**; `--skip-firewall` is effectively a no op locally
+- WireGuard is only installed and never configured in either mode
 
 ## What gets created
 
