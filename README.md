@@ -6,13 +6,12 @@ Your support keeps this project going. If you'd like to contribute, sponsoring o
 
 
 ## Notice
-This documentation is currently behind the latest changes.
-- Documentation explaining the new changes is completely missing.
-- The setup documentation for new features is also missing.
+This documentation is currently behind.
 - The client executable working with this emulator is missing.
 - The externalLibraries/cgd_original is outdated.
+- The documentation may not be complete yet.
 
-Adding this new documentation may take a while, so bear with us...
+Updating the docs may take a while!
 
 
 ![C++ CI](https://github.com/DownWithTheFallen/ToyBattlesHQ/actions/workflows/ci.yml/badge.svg)
