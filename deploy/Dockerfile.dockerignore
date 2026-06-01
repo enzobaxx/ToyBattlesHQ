@@ -1,0 +1,12 @@
+.git
+build
+out
+Debug
+Release
+x64
+ExternalLibraries/vcpkg
+ExternalLibraries/CommonLib
+deploy/.env
+**/*.obj
+**/*.o
+**/*.elf

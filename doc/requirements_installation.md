@@ -8,7 +8,13 @@
 
 ## 3.1.2 Installation
 ### 3.1.2.1 Automatic Linux Setup
-If you want an easy setup for Linux (based on Docker), then [this repository](https://github.com/ToyBattles/MicroVolts-Server-Docker) is the best tool for you. Follow the steps shown on it and you'll be ready in only a few minutes.
+This repository ships an automated installer at `deploy/setup.py`. On a Linux host it installs the prerequisites (Docker, plus WireGuard/fail2ban for later use), auto-detects your local/public IP and asks you to confirm, generates `Setup/config.ini`, builds a Docker image that contains the three servers **and** MariaDB, initializes the database (with the default `test` account), runs everything in one container, and — on a VPS — opens the required firewall ports. Run it with:
+
+```bash
+python3 deploy/setup.py
+```
+
+See `deploy/README.md` for full details and flags. Alternatively, [this external repository](https://github.com/ToyBattles/MicroVolts-Server-Docker) provides another Docker-based setup.
 
 
 ### 3.1.2.2 Manual setup (Windows)
