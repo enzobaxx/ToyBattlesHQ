@@ -16,6 +16,23 @@ Run on the target Linux machine (needs `sudo` for package installs and firewall)
 python3 deploy/setup.py
 ```
 
+### Two ways to run it
+
+- **You already cloned the repo** (you have this `deploy/` folder): run
+  `python3 deploy/setup.py` from inside the checkout. It detects the repo and **skips
+  cloning** — that is expected, not wasted work.
+- **Fresh machine, nothing cloned yet**: download only `setup.py` and run it; it will
+  clone the full repo for you (this is what brings the `Dockerfile` and the rest):
+
+  ```bash
+  curl -fsSL https://raw.githubusercontent.com/SoWeBegin/ToyBattlesHQ/toybattles_mvsurge/deploy/setup.py -o setup.py
+  python3 setup.py
+  ```
+
+`setup.py` by itself cannot build anything — the `Dockerfile`, `Dockerfile.dockerignore`
+and the `docker/` scripts live in this `deploy/` folder. The clone path therefore only
+works once `deploy/` has been committed and pushed to the repository.
+
 It will ask for: localhost vs VPS, `LocalIp` (auto-detected), public `Ip`, an optional
 port override, and a DB password (auto-generated if left blank). Everything else is
 automated. Just follow the instructions.
