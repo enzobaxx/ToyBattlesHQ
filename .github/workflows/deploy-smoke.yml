@@ -10,14 +10,11 @@ on:
 jobs:
   smoke:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 50
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
-      - name: Use localhost config for CI
-        run: sed -i 's/123\.456\.78\.9/127.0.0.1/g' Setup/config.ini
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -32,18 +29,26 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+      - name: Configure LocalIp to match detected outbound IP
+        run: |
+          HOST_IP=$(ip -4 route get 8.8.8.8 | grep -oP 'src \K[0-9.]+' | head -1)
+          echo "Detected outbound IP: $HOST_IP"
+          sed -i "s/^LocalIp[[:space:]]*=.*/LocalIp = $HOST_IP/" Setup/config.ini
+          grep -n "LocalIp" Setup/config.ini
+
       - name: Run container
         run: |
-          docker run -d --name toybattles \
+          docker run -d --name toybattles --network host \
             -e MV_DB_PW=ci_test_password \
             -e MV_JWT=ci_dummy_jwt_secret \
             -e MV_DB_PORT=3305 \
+            -v "$PWD/Setup/config.ini:/app/emu/Setup/config.ini:ro" \
             toybattles-emu:ci
 
       - name: Wait for database initialization
         run: |
-          for i in $(seq 1 150); do
-            if docker exec toybattles test -f /run/db_ready; then
+          for i in $(seq 1 180); do
+            if docker exec toybattles test -f /run/db_ready 2>/dev/null; then
               echo "Database initialized."
               exit 0
             fi
@@ -52,7 +57,11 @@ jobs:
               docker logs toybattles
               exit 1
             fi
-            sleep 2
+            if [ $((i % 10)) -eq 0 ]; then
+              echo "--- still waiting (${i}/180), recent logs: ---"
+              docker logs --tail 15 toybattles 2>&1 || true
+            fi
+            sleep 4
           done
           echo "::error::Timed out waiting for database initialization"
           docker logs toybattles
@@ -78,13 +87,13 @@ jobs:
           fi
           echo "All three servers are running and stable."
 
-      - name: Check logs for database connection errors
+      - name: Check logs for fatal errors
         run: |
-          if docker logs toybattles 2>&1 | grep -iE "Error connecting to MariaDB|MariaDB exception"; then
-            echo "::error::Database connection errors found in server logs"
+          if docker logs toybattles 2>&1 | grep -iE "Error connecting to MariaDB|MariaDB exception|Could not retrieve|Sanity check failed"; then
+            echo "::error::Fatal startup/database errors found in server logs"
             exit 1
           fi
-          echo "No database connection errors."
+          echo "No fatal errors."
 
       - name: Dump container logs
         if: always()
