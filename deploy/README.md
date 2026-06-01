@@ -29,7 +29,7 @@ python3 deploy/setup.py
   python3 setup.py
   ```
 
-`setup.py` by itself cannot build anything — the `Dockerfile`, `Dockerfile.dockerignore`
+`setup.py` by itself cannot build anything; the `Dockerfile`, `Dockerfile.dockerignore`
 and the `docker/` scripts live in this `deploy/` folder. The clone path therefore only
 works once `deploy/` has been committed and pushed to the repository.
 
