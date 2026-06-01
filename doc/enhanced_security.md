@@ -93,7 +93,7 @@ Below are the required configuration steps to properly enable Graded Access.
 
 ## 1. Enforcing HWID Validation
 
-Each moderator or administrator must install a specific local client file: https://github.com/SoWeBegin/ToyBattlesHQ/tree/toybattles_mvsurge/GradedAccess/Release
+Each moderator or administrator must install a specific local client file: https://github.com/DownWithTheFallen/ToyBattlesHQ/tree/toybattles_mvsurge/GradedAccess/Release
 
 
 ### Installation Steps
@@ -225,5 +225,5 @@ For production environments, it is strongly recommended to:
 
 ---
 
-[3.3 Setting up the database](https://github.com/SoWeBegin/MicrovoltsEmulator/blob/mv1.1_2.0/doc/database_setup.md)
+[3.3 Setting up the database](https://github.com/DownWithTheFallen/MicrovoltsEmulator/blob/mv1.1_2.0/doc/database_setup.md)
 

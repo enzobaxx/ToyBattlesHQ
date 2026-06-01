@@ -133,4 +133,4 @@ If you want it to be permanent:
 
 
 ## Next
-[3.4 Setting up the client](https://github.com/SoWeBegin/MicrovoltsEmulator/blob/mv1.1_2.0/doc/client_setup.md)
+[3.4 Setting up the client](https://github.com/DownWithTheFallen/MicrovoltsEmulator/blob/mv1.1_2.0/doc/client_setup.md)

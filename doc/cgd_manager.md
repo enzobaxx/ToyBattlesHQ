@@ -6,7 +6,7 @@ This tool is useful to modify the `cgd.dip` file of MicroVolts/ToyBattles, which
 
 These are just a few examples. `cgd.dip` is a super important archive for the game.
 
-Inside of it, there are multiple `cdb` files (a custom format) that contain data. The archive is protected by a ZipCrypto password, and you can find the password for your archive by using the [Password Tool](https://github.com/SoWeBegin/ToyBattlesHQ/blob/toybattles_mvsurge/doc/password_updater.md).
+Inside of it, there are multiple `cdb` files (a custom format) that contain data. The archive is protected by a ZipCrypto password, and you can find the password for your archive by using the [Password Tool](https://github.com/DownWithTheFallen/ToyBattlesHQ/blob/toybattles_mvsurge/doc/password_updater.md).
 
 Of course modifying cdb files through tools like HxD is possible, but it's very time consuming. This tool makes the whole process much easier.
 
@@ -55,7 +55,7 @@ The final executable will be inside the new `dist` folder. This is a standalone 
 <img width="606" height="590" alt="image" src="https://github.com/user-attachments/assets/61f74213-9979-4cbf-b2ca-271e5599a81b" />
 
 When you launch the exe this is the first window. You have two import options:
-1) Import a `cgd.dip` archive. You will need to know the password, and you can find it through the [Password Tool](https://github.com/SoWeBegin/ToyBattlesHQ/blob/toybattles_mvsurge/doc/password_updater.md).
+1) Import a `cgd.dip` archive. You will need to know the password, and you can find it through the [Password Tool](https://github.com/DownWithTheFallen/ToyBattlesHQ/blob/toybattles_mvsurge/doc/password_updater.md).
    - Enter Full Path: here you must add the path to the cgd.dip archive. Example: `C:\MyFiles\cgd.dip`
    - Path to unpacked UI/icon folder: this requires you to unpack Microvolts/ToyBattles `ui.dat` archive (you can follow [this](https://www.youtube.com/watch?v=xd5s4XigkAE) tutorial). Once unpacked, the resulting UI folder will contain an `icon` folder. The path to it needs to be inserted here.
    - Output path: This is where the tool will generate a `cdbs` folder, containing updated data every time you modify anything. This output can later be imported to continue previous work.
@@ -74,5 +74,5 @@ The CapsuleManager makes it really easy to edit existing capsules, remove them, 
   
 
 ## Next
-[8.1 How to create bug reports via GitHub Issues](https://github.com/SoWeBegin/MicrovoltsEmulator/blob/mv1.1_2.0/doc/reporting_issues.md)
+[8.1 How to create bug reports via GitHub Issues](https://github.com/DownWithTheFallen/MicrovoltsEmulator/blob/mv1.1_2.0/doc/reporting_issues.md)
 

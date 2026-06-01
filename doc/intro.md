@@ -27,7 +27,7 @@ For more information you can visit the ToyBattles website at https://toybattles.
 ### 1.1.1.1 ToyBattles Team
 Considering the efforts that the whole team put onto the project, it's fair to write about each member and how they contributed (or still contribute).
 
-- [SoWeBegin](https://github.com/SoWeBegin): The original author of this Emulator. Contributes to the emulator code & helps managing the ToyBattles server.
+- [DownWithTheFallen](https://github.com/DownWithTheFallen): The original author of this Emulator. Contributes to the emulator code & helps managing the ToyBattles server.
 - [Mikael](https://github.com/Mikael): An essential part of the ToyBattles project. Actively contributes to the emulator, manages the ToyBattles server, and created a bunch of essential things (like the website & admin panel) for ToyBattles.
 - [Krymel](https://github.com/Krymelte): One of the original project members, he's the one behind all the `cgd.dip` changes, additions and modifications. He's also the one who manages the updates for ToyBattles.
 - [OGSapphire](https://github.com/m1exe): Also one of the original project members, he likes to work on the artistic side. This includes (but isn't limited to) client UI changes, in-game item and UI changes, maps, and much more.
@@ -65,4 +65,4 @@ There were a lot of progresses. You can find out many videos on youtube by searc
 - https://www.youtube.com/watch?v=qme0okRUlwE
 
 ## Next
-[1.2 Overview of the different projects (MainServer, CastServer, AuthServer, Common)](https://github.com/SoWeBegin/MicrovoltsEmulator/blob/mv1.1_2.0/doc/intro2.md)
+[1.2 Overview of the different projects (MainServer, CastServer, AuthServer, Common)](https://github.com/DownWithTheFallen/MicrovoltsEmulator/blob/mv1.1_2.0/doc/intro2.md)

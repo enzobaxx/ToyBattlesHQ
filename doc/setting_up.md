@@ -122,5 +122,5 @@ I’ll also provide example setup.ini files for different setups in later chapte
 
 
 ## Next
-[3.2.1 Enhanced Security](https://github.com/SoWeBegin/ToyBattlesHQ/blob/toybattles_mvsurge/doc/enhanced_security.md)
+[3.2.1 Enhanced Security](https://github.com/DownWithTheFallen/ToyBattlesHQ/blob/toybattles_mvsurge/doc/enhanced_security.md)
 

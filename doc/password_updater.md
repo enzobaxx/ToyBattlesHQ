@@ -64,4 +64,4 @@ Requires:
 
 
 ## Next
-[7.4 CGD Archive Manager Tool](https://github.com/SoWeBegin/ToyBattlesHQ/blob/toybattles_mvsurge/doc/cgd_manager.md)
+[7.4 CGD Archive Manager Tool](https://github.com/DownWithTheFallen/ToyBattlesHQ/blob/toybattles_mvsurge/doc/cgd_manager.md)

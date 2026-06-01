@@ -21,7 +21,7 @@ The following files can be found in the root directory of the game folder.
 Specifies download locations:
 ```ini
 [update]
-addr = http://raw.githubusercontent.com/SoWeBegin/MVPtchTest/main
+addr = http://raw.githubusercontent.com/DownWithTheFallen/MVPtchTest/main
 
 [FullFile]
 addr = http://dls3.microvolts.com/update/ENG/Full/
@@ -62,7 +62,7 @@ microvolts/
     └── microvolts-[OLD_VERSION]-[NEW_VERSION].xml    # Update manifest
 ```
 
-You can take a look at my public example [here](https://github.com/SoWeBegin/MVPtchTest/tree/main)
+You can take a look at my public example [here](https://github.com/DownWithTheFallen/MVPtchTest/tree/main)
 
 ### Update Package Components
 Each version folder contains two critical files:
@@ -157,4 +157,4 @@ Before deploying:
 
 
 ## Next
-[7.2 Changing the client version (using the client version tool)](https://github.com/SoWeBegin/MicrovoltsEmulator/blob/mv1.1_2.0/doc/client_version_tool.md)
+[7.2 Changing the client version (using the client version tool)](https://github.com/DownWithTheFallen/MicrovoltsEmulator/blob/mv1.1_2.0/doc/client_version_tool.md)

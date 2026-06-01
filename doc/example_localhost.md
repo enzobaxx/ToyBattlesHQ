@@ -63,4 +63,4 @@ SecurityNotificationReceiver = receiver1@gmail.com,  receiver2@gmail.com  # who 
 
 
 ## Next
-[4.2 Config setup for VPS](https://github.com/SoWeBegin/MicrovoltsEmulator/blob/mv1.1_2.0/doc/example_vps.md)
+[4.2 Config setup for VPS](https://github.com/DownWithTheFallen/MicrovoltsEmulator/blob/mv1.1_2.0/doc/example_vps.md)

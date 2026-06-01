@@ -11,7 +11,7 @@ import textwrap
 import urllib.request
 from pathlib import Path
 
-REPO_URL = "https://github.com/SoWeBegin/ToyBattlesHQ.git"
+REPO_URL = "https://github.com/DownWithTheFallen/ToyBattlesHQ.git"
 REPO_BRANCH = "toybattles_mvsurge"
 IMAGE_NAME = "toybattles-emu"
 CONTAINER_NAME = "toybattles"

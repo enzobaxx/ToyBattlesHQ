@@ -34,7 +34,7 @@ See `deploy/README.md` for full details and flags. Alternatively, [this external
 6) Move the generated elf files in an output folder: `mkdir -p Output` and next `mv AuthServer.elf MainServer.elf CastServer.elf Output/`
 
 ## Next
-[3.2 Setting up the emulator](https://github.com/SoWeBegin/MicrovoltsEmulator/blob/mv1.1_2.0/doc/setting_up.md)
+[3.2 Setting up the emulator](https://github.com/DownWithTheFallen/MicrovoltsEmulator/blob/mv1.1_2.0/doc/setting_up.md)
 
 
 

@@ -25,7 +25,7 @@ python3 deploy/setup.py
   clone the full repo for you (this is what brings the `Dockerfile` and the rest):
 
   ```bash
-  curl -fsSL https://raw.githubusercontent.com/SoWeBegin/ToyBattlesHQ/toybattles_mvsurge/deploy/setup.py -o setup.py
+  curl -fsSL https://raw.githubusercontent.com/DownWithTheFallen/ToyBattlesHQ/toybattles_mvsurge/deploy/setup.py -o setup.py
   python3 setup.py
   ```
 
