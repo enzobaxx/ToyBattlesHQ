@@ -3,8 +3,6 @@
 
 #include <string>
 #include <thread>
-#include <mutex>
-#include <utility>
 #include "../MainEnums.h"
 #include "Utils/SetupParser.h"
 #include "Utils/Logger.h"
@@ -29,16 +27,21 @@ namespace Main
 {
 	namespace Persistence
 	{
+		class ConnectionHandle
+		{
+			bool m_autoCommit;
+		public:
+			explicit ConnectionHandle(bool autoCommit) : m_autoCommit(autoCommit) {}
+			sql::Connection* get() const;
+			sql::Connection* operator->() const { return get(); }
+			sql::Connection& operator*() const { return *get(); }
+		};
+
 		class PersistentDatabase
 		{
 		private:
-			std::unique_ptr<sql::Connection> m_con; // only for functions that need autocommit=true (already atomic)
-			std::unique_ptr<sql::Connection> m_transactionalCon; // only for functions that need autocommit=false (manual management)
-
-			std::recursive_mutex m_mutex;
-
-			std::atomic<bool> m_running{ true };
-			std::thread m_pingThread;
+			ConnectionHandle m_con{ true };
+			ConnectionHandle m_transactionalCon{ false };
 
 			using Item = Main::Structures::Item;
 			using BoughtItem = Main::Structures::BoughtItem;
@@ -47,28 +50,9 @@ namespace Main
 
 			void connectWithRetry();
 			void initialize();
-			void recreateConnection(std::unique_ptr<sql::Connection>& conn, bool autoCommit);
-			bool isValidConnection(const std::unique_ptr<sql::Connection>& conn);
 
 		public:
 			PersistentDatabase();
-			void ensureConnections();
-
-			template<typename F>
-			decltype(auto) withGuard(F&& func)
-			{
-				std::lock_guard<std::recursive_mutex> lock(m_mutex);
-				try
-				{
-					ensureConnections();
-				}
-				catch (const std::exception& e)
-				{
-					::Utils::Logger::log(std::string("ensureConnections failed, proceeding: ") + e.what(),
-						::Utils::LogType::Error, "PersistentDatabase::withGuard");
-				}
-				return std::forward<F>(func)();
-			}
 			void updatePlayerCurrencyByType(std::uint32_t accountID, std::uint32_t newAmount, Main::Enums::ItemCurrencyType currencyType);
 			void addPlayerAchievement(std::uint32_t accountID, std::uint32_t achievementIndex);
 			std::optional<std::string> getColumnByAid(const std::string& columnName, std::uint32_t accountID);
@@ -326,12 +310,7 @@ namespace Main
 
 			[[nodiscard]] bool isItemTradeable(std::uint32_t accountId, std::uint32_t itemNumber);
 
-			~PersistentDatabase()
-			{
-				m_running = false;
-				if (m_pingThread.joinable())
-					m_pingThread.join();
-			}
+			~PersistentDatabase() = default;
 		};
 	}
 }

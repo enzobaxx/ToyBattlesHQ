@@ -75,15 +75,13 @@ namespace Main
                 m_databaseCallbacksIncremental.clear();
             }
 
-            m_database.withGuard([&]() {
-                for (const auto& [accountId, callbacks] : incremental)
-                    for (const auto& [updateType, callback] : callbacks)
-                        runCallback(callback);
+            for (const auto& [accountId, callbacks] : incremental)
+                for (const auto& [updateType, callback] : callbacks)
+                    runCallback(callback);
 
-                for (const auto& [accountId, callbacks] : normal)
-                    for (const auto& [updateType, callback] : callbacks)
-                        runCallback(callback);
-            });
+            for (const auto& [accountId, callbacks] : normal)
+                for (const auto& [updateType, callback] : callbacks)
+                    runCallback(callback);
         }
 
         void MainScheduler::runCallback(const std::function<void()>& callback)
@@ -114,13 +112,11 @@ namespace Main
                 m_databaseCallbacksIncremental.erase(accountId);
             }
 
-            m_database.withGuard([&]() {
-                for (const auto& [updateType, callback] : incremental)
-                    runCallback(callback);
+            for (const auto& [updateType, callback] : incremental)
+                runCallback(callback);
 
-                for (const auto& [updateType, callback] : normal)
-                    runCallback(callback);
-            });
+            for (const auto& [updateType, callback] : normal)
+                runCallback(callback);
         }
     };
 }

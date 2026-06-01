@@ -63,10 +63,33 @@ namespace Main
             try { stmt->execute("UPDATE Users SET CanUpdateNickname = 1 WHERE CanUpdateNickname = 0 AND AccountID IS NOT NULL"); } catch (...) {}
         }
 
+        sql::Connection* ConnectionHandle::get() const
+        {
+            static thread_local std::unique_ptr<sql::Connection> autoConn;
+            static thread_local std::unique_ptr<sql::Connection> transConn;
+            std::unique_ptr<sql::Connection>& slot = m_autoCommit ? autoConn : transConn;
+
+            if (slot)
+            {
+                try
+                {
+                    if (!slot->isClosed())
+                        return slot.get();
+                }
+                catch (...) {}
+                slot.reset();
+            }
+
+            const auto& dbSetup = Common::Utils::SetupParser::getInstance().getDatabaseSetup();
+            slot.reset(sql::mariadb::get_driver_instance()->connect(
+                "tcp://" + dbSetup.ip + ":" + std::to_string(dbSetup.port), dbSetup.username, dbSetup.password));
+            slot->setSchema(dbSetup.databaseName);
+            slot->setAutoCommit(m_autoCommit);
+            return slot.get();
+        }
+
         void PersistentDatabase::connectWithRetry()
         {
-            const auto& dbSetup = Common::Utils::SetupParser::getInstance().getDatabaseSetup();
-
             constexpr int maxRetries = 5;
 
             for (int attempt = 1; attempt <= maxRetries; ++attempt)
@@ -75,18 +98,10 @@ namespace Main
                 {
                     ::Utils::Logger::log("Connecting to MariaDB (attempt " + std::to_string(attempt) + ")", Utils::LogType::Info, "PersistentDatabase");
 
-                    m_con = std::unique_ptr<sql::Connection>(sql::mariadb::get_driver_instance()->connect("tcp://" + dbSetup.ip + ":" + std::to_string(dbSetup.port),
-                            dbSetup.username,dbSetup.password));                    
-                    m_con->setSchema(dbSetup.databaseName);
-                    m_con->setAutoCommit(true);
-
-                    m_transactionalCon = std::unique_ptr<sql::Connection>(sql::mariadb::get_driver_instance()->connect( "tcp://" + dbSetup.ip + ":" + std::to_string(dbSetup.port),
-                            dbSetup.username,dbSetup.password));     
-                    m_transactionalCon->setSchema(dbSetup.databaseName);
-                    m_transactionalCon->setAutoCommit(false);
+                    m_con.get();
+                    m_transactionalCon.get();
 
                     ::Utils::Logger::log("Connected to MariaDB successfully", Utils::LogType::Info, "PersistentDatabase");
-
                     return;
                 }
                 catch (const sql::SQLException& e)
@@ -101,64 +116,6 @@ namespace Main
 
                     std::this_thread::sleep_for(std::chrono::seconds(1 * attempt));
                 }
-            }
-        }
-
-        void PersistentDatabase::recreateConnection(std::unique_ptr<sql::Connection>& conn, bool autoCommit)
-        {
-            const auto& dbSetup = Common::Utils::SetupParser::getInstance().getDatabaseSetup();
-
-            try {
-                conn.reset(sql::mariadb::get_driver_instance()->connect(
-                    "tcp://" + dbSetup.ip + ":" + std::to_string(dbSetup.port),
-                    dbSetup.username,
-                    dbSetup.password
-                ));
-                conn->setSchema(dbSetup.databaseName);
-                conn->setAutoCommit(autoCommit);
-
-                ::Utils::Logger::log("Connection recreated successfully (autoCommit=" +
-                    std::string(autoCommit ? "true" : "false") + ")",
-                    Utils::LogType::Info, "PersistentDatabase::recreateConnection");
-            }
-            catch (const sql::SQLException& e) {
-                ::Utils::Logger::log("Failed to recreate connection: " + std::string(e.what()),
-                    Utils::LogType::Error, "PersistentDatabase::recreateConnection");
-                throw; 
-            }
-        }
-
-        bool PersistentDatabase::isValidConnection(const std::unique_ptr<sql::Connection>& conn)
-        {
-            if (!conn) return false;
-
-            try {
-                if (conn->isClosed()) return false;
-
-                std::unique_ptr<sql::Statement> stmt(conn->createStatement());
-                std::unique_ptr<sql::ResultSet> res(stmt->executeQuery("SELECT 1"));
-
-                return true;
-            }
-            catch (const sql::SQLException& e) {
-                ::Utils::Logger::log("Connection validation failed: " + std::string(e.what()),Utils::LogType::Error, "PersistentDatabase::isValidConnection");
-                return false;
-            }
-            catch (...) {
-                return false;
-            }
-        }
-
-        void PersistentDatabase::ensureConnections()
-        {
-            if (!isValidConnection(m_con)) 
-            {
-                recreateConnection(m_con, true);  
-            }
-
-            if (!isValidConnection(m_transactionalCon)) 
-            {
-                recreateConnection(m_transactionalCon, false); 
             }
         }
 
