@@ -79,7 +79,7 @@ namespace Main
                     session->asyncWrite(response);
                     return std::nullopt;
                 }
-                if ((serverUnavailable || !clientVersionMatches || !isPublic) && accountInfoOpt->playerGrade < Common::Enums::PlayerGrade::GRADE_MOD)
+                if ((serverUnavailable || !clientVersionMatches || !isPublic) && accountInfoOpt->playerGrade < Common::Enums::PlayerGrade::ES)
                 {
                     response.setExtra(static_cast<std::uint8_t>(Main::Enums::AuthorizationExtra::WRONG_CLIENT_VER_OR_SERVER_FULL_OR_OFFLINE));
                     session->asyncWrite(response);
