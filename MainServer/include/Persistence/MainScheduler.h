@@ -79,7 +79,9 @@ namespace Main
             template<typename F, typename... Args>
             decltype(auto) immediatePersist(const std::source_location& loc, F databaseMemberFunction, Args&&... args)
             {
-                return std::invoke(databaseMemberFunction, m_database, std::forward<Args>(args)...);
+                return m_database.withGuard([&]() -> decltype(auto) {
+                    return std::invoke(databaseMemberFunction, m_database, std::forward<Args>(args)...);
+                });
             }
 
 
