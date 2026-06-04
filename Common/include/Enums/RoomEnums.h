@@ -137,6 +137,8 @@ namespace Common
             RumpusRoomREV = 47,
             OldCargo = 49,
             Plaza = 50,
+            Warzone = 55,
+            CityHall = 57,
             MAPS_MAX
         };
 
