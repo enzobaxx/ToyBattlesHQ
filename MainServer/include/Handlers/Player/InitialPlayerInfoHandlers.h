@@ -37,7 +37,7 @@ namespace Main
 				response.setData(reinterpret_cast<std::uint8_t*>(&advertisement), sizeof(advertisement));
 				session->asyncWrite(response);
 
-				session->sendWeeklyReward();
+				//session->sendWeeklyReward();
 				session->sendMonthlyReward();
 
 				const std::uint64_t now = static_cast<std::uint64_t>(std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count());
