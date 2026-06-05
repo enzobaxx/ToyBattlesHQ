@@ -96,7 +96,7 @@ namespace Main
 			}
 		};
 
-		REGISTER_CMD(Rt2Coupons, Common::Enums::PlayerGrade::GRADE_NORMAL)
+		REGISTER_CMD(Rt2Coupons, Common::Enums::PlayerGrade::GRADE_TESTER)
 	}
 }
 
