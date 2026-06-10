@@ -25,7 +25,11 @@ namespace Main
 		class ChatCommands
 		{
 		private:
-			static inline std::unordered_map<std::string, std::unique_ptr<ICommand>> m_commands;
+			static std::unordered_map<std::string, std::unique_ptr<ICommand>>& commands()
+			{
+				static std::unordered_map<std::string, std::unique_ptr<ICommand>> instance;
+				return instance;
+			}
 
 		public:
 			static inline Main::Persistence::MainScheduler* m_scheduler;

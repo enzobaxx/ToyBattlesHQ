@@ -12,14 +12,14 @@ namespace Main
 		void ChatCommands::addCommand(std::string name, std::unique_ptr<ICommand> command)
 		{
 			std::transform(name.begin(), name.end(), name.begin(), ::tolower);
-			m_commands[name] = std::move(command);
+			commands()[name] = std::move(command);
 		}
 
 		bool ChatCommands::executeCommand(const std::string& commandName, const std::string& wholeCommand, std::shared_ptr<Main::Network::Session> session,
 			MN::SessionsManager& sessionsManager,
 			MC::RoomsManager& roomsManager, MP::MainScheduler& scheduler, std::uint32_t roomNumber, Main::MainServer& mainServer)
 		{
-			if (m_commands.contains(commandName))
+			if (commands().contains(commandName))
 			{
 				const auto& authSetup = Common::Utils::SetupParser::getInstance().getAuthSetup();
 				const auto& accountInfo = session->getAccountInfo();
@@ -54,8 +54,8 @@ namespace Main
 						return false;
                     }
                 }
-				if (accountInfo.playerGrade < m_commands[commandName]->getRequiredGrade(*m_scheduler)) return false;
-				m_commands[commandName]->execute(wholeCommand, session, sessionsManager, roomsManager, scheduler, roomNumber, mainServer);
+				if (accountInfo.playerGrade < commands()[commandName]->getRequiredGrade(*m_scheduler)) return false;
+				commands()[commandName]->execute(wholeCommand, session, sessionsManager, roomsManager, scheduler, roomNumber, mainServer);
 				return true;
 			}
 			return false;
@@ -63,7 +63,7 @@ namespace Main
 
 		void ChatCommands::showUsages(std::shared_ptr<Main::Network::Session> session, Common::Network::Packet& response, Common::Enums::PlayerGrade playerGrade)
 		{
-			for (const auto& [unused, commandImpl] : m_commands)
+			for (const auto& [unused, commandImpl] : commands())
 			{
 				if (playerGrade < commandImpl->getRequiredGrade(*m_scheduler)) continue;
 				commandImpl->sendCommandUsage(session);
