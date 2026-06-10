@@ -39,7 +39,7 @@ namespace Main
 
 			const auto friends = scheduler.immediatePersist(std::source_location::current(),
 				&Main::Persistence::PersistentDatabase::loadFriends, accountInfo.accountID);
-			session->getPlayer().setFriendList(friends);
+			session->getPlayer().getSocialInfo().setFriendList(friends);
 			for (const auto& currentFriend : friends)
 			{
 				if (auto targetSession = sessionsManager.getSessionByAccountId(currentFriend.targetAccountId))
@@ -51,7 +51,7 @@ namespace Main
 			}
 
 			
-			session->getPlayer().setBlockedPlayers(scheduler.immediatePersist(std::source_location::current(),
+			session->getPlayer().getSocialInfo().setBlockedPlayers(scheduler.immediatePersist(std::source_location::current(),
 				&Main::Persistence::PersistentDatabase::loadBlockedPlayers, accountInfo.accountID));
 			session->setMute(scheduler.immediatePersist(std::source_location::current(), &Main::Persistence::PersistentDatabase::isMuted, accountInfo.accountID));
 			if (scheduler.immediatePersist(std::source_location::current(), &Main::Persistence::PersistentDatabase::isRoomCreationDisabled, accountInfo.accountID))
@@ -64,8 +64,8 @@ namespace Main
 			}
 			auto [sentMailboxes, receivedMailboxes] = scheduler.immediatePersist(std::source_location::current(), 
 				&Main::Persistence::PersistentDatabase::loadMailboxes, accountInfo.accountID);
-			session->getPlayer().setMailbox(sentMailboxes, true);
-			session->getPlayer().setMailbox(receivedMailboxes, false);
+			session->getPlayer().getMailbox().setMailbox(sentMailboxes, true);
+			session->getPlayer().getMailbox().setMailbox(receivedMailboxes, false);
 			session->setReceivedGiftboxes(scheduler.immediatePersist(std::source_location::current(), 
 				&Main::Persistence::PersistentDatabase::loadReceivedGiftboxes, accountInfo.accountID));
 			session->setLatestWeeklyRewardDate(scheduler.immediatePersist(std::source_location::current(),

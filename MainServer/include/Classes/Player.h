@@ -12,6 +12,8 @@
 #include "../Structures/TradeSystem/TradeSystemItem.h"
 #include "../Structures/ClientData/Structures.h"
 #include "Inventory.h"
+#include "SocialInfo.h"
+#include "Mailbox.h"
 
 #include <unordered_map>
 #include <vector>
@@ -41,8 +43,8 @@ namespace Main
 
 			AccountInfo m_accountInfo{};
 			Inventory m_inventory{ m_accountInfo };
-			std::unordered_map<Friend, std::weak_ptr<Session>> m_friends;
-			std::vector<BlockedPlayer> m_blockedAccounts{};
+			SocialInfo m_socialInfo{};
+			Main::Classes::Mailbox m_mailbox{};
 			Common::Enums::PlayerState m_playerState{};
 			std::uint16_t m_ping{};
 			bool m_isMuted{ false };
@@ -53,11 +55,6 @@ namespace Main
 			std::string m_mutedUntil{};
 			std::string m_latestWeeklyRewardDay{};
 			std::string m_latestMonthlyRewardDay{};
-
-			// Mailbox/Giftbox specific
-			std::vector<Mailbox> m_mailboxReceived{};
-			std::vector<Mailbox> m_mailboxSent{};
-			std::vector<Giftbox> m_giftboxReceived{};
 
 			// Other
 			std::uint16_t m_roomNumber{};
@@ -74,6 +71,14 @@ namespace Main
 			// Inventory
 			Inventory& getInventory() noexcept { return m_inventory; }
 			const Inventory& getInventory() const noexcept { return m_inventory; }
+
+			// Social (friends + blocked)
+			SocialInfo& getSocialInfo() noexcept { return m_socialInfo; }
+			const SocialInfo& getSocialInfo() const noexcept { return m_socialInfo; }
+
+			// Mailbox / giftbox
+			Main::Classes::Mailbox& getMailbox() noexcept { return m_mailbox; }
+			const Main::Classes::Mailbox& getMailbox() const noexcept { return m_mailbox; }
 
 			// Account info
 			void setAccountInfo(const AccountInfo& accountInfo);
@@ -112,41 +117,10 @@ namespace Main
 			bool expandBattery();
 			bool expandInventory(std::uint32_t spaceToAdd);
 
-			// Friends
-			const std::vector<Friend> getFriendlist() const;
-			std::unordered_map<Friend, std::weak_ptr<Session>>& getFriendSessions();
-			void setFriendList(const std::vector<Friend>& friendlist);
-			void updateFriend(const Friend& targetFriend, std::shared_ptr<Main::Network::Session> targetSession, bool remove);
-			// call once with default "persist", since removeFriend removes the friend for both players
-			bool deleteFriend(std::uint32_t targetAccountId);
-			void addOfflineFriend(const Main::Structures::Friend& ffriend);
-			std::optional<Main::Structures::Friend> addOnlineFriend(std::shared_ptr<Main::Network::Session> session);
-			bool isFriend(std::uint32_t accountId) const;
 
 			std::uint32_t addBattery(std::uint32_t battery);
 
 
-			// Blocked players
-			bool blockAccount(std::uint32_t accountId, const char* nickname);
-			bool unblockAccount(std::uint32_t accountId);
-			bool hasBlocked(std::uint32_t accountId) const;
-			const std::vector<Main::Structures::BlockedPlayer>& getBlockedPlayers() const;
-			void setBlockedPlayers(const std::vector<Main::Structures::BlockedPlayer>& blockedPlayers);
-
-			// Mailbox, giftbox
-			void addMailboxReceived(const Main::Structures::Mailbox& mailbox);
-			void addGiftboxReceived(const Main::Structures::Giftbox& giftbox);
-			void addMailboxSent(const Main::Structures::Mailbox& mailbox);
-			bool deleteSentMailbox(std::uint32_t timestamp);
-			bool deleteReceivedMailbox(std::uint32_t timestamp);
-			const std::vector<Main::Structures::Mailbox>& getMailboxReceived() const;
-			const std::vector<Main::Structures::Mailbox>& getMailboxSent() const;
-			const std::vector<Main::Structures::Giftbox>& getGiftboxReceived() const;
-			std::optional<Main::Structures::Giftbox> getGiftbox(std::uint32_t timestamp) const;
-			void setMailbox(const std::vector<Main::Structures::Mailbox>& mailbox, bool sent);
-			void setReceivedGiftboxes(const std::vector<Main::Structures::Giftbox>& gifbox);
-			std::optional<std::uint32_t> getItemIdFromGiftbox(std::uint32_t timestamp) const;
-			void deleteGiftbox(std::uint32_t timestamp);
 
 			// Rewards
 			void setLatestWeeklyRewardDate(const std::string& date) { m_latestWeeklyRewardDay = date; }

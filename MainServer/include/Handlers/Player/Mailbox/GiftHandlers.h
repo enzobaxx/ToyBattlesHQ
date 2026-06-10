@@ -32,7 +32,7 @@ namespace Main
 				for (std::uint32_t currentSentGift = 0; currentSentGift < totalSentGifts; ++currentSentGift)
 				{
 					const std::uint32_t timestamp = Main::Details::parseData<std::uint32_t>(request, 8 * (currentSentGift + 1)); 
-					if (const auto itemIdOpt = session->getPlayer().getGiftbox(timestamp); itemIdOpt)
+					if (const auto itemIdOpt = session->getPlayer().getMailbox().getGiftbox(timestamp); itemIdOpt)
 					{
 						Main::Structures::Giftbox2 giftbox{ *itemIdOpt };
 						giftbox.serialInfo.itemNumber = ++latestItemNumber;

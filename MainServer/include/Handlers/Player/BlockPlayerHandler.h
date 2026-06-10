@@ -28,7 +28,7 @@ namespace Main
 						return;
 					}
 					if (const std::uint32_t targetAccountId = targetSession->getAccountInfo().accountID;
-						session->blockAccount(targetAccountId, targetAccountName.data()) && session->getPlayer().isFriend(targetAccountId))
+						session->blockAccount(targetAccountId, targetAccountName.data()) && session->getPlayer().getSocialInfo().isFriend(targetAccountId))
 					{
 						session->deleteFriend(targetAccountId);
 						targetSession->deleteFriend(session->getAccountInfo().accountID, false);
@@ -37,7 +37,7 @@ namespace Main
 				else if (const std::optional<std::uint32_t> targetAccountId = m_scheduler.immediatePersist(std::source_location::current(), 
 					&Main::Persistence::PersistentDatabase::blockPlayerByNickname,
 					session->getAccountInfo().accountID, targetAccountName.data());
-					targetAccountId.has_value() && session->blockAccount(*targetAccountId, targetAccountName.data()) && session->getPlayer().isFriend(*targetAccountId))
+					targetAccountId.has_value() && session->blockAccount(*targetAccountId, targetAccountName.data()) && session->getPlayer().getSocialInfo().isFriend(*targetAccountId))
 				{
 					session->deleteFriend(*targetAccountId);
 				}

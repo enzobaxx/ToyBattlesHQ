@@ -32,7 +32,7 @@ namespace Main
 			auto session = it->second;
 
 			std::vector<std::weak_ptr<Session>> validFriendSessions;
-			for (const auto& [_, friendSession] : session->getPlayer().getFriendSessions())
+			for (const auto& [_, friendSession] : session->getPlayer().getSocialInfo().getFriendSessions())
 			{
 				if (friendSession.lock())
 					validFriendSessions.push_back(friendSession);

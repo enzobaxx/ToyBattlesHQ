@@ -110,7 +110,7 @@ namespace Main
 						session->sendMessage("The player you are trying to invite is already in your room.");
 						return;
 					}
-					else if (targetPlayer.hasBlocked(session->getAccountInfo().accountID))
+					else if (targetPlayer.getSocialInfo().hasBlocked(session->getAccountInfo().accountID))
 					{
 						session->sendMessage("The player you are trying to invite has blocked you.");
 						return;

@@ -97,7 +97,7 @@ namespace Main
 			m_packet.setOrder(104);
 			m_packet.setData(nullptr, 0);
 
-			if (m_player.getMailboxSent().size() > Common::Constants::maxMailbox)
+			if (m_player.getMailbox().getMailboxSent().size() > Common::Constants::maxMailbox)
 			{
 				m_packet.setExtra(Main::Enums::MailboxExtra::SENDER_NO_SPACE_LEFT);
 				asyncWrite(m_packet);
@@ -136,19 +136,19 @@ namespace Main
 			m_packet.setData(nullptr, 0);
 			const auto& selfAccountInfo = m_player.getAccountInfo();
 
-			if (m_player.getMailboxSent().size() > Common::Constants::maxMailbox)
+			if (m_player.getMailbox().getMailboxSent().size() > Common::Constants::maxMailbox)
 			{
 				m_packet.setExtra(Main::Enums::MailboxExtra::SENDER_NO_SPACE_LEFT);
 				asyncWrite(m_packet);
 				return false;
 			}
-			else if (target->getPlayer().getMailboxReceived().size() > Common::Constants::maxMailbox)
+			else if (target->getPlayer().getMailbox().getMailboxReceived().size() > Common::Constants::maxMailbox)
 			{
 				m_packet.setExtra(Main::Enums::MailboxExtra::RECEIVER_NO_SPACE_LEFT);
 				asyncWrite(m_packet);
 				return false;
 			}
-			else if (target->getPlayer().hasBlocked(selfAccountInfo.accountID))
+			else if (target->getPlayer().getSocialInfo().hasBlocked(selfAccountInfo.accountID))
 			{
 				m_packet.setExtra(Main::Enums::MailboxExtra::MAILBOX_RECEIVER_BLOCKED_SENDER);
 				asyncWrite(m_packet);
@@ -170,28 +170,28 @@ namespace Main
 
 		void Session::addMailboxReceived(const Main::Structures::Mailbox& mailbox)
 		{
-			m_player.addMailboxReceived(mailbox);
+			m_player.getMailbox().addMailboxReceived(mailbox);
 			m_scheduler.addRepetitiveCallback(std::source_location::current(), m_player.getAccountID(), &Main::Persistence::PersistentDatabase::storeMailbox,
 				mailbox, m_player.getAccountID(), false);
 		}
 
 		void Session::addGiftboxReceived(const Main::Structures::Giftbox& giftbox)
 		{
-			m_player.addGiftboxReceived(giftbox);
+			m_player.getMailbox().addGiftboxReceived(giftbox);
 			m_scheduler.addRepetitiveCallback(std::source_location::current(), m_player.getAccountID(), LIFT_MEMBER(storeGiftbox),
 				giftbox, m_player.getAccountID());
 		}
 
 		void Session::addMailboxSent(const Main::Structures::Mailbox& mailbox)
 		{
-			m_player.addMailboxSent(mailbox);
+			m_player.getMailbox().addMailboxSent(mailbox);
 			m_scheduler.addRepetitiveCallback(std::source_location::current(), m_player.getAccountID(), &Main::Persistence::PersistentDatabase::storeMailbox,
 				mailbox, m_player.getAccountID(), true);
 		}
 
 		bool Session::deleteSentMailbox(std::uint32_t timestamp)
 		{
-			if (m_player.deleteSentMailbox(timestamp))
+			if (m_player.getMailbox().deleteSentMailbox(timestamp))
 			{
 				m_scheduler.addRepetitiveCallback(std::source_location::current(), m_player.getAccountID(), &Main::Persistence::PersistentDatabase::deleteMailbox,
 					timestamp, m_player.getAccountID(), true);
@@ -203,7 +203,7 @@ namespace Main
 
 		bool Session::deleteReceivedMailbox(std::uint32_t timestamp)
 		{
-			if (m_player.deleteReceivedMailbox(timestamp))
+			if (m_player.getMailbox().deleteReceivedMailbox(timestamp))
 			{
 				m_scheduler.addRepetitiveCallback(std::source_location::current(), m_player.getAccountID(), &Main::Persistence::PersistentDatabase::deleteMailbox,
 					timestamp, m_player.getAccountID(), false);
@@ -223,7 +223,7 @@ namespace Main
 
 		void Session::setReceivedGiftboxes(const std::vector<Main::Structures::Giftbox>& giftboxes)
 		{
-			m_player.setReceivedGiftboxes(giftboxes);
+			m_player.getMailbox().setReceivedGiftboxes(giftboxes);
 			if (!giftboxes.empty())
 			{
 				m_packet.setTcpHeader(m_id, Common::Enums::NO_ENCRYPTION);
@@ -235,7 +235,7 @@ namespace Main
 
 		void Session::sendUnreadMailboxes()
 		{
-			const auto& newMailboxes = m_player.getMailboxReceived();
+			const auto& newMailboxes = m_player.getMailbox().getMailboxReceived();
 			std::vector<Main::Structures::Mailbox> unreadMailboxes;
 			std::copy_if(newMailboxes.begin(), newMailboxes.end(), std::back_inserter(unreadMailboxes), [](const Main::Structures::Mailbox& mailbox) {
 				return !mailbox.hasBeenRead;
@@ -285,7 +285,7 @@ namespace Main
 			m_packet.setCommand(61, 0, 0, 0);
 			m_packet.setData(nullptr, 0);
 
-			if (m_player.getFriendlist().size() >= Common::Constants::maxFriends)
+			if (m_player.getSocialInfo().getFriendlist().size() >= Common::Constants::maxFriends)
 			{
 				m_packet.setMission(Main::Enums::AddFriendServerMission::SENDER_FRIENDLIST_FULL);
 				m_packet.setExtra(Main::Enums::AddFriendServerExtra::TARGET_OR_SENDER_FRIEND_LIST_FULL);
@@ -327,14 +327,14 @@ namespace Main
 				sendMessage("You cannot send a friend request to yourself!");
 				return;
 			}
-			if (targetSession->getPlayer().getFriendlist().size() >= Common::Constants::maxFriends)
+			if (targetSession->getPlayer().getSocialInfo().getFriendlist().size() >= Common::Constants::maxFriends)
 			{
 				m_packet.setExtra(Main::Enums::AddFriendServerExtra::TARGET_OR_SENDER_FRIEND_LIST_FULL);
 				m_packet.setMission(Main::Enums::AddFriendServerMission::RECEIVER_FRIENDLIST_FULL);
 				asyncWrite(m_packet);
 				return;
 			}
-			if (targetSession->getPlayer().hasBlocked(accountInfo.accountID))
+			if (targetSession->getPlayer().getSocialInfo().hasBlocked(accountInfo.accountID))
 			{
 				m_packet.setExtra(Main::Enums::AddFriendServerExtra::RECEIVER_BLOCKED_SENDER);
 				asyncWrite(m_packet);
@@ -391,7 +391,7 @@ namespace Main
 			}
 			else
 			{ // sender and receiver are both online
-				m_player.addOnlineFriend(senderSession);
+				m_player.getSocialInfo().addOnlineFriend(senderSession);
 				senderSession->addOnlineFriend(std::static_pointer_cast<Main::Network::Session>(shared_from_this()));
 				m_scheduler.immediatePersist(std::source_location::current(), &Main::Persistence::PersistentDatabase::addFriend, 
 					m_player.getAccountID(), senderSession->getAccountInfo().accountID);
@@ -413,7 +413,7 @@ namespace Main
 					asyncWrite(m_packet);
 				}
 			}
-			const std::vector<Main::Structures::Friend> friendlist = m_player.getFriendlist();
+			const std::vector<Main::Structures::Friend> friendlist = m_player.getSocialInfo().getFriendlist();
 			m_packet.setCommand(63, 0, 37, friendlist.size());
 			m_packet.setData(reinterpret_cast<const std::uint8_t*>(friendlist.data()), friendlist.size() * sizeof(Main::Structures::Friend));
 			asyncWrite(m_packet);
@@ -445,13 +445,13 @@ namespace Main
 				targetFriend.targetAccountId = targetAccountInfo.accountID;
 				targetFriend.targetUniqueId = remove ? Main::Structures::UniqueId{} : targetAccountInfo.uniqueId;
 				std::memcpy(targetFriend.targetNickname, targetAccountInfo.nickname, 16);
-				m_player.updateFriend(targetFriend, targetSession, remove);
+				m_player.getSocialInfo().updateFriend(targetFriend, targetSession, remove);
 			}
 		}
 
 		bool Session::blockAccount(std::uint32_t accountId, const char* nickname)
 		{
-			if (m_player.blockAccount(accountId, nickname))
+			if (m_player.getSocialInfo().blockAccount(accountId, nickname))
 			{
 				m_packet.setTcpHeader(m_id, Common::Enums::NO_ENCRYPTION);
 				m_packet.setCommand(52, 0, 1, 0);
@@ -491,7 +491,7 @@ namespace Main
 			START_BENCHMARK
 
 			bool unblockSuccess = false;
-			if (m_player.unblockAccount(accountId))
+			if (m_player.getSocialInfo().unblockAccount(accountId))
 			{
 				m_scheduler.addRepetitiveCallback(std::source_location::current(), m_player.getAccountID(), &Main::Persistence::PersistentDatabase::unblockPlayer,
 					m_player.getAccountID(), accountId);
@@ -508,7 +508,7 @@ namespace Main
 		void Session::sendBlockedPlayers()
 		{
 			START_BENCHMARK
-			const std::vector<Main::Structures::BlockedPlayer>& blockedPlayers = m_player.getBlockedPlayers();
+			const std::vector<Main::Structures::BlockedPlayer>& blockedPlayers = m_player.getSocialInfo().getBlockedPlayers();
 			m_packet.setTcpHeader(m_id, Common::Enums::NO_ENCRYPTION);
 			m_packet.setCommand(54, 0, 37, blockedPlayers.size());  // max blocked players is 30, should never exceed 1440 bytes in total
 			m_packet.setData(reinterpret_cast<const std::uint8_t*>(blockedPlayers.data()), blockedPlayers.size() * sizeof(Main::Structures::BlockedPlayer));
@@ -530,7 +530,7 @@ namespace Main
 		// call once with default "persist", since removeFriend removes the friend for both players
 		void Session::deleteFriend(std::uint32_t targetAccountId, bool persist)
 		{
-			const bool deletedFriend = m_player.deleteFriend(targetAccountId);
+			const bool deletedFriend = m_player.getSocialInfo().deleteFriend(targetAccountId);
 			if (persist)
 			{
 				m_scheduler.immediatePersist(std::source_location::current(), &Main::Persistence::PersistentDatabase::removeFriend, m_player.getAccountID(), targetAccountId);
@@ -986,7 +986,7 @@ namespace Main
 
 		void Session::addFriend(const Main::Structures::Friend& ffriend)
 		{
-			m_player.addOfflineFriend(ffriend);
+			m_player.getSocialInfo().addOfflineFriend(ffriend);
 			m_scheduler.immediatePersist(std::source_location::current(), 
 				&Main::Persistence::PersistentDatabase::addFriend, m_player.getAccountID(), ffriend.targetAccountId);
 		}
@@ -994,7 +994,7 @@ namespace Main
 		std::optional<Main::Structures::Friend> Session::addOnlineFriend(std::shared_ptr<Main::Network::Session> session)
 		{
 			if (!session) return std::nullopt;
-			return m_player.addOnlineFriend(session);
+			return m_player.getSocialInfo().addOnlineFriend(session);
 		}
 
 		void Session::equipItem(const std::uint16_t itemNumber)
@@ -1182,7 +1182,7 @@ namespace Main
 		// Assumptions: giftDescription is < 256 characters; itemId is valid
 		bool Session::receiveGift(std::uint32_t itemId, const std::string& giftDescription)
 		{
-			if (m_player.getMailboxReceived().size() > Common::Constants::maxMailbox)
+			if (m_player.getMailbox().getMailboxReceived().size() > Common::Constants::maxMailbox)
 			{
 				return false;
 			}
@@ -1203,7 +1203,7 @@ namespace Main
 
 		void Session::deleteGiftbox(std::uint32_t timestamp)
 		{
-			m_player.deleteGiftbox(timestamp);
+			m_player.getMailbox().deleteGiftbox(timestamp);
 			m_scheduler.addRepetitiveCallback(std::source_location::current(), 
 				m_player.getAccountID(), &Main::Persistence::PersistentDatabase::deleteReceivedGiftbox, m_player.getAccountID(), timestamp);
 		}
@@ -1217,7 +1217,7 @@ namespace Main
 				return; // currently, sending / sent gifts remains unimplemented
 			}
 
-			const auto& receivedGiftboxes = m_player.getGiftboxReceived();
+			const auto& receivedGiftboxes = m_player.getMailbox().getGiftboxReceived();
 			const std::uint32_t totalBytes = receivedGiftboxes.size() * sizeof(Main::Structures::Giftbox);
 			m_packet.setCommand(67, type, 0, receivedGiftboxes.size());
 
@@ -1247,7 +1247,7 @@ namespace Main
 		{
 			START_BENCHMARK
 
-			const auto& actualMailbox = mailboxType == Main::Enums::MISSION_MAILBOX_RECEIVED ? m_player.getMailboxReceived() : m_player.getMailboxSent();
+			const auto& actualMailbox = mailboxType == Main::Enums::MISSION_MAILBOX_RECEIVED ? m_player.getMailbox().getMailboxReceived() : m_player.getMailbox().getMailboxSent();
 			m_packet.setTcpHeader(m_id, Common::Enums::NO_ENCRYPTION);
 			m_packet.setCommand(106, mailboxType, 0, actualMailbox.size());
 			const std::size_t totalBytes = actualMailbox.size() * sizeof(Main::Structures::Mailbox);
