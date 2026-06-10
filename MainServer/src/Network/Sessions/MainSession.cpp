@@ -2083,7 +2083,8 @@ PACK_POP()
 		void Session::resetTradeInfo()
 		{
 			unsealAllItems();
-			m_player.resetTradeInfo();
+			m_player.getTradeInfo().reset();
+			m_player.setPlayerState(Common::Enums::PlayerState::STATE_INVENTORY);
 		}
 
 

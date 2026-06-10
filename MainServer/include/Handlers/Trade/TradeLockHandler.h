@@ -21,7 +21,7 @@ namespace Main
 			response.setOrder(request.getOrder());
 			response.setExtra(Enums::TradeSystemExtra::TRADE_SUCCESS);
 
-			if (auto targetSession = sessionsManager.getSessionByAccountId(session->getPlayer().getCurrentlyTradingWithAccountId()))
+			if (auto targetSession = sessionsManager.getSessionByAccountId(session->getPlayer().getTradeInfo().getCurrentlyTradingWithAccountId()))
 			{
 				targetSession->asyncWrite(response);
 			}

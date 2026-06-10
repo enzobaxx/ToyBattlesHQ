@@ -13,6 +13,7 @@
 #include "Structures/ClientData/Structures.h"
 #include "Entities/Inventory.h"
 #include "Entities/SocialInfo.h"
+#include "Entities/TradeInfo.h"
 #include "Entities/Mailbox.h"
 
 #include <unordered_map>
@@ -39,11 +40,11 @@ namespace Main
 			using Friend = Main::Structures::Friend;
 			using Mailbox = Main::Structures::Mailbox;
 			using Giftbox = Main::Structures::Giftbox;
-			using TradedItem = Main::Structures::TradeBasicItem;
 
 			AccountInfo m_accountInfo{};
 			Inventory m_inventory{ m_accountInfo };
 			SocialInfo m_socialInfo{};
+			TradeInfo m_tradeInfo{};
 			Main::Classes::Mailbox m_mailbox{};
 			Common::Enums::PlayerState m_playerState{};
 			std::uint16_t m_ping{};
@@ -62,11 +63,6 @@ namespace Main
 			bool m_isInMatch{};
 			std::uint32_t m_batteryObtainedInMatch{};
 
-			// Trade system
-			std::uint32_t m_currentlyTradingWithAccountId{};
-			std::vector<TradedItem> m_tradedItems{};
-			bool m_hasPlayerLocked{};
-
 		public:
 			// Inventory
 			Inventory& getInventory() noexcept { return m_inventory; }
@@ -75,6 +71,10 @@ namespace Main
 			// Social (friends + blocked)
 			SocialInfo& getSocialInfo() noexcept { return m_socialInfo; }
 			const SocialInfo& getSocialInfo() const noexcept { return m_socialInfo; }
+
+			// Trade system
+			TradeInfo& getTradeInfo() noexcept { return m_tradeInfo; }
+			const TradeInfo& getTradeInfo() const noexcept { return m_tradeInfo; }
 
 			// Mailbox / giftbox
 			Main::Classes::Mailbox& getMailbox() noexcept { return m_mailbox; }
@@ -140,18 +140,6 @@ namespace Main
 
 			// Achievements
 			void addAchievementTier1(std::uint32_t achievementId);
-
-			// Trade system
-			void lockTrade();
-			bool hasPlayerLocked() const;
-			void resetTradeInfo();
-			void setCurrentlyTradingWithAccountId(std::uint32_t targetAccountId);
-			std::uint32_t getCurrentlyTradingWithAccountId() const;
-			bool addTradedItem(std::uint32_t itemId, const Main::Structures::ItemSerialInfo& serialInfo);
-			void removeTradedItem(const Main::Structures::ItemSerialInfo& serialInfo);
-			void resetTradedItems();
-			const std::vector<TradedItem>& getTradedItems() const;
-
 
 			std::string getPlayerInfoAsString() const
 			{

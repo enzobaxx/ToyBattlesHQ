@@ -31,22 +31,22 @@ namespace Main
 			else return;
 
 			const auto& accountInfo = session->getAccountInfo();
-			if (auto targetSession = sessionsManager.getSessionByAccountId(session->getPlayer().getCurrentlyTradingWithAccountId()))
+			if (auto targetSession = sessionsManager.getSessionByAccountId(session->getPlayer().getTradeInfo().getCurrentlyTradingWithAccountId()))
 			{
 				Main::Structures::TradeAddedItemDetailed tradeItem{ session->getAccountInfo().accountID, itemSerialInfo, itemID};
 				const auto& targetAccountInfo = targetSession->getAccountInfo();
 
-				const bool targetHasEnoughSpace = targetSession->getPlayer().getInventory().hasEnoughInventorySpace(session->getPlayer().getTradedItems().size() + 1);
+				const bool targetHasEnoughSpace = targetSession->getPlayer().getInventory().hasEnoughInventorySpace(session->getPlayer().getTradeInfo().getTradedItems().size() + 1);
 				if (!targetHasEnoughSpace)
 				{
 					response.setExtra(Enums::TradeSystemExtra::TARGET_NOT_ENOUGH_INVENTORY_SPACE);
 					tradeItem.originalItemOwnerAccountId = targetAccountInfo.accountID;
 				}
-				else if (session->getPlayer().getTradedItems().size() > 10)
+				else if (session->getPlayer().getTradeInfo().getTradedItems().size() > 10)
 				{
 					response.setExtra(Enums::TradeSystemExtra::MAX_NUM_OF_ITEMS_AT_ONCE_REACHED);
 				}
-				else if (accountInfo.microPoints < (5000 * (session->getPlayer().getTradedItems().size() + 1)))
+				else if (accountInfo.microPoints < (5000 * (session->getPlayer().getTradeInfo().getTradedItems().size() + 1)))
 				{
 					std::vector<std::uint8_t> error(8);
 					std::memcpy(error.data() + 4, &accountInfo.accountID, sizeof(accountInfo.accountID));
@@ -69,7 +69,7 @@ namespace Main
 					session->sendMessage("[ERROR] This item cannot be traded!");
 					return;
 				}
-				else if (session->getPlayer().addTradedItem(itemID, itemSerialInfo))
+				else if (session->getPlayer().getTradeInfo().addTradedItem(itemID, itemSerialInfo))
 				{
 					response.setExtra(Enums::TradeSystemExtra::TRADE_SUCCESS);
 				}

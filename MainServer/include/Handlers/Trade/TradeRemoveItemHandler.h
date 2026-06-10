@@ -30,11 +30,11 @@ namespace Main
 			else return;
 
 			const auto& accountInfo = session->getAccountInfo();
-			if (auto targetSession = sessionsManager.getSessionByAccountId(session->getPlayer().getCurrentlyTradingWithAccountId()))
+			if (auto targetSession = sessionsManager.getSessionByAccountId(session->getPlayer().getTradeInfo().getCurrentlyTradingWithAccountId()))
 			{
 				Main::Structures::TradeAddedItemDetailed tradeItem{ session->getAccountInfo().accountID, itemSerialInfo, itemID };			
 				response.setExtra(Enums::TradeSystemExtra::TRADE_SUCCESS);
-				session->getPlayer().removeTradedItem(itemSerialInfo);
+				session->getPlayer().getTradeInfo().removeTradedItem(itemSerialInfo);
 				response.setData(reinterpret_cast<std::uint8_t*>(&tradeItem), sizeof(tradeItem));
 				session->asyncWrite(response);
 				targetSession->asyncWrite(response);

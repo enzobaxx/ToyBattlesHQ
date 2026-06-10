@@ -41,7 +41,7 @@ namespace Main
 				selfEquippedHair, selfEquippedEyes };
 			response.setData(reinterpret_cast<std::uint8_t*>(&tradePlayerInfo), sizeof(tradePlayerInfo));
 			targetSession->asyncWrite(response);
-			targetSession->getPlayer().setCurrentlyTradingWithAccountId(selfAccountInfo.accountID);
+			targetSession->getPlayer().getTradeInfo().setCurrentlyTradingWithAccountId(selfAccountInfo.accountID);
 		}
 
 		inline void handleTradeInitialization(const Common::Network::Packet& request, std::shared_ptr<Main::Network::Session> session, 
