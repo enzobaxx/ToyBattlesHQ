@@ -649,6 +649,108 @@ namespace Main
             addPlayerItems(accountID, std::vector<Item>{ item }, latestCharacterSelected);
         }
 
+        bool PersistentDatabase::addUntradeablePlayerItem(const Item& item, std::uint32_t accountID, std::uint32_t latestCharacterSelected)
+        {
+            try
+            {
+                TransactionGuard tx(m_transactionalCon.get());
+
+                const std::string queryStr =
+                    "INSERT INTO UserItems (AccountID, IsEquipped, CharacterID, ItemID, ItemDuration, ItemNumber, ItemOrigin, acquisitionServerId, creationDate,"
+                    " durability, energy, isSealed, sealLevel, expEnhancement, mpEnhancement, IsCoupon, Stocks, IsTradeable) "
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)";
+
+                std::unique_ptr<sql::PreparedStatement> stmt(m_transactionalCon->prepareStatement(queryStr));
+                stmt->setUInt(1, accountID);
+                stmt->setUInt(2, latestCharacterSelected == -1 ? 0 : 1);
+                stmt->setUInt(3, latestCharacterSelected == -1 ? 0 : latestCharacterSelected);
+                stmt->setUInt(4, item.itemId.itemId);
+                stmt->setInt64(5, static_cast<std::int64_t>(item.expirationDate <= 3 ? item.expirationDate : item.expirationDate - item.serialInfo.itemCreationDate));
+                stmt->setInt64(6, static_cast<std::int64_t>(item.serialInfo.itemNumber));
+                stmt->setInt64(7, static_cast<std::int64_t>(item.serialInfo.itemOrigin));
+                stmt->setInt64(8, static_cast<std::int64_t>(item.serialInfo.m_serverId));
+                stmt->setInt64(9, static_cast<std::int64_t>(item.serialInfo.itemCreationDate));
+                stmt->setUInt(10, static_cast<std::uint32_t>(item.durability));
+                stmt->setUInt(11, static_cast<std::uint32_t>(item.energy));
+                stmt->setUInt(12, 0); // isSealed
+                stmt->setUInt(13, 0); // sealLevel
+                stmt->setUInt(14, 0); // expEnhancement
+                stmt->setUInt(15, 0); // mpEnhancement
+                stmt->setUInt(16, 0); // unknown
+                stmt->setUInt(17, item.itemId.stock);
+                stmt->executeUpdate();
+
+                tx.commit();
+                return true;
+            }
+            catch (const sql::SQLException& e)
+            {
+                ::Utils::Logger::log("MariaDB exception: " + std::string(e.what()), Utils::LogType::Error, "PersistentDatabase::addUntradeablePlayerItem");
+                return false;
+            }
+        }
+
+        bool PersistentDatabase::addUntradeableItemByName(const std::string& nickname, const Item& item, std::uint32_t executorGrade)
+        {
+            try
+            {
+                TransactionGuard tx(m_transactionalCon.get());
+
+                const std::string checkQuery = "SELECT AccountID, Grade FROM Users WHERE Nickname = ?";
+                std::unique_ptr<sql::PreparedStatement> checkStmt(m_transactionalCon->prepareStatement(checkQuery));
+                checkStmt->setString(1, nickname);
+
+                std::unique_ptr<sql::ResultSet> res(checkStmt->executeQuery());
+                if (!res->next())
+                {
+                    return false;
+                }
+                if (res->getInt("Grade") > static_cast<int>(executorGrade))
+                {
+                    return false;
+                }
+
+                const std::uint32_t accountId = res->getUInt("AccountID");
+
+                std::unique_ptr<sql::PreparedStatement> maxStmt(m_transactionalCon->prepareStatement(
+                    "SELECT COALESCE(MAX(ItemNumber), 0) AS MaxNum FROM UserItems WHERE AccountID = ?"));
+                maxStmt->setUInt(1, accountId);
+                std::unique_ptr<sql::ResultSet> maxRes(maxStmt->executeQuery());
+                std::int64_t nextItemNumber = 1;
+                if (maxRes->next())
+                {
+                    nextItemNumber = maxRes->getInt64("MaxNum") + 1;
+                }
+
+                const std::string queryStr =
+                    "INSERT INTO UserItems (AccountID, IsEquipped, CharacterID, ItemID, ItemDuration, ItemNumber, ItemOrigin, acquisitionServerId, creationDate,"
+                    " durability, energy, isSealed, sealLevel, expEnhancement, mpEnhancement, IsCoupon, Stocks, IsTradeable) "
+                    "VALUES (?, 0, 0, ?, ?, ?, ?, ?, ?, ?, ?, 0, 0, 0, 0, 0, ?, 0)";
+
+                std::unique_ptr<sql::PreparedStatement> stmt(m_transactionalCon->prepareStatement(queryStr));
+                stmt->setUInt(1, accountId);
+                stmt->setUInt(2, item.itemId.itemId);
+                stmt->setInt64(3, static_cast<std::int64_t>(item.expirationDate <= 3 ? item.expirationDate : item.expirationDate - item.serialInfo.itemCreationDate));
+                stmt->setInt64(4, nextItemNumber);
+                stmt->setInt64(5, static_cast<std::int64_t>(item.serialInfo.itemOrigin));
+                stmt->setInt64(6, static_cast<std::int64_t>(item.serialInfo.m_serverId));
+                stmt->setInt64(7, static_cast<std::int64_t>(item.serialInfo.itemCreationDate));
+                stmt->setUInt(8, static_cast<std::uint32_t>(item.durability));
+                stmt->setUInt(9, static_cast<std::uint32_t>(item.energy));
+                stmt->setUInt(10, item.itemId.stock);
+                stmt->executeUpdate();
+
+                tx.commit();
+                return true;
+            }
+            catch (const sql::SQLException& e)
+            {
+                ::Utils::Logger::log("MariaDB exception: " + std::string(e.what()) + " | Nickname: " + nickname,
+                    Utils::LogType::Error, "PersistentDatabase::addUntradeableItemByName");
+                return false;
+            }
+        }
+
         void PersistentDatabase::insertEnergyToItem(std::uint32_t accountID, std::uint64_t itemNumber, std::uint32_t newItemEnergy, std::uint32_t newTotalEnergy)
         {
             try

@@ -753,6 +753,146 @@ namespace Main
             }
         }
 
+        bool PersistentDatabase::updatePlayerNameByNickname(const std::string& targetNickname, const std::string& newNickname, std::uint32_t executorGrade)
+        {
+            try
+            {
+                TransactionGuard tg(m_transactionalCon.get());
+
+                const std::string checkQuery = "SELECT AccountID, Grade FROM Users WHERE Nickname = ?";
+                std::unique_ptr<sql::PreparedStatement> checkStmt(m_transactionalCon->prepareStatement(checkQuery));
+                checkStmt->setString(1, targetNickname);
+
+                std::unique_ptr<sql::ResultSet> res(checkStmt->executeQuery());
+                if (!res->next())
+                {
+                    return false;
+                }
+                if (res->getInt("Grade") > static_cast<int>(executorGrade))
+                {
+                    return false;
+                }
+
+                const std::uint32_t accountId = res->getUInt("AccountID");
+
+                std::unique_ptr<sql::PreparedStatement> duplicateStmt(m_transactionalCon->prepareStatement(
+                    "SELECT AccountID FROM Users WHERE Nickname = ? AND AccountID != ?"));
+                duplicateStmt->setString(1, newNickname);
+                duplicateStmt->setUInt(2, accountId);
+
+                std::unique_ptr<sql::ResultSet> duplicateRes(duplicateStmt->executeQuery());
+                if (duplicateRes->next())
+                {
+                    return false;
+                }
+
+                std::unique_ptr<sql::PreparedStatement> stmt(m_transactionalCon->prepareStatement(
+                    "UPDATE Users SET Nickname = ? WHERE AccountID = ?"));
+                stmt->setString(1, newNickname);
+                stmt->setUInt(2, accountId);
+                if (stmt->executeUpdate() == 0)
+                {
+                    return false;
+                }
+
+                tg.commit();
+                return true;
+            }
+            catch (const sql::SQLException& e)
+            {
+                ::Utils::Logger::log("[Main::Database::updatePlayerNameByNickname] MariaDB exception: " + std::string(e.what()) +
+                    " | Nickname: " + targetNickname,
+                    Utils::LogType::Error, "PersistentDatabase::updatePlayerNameByNickname");
+                return false;
+            }
+        }
+
+        bool PersistentDatabase::addRockTotensByName(const std::string& nickname, std::uint32_t amountToAdd, std::uint32_t executorGrade)
+        {
+            try
+            {
+                TransactionGuard tg(m_transactionalCon.get());
+
+                const std::string checkQuery = "SELECT AccountID, Grade, RockTotens FROM Users WHERE Nickname = ?";
+                std::unique_ptr<sql::PreparedStatement> checkStmt(m_transactionalCon->prepareStatement(checkQuery));
+                checkStmt->setString(1, nickname);
+
+                std::unique_ptr<sql::ResultSet> res(checkStmt->executeQuery());
+                if (!res->next())
+                {
+                    return false;
+                }
+                if (res->getInt("Grade") > static_cast<int>(executorGrade))
+                {
+                    return false;
+                }
+
+                const std::uint32_t accountId = res->getUInt("AccountID");
+                const std::uint64_t current = res->getUInt64("RockTotens");
+                constexpr std::uint64_t maxRockTotens = 0x3FFFFFFF;
+                std::uint64_t updated = current + amountToAdd;
+                if (updated > maxRockTotens)
+                {
+                    updated = maxRockTotens;
+                }
+
+                std::unique_ptr<sql::PreparedStatement> stmt(m_transactionalCon->prepareStatement(
+                    "UPDATE Users SET RockTotens = ? WHERE AccountID = ?"));
+                stmt->setUInt(1, static_cast<std::uint32_t>(updated));
+                stmt->setUInt(2, accountId);
+                stmt->executeUpdate();
+
+                tg.commit();
+                return true;
+            }
+            catch (const sql::SQLException& e)
+            {
+                ::Utils::Logger::log("[Main::Database::addRockTotensByName] MariaDB exception: " + std::string(e.what()) +
+                    " | Nickname: " + nickname,
+                    Utils::LogType::Error, "PersistentDatabase::addRockTotensByName");
+                return false;
+            }
+        }
+
+        bool PersistentDatabase::setGradeByName(const std::string& nickname, std::uint32_t newGrade, std::uint32_t executorGrade)
+        {
+            try
+            {
+                TransactionGuard tg(m_transactionalCon.get());
+
+                const std::string checkQuery = "SELECT AccountID, Grade FROM Users WHERE Nickname = ?";
+                std::unique_ptr<sql::PreparedStatement> checkStmt(m_transactionalCon->prepareStatement(checkQuery));
+                checkStmt->setString(1, nickname);
+
+                std::unique_ptr<sql::ResultSet> res(checkStmt->executeQuery());
+                if (!res->next())
+                {
+                    return false;
+                }
+                if (res->getInt("Grade") > static_cast<int>(executorGrade))
+                {
+                    return false;
+                }
+
+                const std::uint32_t accountId = res->getUInt("AccountID");
+                std::unique_ptr<sql::PreparedStatement> stmt(m_transactionalCon->prepareStatement(
+                    "UPDATE Users SET Grade = ? WHERE AccountID = ?"));
+                stmt->setUInt(1, newGrade);
+                stmt->setUInt(2, accountId);
+                stmt->executeUpdate();
+
+                tg.commit();
+                return true;
+            }
+            catch (const sql::SQLException& e)
+            {
+                ::Utils::Logger::log("[Main::Database::setGradeByName] MariaDB exception: " + std::string(e.what()) +
+                    " | Nickname: " + nickname,
+                    Utils::LogType::Error, "PersistentDatabase::setGradeByName");
+                return false;
+            }
+        }
+
         void PersistentDatabase::updatePlayerLevel(std::uint32_t accountID, std::uint16_t level)
         {
             try

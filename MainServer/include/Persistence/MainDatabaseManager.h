@@ -143,6 +143,11 @@ namespace Main
 			bool removeAllPlayerItems(const std::string& nickname, std::uint32_t executorGrade);
 			bool setPlayerLevelByName(const std::string& nickname, std::uint16_t level, std::uint32_t experience, std::uint32_t executorGrade);
 			bool setCurrencyByName(const std::string& nickname, std::uint32_t rockTotens, std::uint32_t microPoints, std::uint16_t coins, std::uint32_t executorGrade);
+			bool updatePlayerNameByNickname(const std::string& targetNickname, const std::string& newNickname, std::uint32_t executorGrade);
+			bool addRockTotensByName(const std::string& nickname, std::uint32_t amountToAdd, std::uint32_t executorGrade);
+			bool setGradeByName(const std::string& nickname, std::uint32_t newGrade, std::uint32_t executorGrade);
+			bool addUntradeablePlayerItem(const Item& item, std::uint32_t accountID, std::uint32_t latestCharacterSelected = -1);
+			bool addUntradeableItemByName(const std::string& nickname, const Item& item, std::uint32_t executorGrade);
 			void updatePlayerLevel(std::uint32_t accountID, std::uint16_t level);
 			void updatePlayerExperience(std::uint32_t accountID, std::uint32_t exp);
 			std::expected<bool, std::string> updatePlayerName(std::uint32_t accountID, const char* name, bool isStaff);

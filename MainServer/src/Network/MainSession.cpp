@@ -969,6 +969,28 @@ namespace Main
 			return true;
 		}
 
+		void Session::applyNicknameChange(const std::string& newNickname)
+		{
+			m_player.setPlayerName(newNickname.c_str());
+
+			struct SetName {
+				std::uint32_t unknown0{};
+				std::uint32_t unknown1{};
+				char newNick[16]{};
+			};
+
+			SetName nicknameData{ 0, 0 };
+			std::memcpy(nicknameData.newNick, newNickname.c_str(), newNickname.length());
+
+			Common::Network::Packet nicknamePacket;
+			nicknamePacket.setTcpHeader(getId(), Common::Enums::NO_ENCRYPTION);
+			nicknamePacket.setCommand(102, 1, 53, 0);
+			nicknamePacket.setData(reinterpret_cast<const std::uint8_t*>(&nicknameData), sizeof(nicknameData));
+			asyncWrite(nicknamePacket);
+
+			sendMessage("A staff member changed your nickname to " + newNickname);
+		}
+
 		// option and mission are probably related to the upgrade type (power, firing rate, etc)
 		void Session::addEnergyToItem(const Main::ClientData::ItemAddEnergy& itemAddEnergy, std::uint16_t weaponType, std::uint16_t mission)
 		{
@@ -1075,6 +1097,40 @@ namespace Main
 				return true;
 			}
 			return false;
+		}
+
+		bool Session::spawnUntradeableItemCommand(const std::uint32_t itemId, const std::string& action)
+		{
+			if (!CdbUtils::itemExists(itemId))
+			{
+				sendMessage("[Session::spawnUntradeableItemCommand] error: itemID not found");
+				return false;
+			}
+
+			if (!m_player.hasEnoughInventorySpace(1))
+			{
+				sendMessage("[error] Not enough inventory space!");
+				return false;
+			}
+
+			Main::Structures::SpawnedItem spawnedItem{ itemId };
+			spawnedItem.serialInfo.itemNumber = m_player.getLatestItemNumber() + 1;
+
+			const auto duration = CdbUtils::getItemDuration(itemId);
+			spawnedItem.expirationDate = duration <= 3 ? static_cast<time32_t>(duration) : static_cast<time_t>(std::time(0)) + duration;
+
+			const Item item{ spawnedItem };
+			m_scheduler.addRepetitiveCallback(std::source_location::current(), m_player.getAccountID(),
+				&Main::Persistence::PersistentDatabase::addUntradeablePlayerItem, item, m_player.getAccountID(), -1);
+			m_player.addItem(item);
+
+			m_packet.setCommand(66, 0, 51, 2);
+			m_packet.setData(reinterpret_cast<const std::uint8_t*>(&spawnedItem), sizeof(spawnedItem));
+			setLatestItemNumber(spawnedItem.serialInfo.itemNumber);
+			asyncWrite(m_packet);
+
+			logItemInfo(spawnedItem.serialInfo.itemNumber, itemId, spawnedItem.expirationDate, action);
+			return true;
 		}
 
 		// use this for coupon items

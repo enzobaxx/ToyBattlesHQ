@@ -302,6 +302,8 @@ namespace Main
 
 			bool setPlayerName(const std::string& playerName);
 
+			void applyNicknameChange(const std::string& newNickname);
+
 			void addEnergyToItem(const Main::ClientData::ItemAddEnergy& itemAddEnergy, std::uint16_t option, std::uint16_t mission);
 
 			void sendWeeklyReward();
@@ -317,6 +319,7 @@ namespace Main
 			bool replaceItem(const Main::Structures::ItemSerialInfo& serialInfo, std::uint32_t newItemId, const std::string& action);
 
 			bool spawnItemCommand(std::uint32_t itemId, const std::string& action);
+			bool spawnUntradeableItemCommand(std::uint32_t itemId, const std::string& action);
 			bool spawnCoupon(const std::uint32_t total);
 			bool spawnCouponImmediate(const std::uint32_t total);
 
