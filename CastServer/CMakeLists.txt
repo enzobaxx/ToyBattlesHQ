@@ -16,6 +16,7 @@ add_executable(CastServer
 
 target_include_directories(CastServer PUBLIC
         ${CMAKE_CURRENT_LIST_DIR}/include
+        ${CMAKE_CURRENT_LIST_DIR}/../MainServer/include
 )
 
 find_package(directxmath CONFIG REQUIRED)
