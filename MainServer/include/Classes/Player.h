@@ -11,6 +11,7 @@
 #include "../Persistence/MainScheduler.h"
 #include "../Structures/TradeSystem/TradeSystemItem.h"
 #include "../Structures/ClientData/Structures.h"
+#include "Inventory.h"
 
 #include <unordered_map>
 #include <vector>
@@ -39,9 +40,7 @@ namespace Main
 			using TradedItem = Main::Structures::TradeBasicItem;
 
 			AccountInfo m_accountInfo{};
-			std::unordered_map<std::uint64_t, Item> m_itemsByItemNumber{};
-			std::array<EquippedItem, Common::Enums::MAX_ITEMTYPE* Common::Enums::MAX_CHARACTERS> m_equippedItemByCharacter{}; // originally 2D, then flattened
-			std::uint64_t m_totalEquippedItems{};
+			Inventory m_inventory{ m_accountInfo };
 			std::unordered_map<Friend, std::weak_ptr<Session>> m_friends;
 			std::vector<BlockedPlayer> m_blockedAccounts{};
 			Common::Enums::PlayerState m_playerState{};
@@ -65,7 +64,6 @@ namespace Main
 			std::uint16_t m_partyRoomNumber{};
 			bool m_isInMatch{};
 			std::uint32_t m_batteryObtainedInMatch{};
-			std::vector<Item> m_couponItems;
 
 			// Trade system
 			std::uint32_t m_currentlyTradingWithAccountId{};
@@ -73,6 +71,10 @@ namespace Main
 			bool m_hasPlayerLocked{};
 
 		public:
+			// Inventory
+			Inventory& getInventory() noexcept { return m_inventory; }
+			const Inventory& getInventory() const noexcept { return m_inventory; }
+
 			// Account info
 			void setAccountInfo(const AccountInfo& accountInfo);
 			void addBatteryObtainedInMatch(std::uint32_t newBattery);
