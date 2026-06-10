@@ -56,8 +56,8 @@
 #include <source_location>
 #include "boost/beast.hpp"
 #include "Network/Sessions/HttpSession.h"
-#include <Handlers/Lobby/RoomMessage.h>
-#include <Handlers/Lobby/LobbyMessage.h>
+#include <Handlers/Message/RoomMessage.h>
+#include <Handlers/Message/LobbyMessage.h>
 
 namespace Main
 {
