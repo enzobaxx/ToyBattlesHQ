@@ -422,7 +422,7 @@ namespace Cast
 					auto& pkt = m_pendingPositions[index];
 					const auto size = pkt.getDataSize();
 
-					if (totalSize + size > (Common::Constants::maxPacketBytes - sizeof(m_roomTick) - 4))
+					if (totalSize + size > (Common::Constants::maxPacketBytes - 8 - 4)) // 8 bytes header + 4 bytes roomtick
 						break;
 
 					std::memcpy(batchBuffer.data() + totalSize, pkt.getData(), size);
