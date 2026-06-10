@@ -4,8 +4,6 @@
 #include "Handlers/Player/InitialPlayerInfoHandlers.h"
 #include "Handlers/Item/BoughtItemHandler.h"
 #include "Handlers/Player/characterSelectionHandler.h"
-#include "Handlers/Item/BoughtItemHandler.h"
-#include "Handlers/Lobby/MainLobbyChatHandler.h"
 #include "Handlers/Player/EquippedItemsHandler.h"
 #include "Handlers/Player/LobbyAccountInfoHandler.h"
 #include "Handlers/Player/FriendsGeneralHandler.h"
@@ -51,7 +49,6 @@
 #include "Handlers/Trade/TradeCancelHandler.h"
 #include "Handlers/Item/GambleItemHandler.h"
 
-
 // IPC Auth<=>Main
 #include "Handlers/IPC/AuthMainCallbacks.h"
 #include "Handlers/IPC/CastMainCallbacks.h"
@@ -59,6 +56,8 @@
 #include <source_location>
 #include "boost/beast.hpp"
 #include "Network/Sessions/HttpSession.h"
+#include <Handlers/Lobby/RoomMessage.h>
+#include <Handlers/Lobby/LobbyMessage.h>
 
 namespace Main
 {
@@ -219,13 +218,11 @@ namespace Main
 
 		// clientData: {totalToDelete (4bytes), accountID (4bytes), timestamp (4bytes)} => accountID ignored
 		CN::Session::addCallback<CN::PacketType::ENCRYPTED, MN::Session>(103, [&](const Common::Network::Packet& request, std::shared_ptr<Main::Network::Session> session) {
-				START_BENCHMARK
 				std::uint32_t offset = 4; 
 				for (std::uint32_t i = 0; i < Details::parseData<std::uint32_t>(request, 0); ++i) {
 					offset += (i == 0 ? 4 : 8);
 					session->deleteMailbox(static_cast<Main::Enums::MailboxMission>(request.getMission()), Details::parseData<std::uint32_t>(request, offset));
 				}
-				END_BENCHMARK(session.deleteMailbox, session)
 		}); 
 		CN::Session::addCallback<CN::PacketType::ENCRYPTED, MN::Session>(104, [&](const Common::Network::Packet& request,
 			std::shared_ptr<Main::Network::Session> session) { Main::Handlers::handleMailboxCommunication(request, session, m_sessionsManager, Details::parseData<Main::ClientData::MailboxMessage>(request)); });
@@ -286,14 +283,7 @@ namespace Main
 		CN::Session::addCallback<CN::PacketType::ENCRYPTED, MN::Session>(259, [&](const Common::Network::Packet& request,
 			std::shared_ptr<Main::Network::Session> session) { Main::Handlers::handleEliminationNextRound(request, session, m_roomsManager); });
 
-		/*
-		CN::Session::addCallback<CN::PacketType::ENCRYPTED, MN::Session>(202, [&](const Common::Network::Packet& request,
-			std::shared_ptr<Main::Network::Session> session) { Main::Handlers::handleModeEvents(request, session, m_database); });
 
-		CN::Session::addCallback<CN::PacketType::ENCRYPTED, MN::Session>(232, [&](const Common::Network::Packet& request,
-			std::shared_ptr<Main::Network::Session> session) { Main::Handlers::handleMapEvents(request, session, m_database); });
-		*/
-				
 		CN::Session::addCallback<CN::PacketType::ENCRYPTED, MN::Session>(163, [&](const Common::Network::Packet& request,
 			std::shared_ptr<Main::Network::Session> session) { Main::Handlers::handleJoinAndInvites(request, session, m_roomsManager, m_sessionsManager, m_serverId); });
 		
@@ -306,13 +296,7 @@ namespace Main
 		// CTB respawn 
 		CN::Session::addCallback<CN::PacketType::ENCRYPTED, MN::Session>(160, [&](const Common::Network::Packet& request,
 			std::shared_ptr<Main::Network::Session> session) { Main::Handlers::unknown(request, session, m_roomsManager); });
-		
-		// Bomb Battle for host
-		/*
-		CN::Session::addCallback<CN::PacketType::ENCRYPTED, MN::Session>(163, [&](const Common::Network::Packet& request,
-			std::shared_ptr<Main::Network::Session> session) { Main::Handlers::unknown(request, session, m_roomsManager); });
-			*/
-
+	
 		// Boss battle - respawning
 		CN::Session::addCallback<CN::PacketType::ENCRYPTED, MN::Session>(329, [&](const Common::Network::Packet& request,
 			std::shared_ptr<Main::Network::Session> session) { session->respawnBossBattle(); });
