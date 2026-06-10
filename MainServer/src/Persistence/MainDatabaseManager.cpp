@@ -60,7 +60,6 @@ namespace Main
             try { stmt->execute("CREATE INDEX IF NOT EXISTS idx_useritems_account_item ON UserItems(AccountID, ItemNumber)"); }catch (...) {}
 
             try { stmt->execute("ALTER TABLE Users ADD COLUMN IF NOT EXISTS CanUpdateNickname BOOLEAN NOT NULL DEFAULT 0"); } catch (...) {}
-            try { stmt->execute("UPDATE Users SET CanUpdateNickname = 1 WHERE CanUpdateNickname = 0 AND AccountID IS NOT NULL"); } catch (...) {}
         }
 
         void PersistentDatabase::connectWithRetry()
