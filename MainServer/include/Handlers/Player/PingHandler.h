@@ -22,7 +22,7 @@ namespace Main
             if (Main::Classes::Room* room = roomsManager.getRoomByNumber(session->getPlayer().getRoomNumber());
                 room && request.getMission() == 1)
             {
-                session->setPing(pingData.ping);
+                session->getPlayer().setPing(pingData.ping);
                 const std::pair<Main::ClientData::Ping, Main::Structures::UniqueId> resp{ pingData, session->getAccountInfo().uniqueId };
 
                 Common::Network::Packet response;

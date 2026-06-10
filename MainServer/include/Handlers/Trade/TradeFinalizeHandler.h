@@ -34,37 +34,37 @@ PACK_POP()
 			Common::Network::Packet response;
 			response.setTcpHeader(request.getSession(), Common::Enums::USER_LARGE_ENCRYPTION);
 			response.setOrder(request.getOrder());
-			if (auto targetSession = sessionsManager.getSessionByAccountId(session->getCurrentlyTradingWithAccountId()))
+			if (auto targetSession = sessionsManager.getSessionByAccountId(session->getPlayer().getCurrentlyTradingWithAccountId()))
 			{
-				if (targetSession->hasPlayerLocked())
+				if (targetSession->getPlayer().hasPlayerLocked())
 				{
 					session->setPlayerState(Common::Enums::PlayerState::STATE_INVENTORY);
 					targetSession->setPlayerState(Common::Enums::PlayerState::STATE_INVENTORY);
 					// The other player has confirmed the trade, we can proceed
 					response.setOrder(199);
 
-					auto selfTradedItems = session->getTradedItems();
-					auto targetTradedItems = targetSession->getTradedItems();
+					auto selfTradedItems = session->getPlayer().getTradedItems();
+					auto targetTradedItems = targetSession->getPlayer().getTradedItems();
 
-					if (!targetSession->getPlayer().hasEnoughInventorySpace(selfTradedItems.size()))
+					if (!targetSession->getPlayer().getInventory().hasEnoughInventorySpace(selfTradedItems.size()))
 					{
 						session->sendMessage("Error: the other player does not have enough inventory space. Cannot proceed!");
 						targetSession->sendMessage("Error: you do not have enough inventory space. Cannot proceed!");
 						return;
 					}
-					else if (!session->getPlayer().hasEnoughInventorySpace(targetTradedItems.size()))
+					else if (!session->getPlayer().getInventory().hasEnoughInventorySpace(targetTradedItems.size()))
 					{
 						targetSession->sendMessage("Error: the other player does not have enough inventory space. Cannot proceed!");
 						session->sendMessage("Error: you do not have enough inventory space. Cannot proceed!");
 						return;
 					}
 
-					std::uint64_t targetLatestItemNumber = targetSession->getPlayer().getLatestItemNumber();
-					std::uint64_t selfLatestItemNumber = session->getPlayer().getLatestItemNumber();
+					std::uint64_t targetLatestItemNumber = targetSession->getPlayer().getInventory().getLatestItemNumber();
+					std::uint64_t selfLatestItemNumber = session->getPlayer().getInventory().getLatestItemNumber();
 
 					// Self
 					TradeUnusedFinalItem unusedFinalTradeItem;
-					session->setAccountMicroPoints(session->getAccountInfo().microPoints - 5000 * session->getTradedItems().size());
+					session->setAccountMicroPoints(session->getAccountInfo().microPoints - 5000 * session->getPlayer().getTradedItems().size());
 					session->sendCurrency();
 					unusedFinalTradeItem.totalNewMp = session->getAccountInfo().microPoints;
 					response.setData(reinterpret_cast<std::uint8_t*>(&unusedFinalTradeItem), sizeof(unusedFinalTradeItem));
@@ -72,11 +72,11 @@ PACK_POP()
 					{
 						current.itemSerialInfo.itemNumber = ++targetLatestItemNumber;
 					}
-					targetSession->setLatestItemNumber(targetLatestItemNumber);
+					targetSession->getPlayer().getInventory().setLatestItemNumber(targetLatestItemNumber);
 					session->asyncWrite(response);
 
 					// Target
-					targetSession->setAccountMicroPoints(targetSession->getAccountInfo().microPoints - 5000 * targetSession->getTradedItems().size());
+					targetSession->setAccountMicroPoints(targetSession->getAccountInfo().microPoints - 5000 * targetSession->getPlayer().getTradedItems().size());
 					targetSession->sendCurrency();
 					unusedFinalTradeItem.totalNewMp = targetSession->getAccountInfo().microPoints;
 					response.setData(reinterpret_cast<std::uint8_t*>(&unusedFinalTradeItem), sizeof(unusedFinalTradeItem));
@@ -84,13 +84,13 @@ PACK_POP()
 					{
 						current.itemSerialInfo.itemNumber = ++selfLatestItemNumber;
 					}
-					session->setLatestItemNumber(selfLatestItemNumber);
+					session->getPlayer().getInventory().setLatestItemNumber(selfLatestItemNumber);
 					targetSession->asyncWrite(response);
-					session->deleteItems(session->getTradedItems(), "Item deleted after it was traded to " + std::string{targetSession->getPlayer().getPlayerName()}
+					session->deleteItems(session->getPlayer().getTradedItems(), "Item deleted after it was traded to " + std::string{targetSession->getPlayer().getPlayerName()}
 						+ " (target AID: " + std::to_string(targetSession->getAccountInfo().accountID) + ")");
 					session->resetTradeInfo();
 
-					targetSession->deleteItems(targetSession->getTradedItems(), "Item deleted after it was traded to " + std::string{ session->getPlayer().getPlayerName() }
+					targetSession->deleteItems(targetSession->getPlayer().getTradedItems(), "Item deleted after it was traded to " + std::string{ session->getPlayer().getPlayerName() }
 						+ " (target AID: " + std::to_string(session->getAccountInfo().accountID) + ")");
 					targetSession->spawnItems(selfTradedItems, "Item received from trade, from user " + std::string{ session->getPlayer().getPlayerName() }
 					+ " (AID: " + std::to_string(session->getAccountInfo().accountID) + ")");
@@ -99,7 +99,7 @@ PACK_POP()
 					targetSession->resetTradeInfo();
 
 				}
-				else if (session->hasPlayerLocked())
+				else if (session->getPlayer().hasPlayerLocked())
 				{
 					// The player has already clicked "Confirm", but tries to click "Confirm" again ==> Tell them that both players must confirm in this case
 					response.setExtra(Main::Enums::TradeSystemExtra::BOTH_PLAYERS_MUST_CONFIRM_TRADE_BEFORE_FINALIZATION);
@@ -111,7 +111,7 @@ PACK_POP()
 				else
 				{
 					// The other player has not yet confirmed the trade and neither did we, notify the other player that we've confirmed the trade now
-					session->lockTrade();
+					session->getPlayer().lockTrade();
 					response.setOrder(197);
 					response.setExtra(Main::Enums::TradeSystemExtra::TRADE_CONFIRMED_NOTIFY_OTHER_PLAYER);
 					targetSession->asyncWrite(response);

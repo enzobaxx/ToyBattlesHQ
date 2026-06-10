@@ -37,7 +37,7 @@ namespace Main
 				for (std::uint32_t idx = 0; idx < request.getOption(); ++idx)
 				{
 					const ItemSerialInfo itemSerialInfoToProlong = Main::Details::parseData<ItemSerialInfo>(request, idx * 8); 
-					const auto itemIdOpt = player.findItemIdBySerialInfo(itemSerialInfoToProlong);
+					const auto itemIdOpt = player.getInventory().findItemIdBySerialInfo(itemSerialInfoToProlong);
 					if (!itemIdOpt)
 					{
 						session->sendMessage("[handleBoughtItem] error: bought item not found through serial info");
@@ -75,7 +75,7 @@ namespace Main
 			}
 			else 
 			{ // buy new item
-				std::uint64_t latestItemNumber = player.getLatestItemNumber();
+				std::uint64_t latestItemNumber = player.getInventory().getLatestItemNumber();
 				std::vector<Main::Structures::BoughtItem> boughtItems; 
 
 				for (std::uint32_t idx = 0; idx < request.getOption(); ++idx)
@@ -121,7 +121,7 @@ namespace Main
 		inline void handleCouponBoughtItem(const Common::Network::Packet& request, std::shared_ptr<Main::Network::Session> session)
 		{
 			const auto& player = session->getPlayer();
-			std::uint64_t latestItemNumber = player.getLatestItemNumber();
+			std::uint64_t latestItemNumber = player.getInventory().getLatestItemNumber();
 			std::vector<Main::Structures::BoughtItem> boughtItems;
 			std::uint32_t totalCouponsSpent = 0;
 

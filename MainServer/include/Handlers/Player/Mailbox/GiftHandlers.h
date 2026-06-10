@@ -24,7 +24,7 @@ namespace Main
 		inline void handleMailboxGiftSend(const Common::Network::Packet& request, std::shared_ptr<Main::Network::Session> session, std::uint32_t serverId)
 		{
 			auto response = request;
-			auto latestItemNumber = session->getPlayer().getLatestItemNumber();
+			auto latestItemNumber = session->getPlayer().getInventory().getLatestItemNumber();
 			START_BENCHMARK
 			if (request.getExtra() == 53)
 			{
@@ -37,7 +37,7 @@ namespace Main
 						Main::Structures::Giftbox2 giftbox{ *itemIdOpt };
 						giftbox.serialInfo.itemNumber = ++latestItemNumber;
 						giftbox.serialInfo.m_serverId = serverId;
-						session->setLatestItemNumber(latestItemNumber);
+						session->getPlayer().getInventory().setLatestItemNumber(latestItemNumber);
 						const std::uint32_t duration = Main::CdbUtils::getItemDuration(giftbox.itemId.itemId);
 						giftbox.expiration = duration <= 3 ? duration : static_cast<time32_t>(std::time(0)) + duration;
 

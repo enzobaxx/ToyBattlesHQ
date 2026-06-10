@@ -53,7 +53,7 @@ namespace Main
                 auto serialInfo = Main::Details::parseData<Main::Structures::ItemSerialInfo>(request, i * sizeof(Main::Structures::ItemSerialInfo));
                 serialInfos.push_back(serialInfo);
 
-                if (auto idAndDurability = session->getPlayer().findItemIdAndDurabilityBySerialInfo(serialInfo))
+                if (auto idAndDurability = session->getPlayer().getInventory().findItemIdAndDurabilityBySerialInfo(serialInfo))
                 {
                     const auto baseItemDurability = Main::CdbUtils::getItemDurability(idAndDurability->first);
                     if (!baseItemDurability)
@@ -86,7 +86,7 @@ namespace Main
 
             for (const auto& serialInfo : itemRepair.serialInfo)
             {
-                if (auto idAndDurability = session->getPlayer().findItemIdAndDurabilityBySerialInfo(serialInfo))
+                if (auto idAndDurability = session->getPlayer().getInventory().findItemIdAndDurabilityBySerialInfo(serialInfo))
                 {
                     const auto baseItemDurability = Main::CdbUtils::getItemDurability(idAndDurability->first);
                     if (baseItemDurability)

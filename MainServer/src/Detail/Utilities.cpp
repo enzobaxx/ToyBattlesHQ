@@ -27,7 +27,7 @@ namespace Main
 				}
 
 				const std::size_t offset = accountInfo.latestSelectedCharacter * Common::Enums::MAX_ITEMTYPE;
-				const auto& targetEquippedItems = player.getEquippedItems();
+				const auto& targetEquippedItems = player.getInventory().getEquippedItems();
 				for (std::size_t i = 0; i < Common::Enums::MAX_ITEMTYPE; ++i)
 				{
 					if (offset + i >= targetEquippedItems.size()) return;

@@ -108,7 +108,7 @@ namespace Main
 			template <typename Predicate>
 			bool checkEquippedItems(Predicate&& pred, const std::string& failMessage)
 			{
-				const auto equippedItems = m_player.getEquippedItemsFor(m_player.getAccountInfo().latestSelectedCharacter);
+				const auto equippedItems = m_player.getInventory().getEquippedItemsFor(m_player.getAccountInfo().latestSelectedCharacter);
 
 				for (const auto& equippedItem : equippedItems)
 				{
@@ -140,7 +140,7 @@ namespace Main
 				{
 					if (CT == Main::Enums::ITEM_COUPON)
 					{
-						if (m_player.getTotalCoupons() >= 250)
+						if (m_player.getInventory().getTotalCoupons() >= 250)
 						{
 							sendMessage("Max coupon limit (250) has been reached. Open this box when you have less coupons!");
 						}
@@ -158,6 +158,7 @@ namespace Main
 				}
 			}
 
+			Main::Classes::Player& getPlayer() noexcept { return m_player; }
 			const Main::Classes::Player& getPlayer() const noexcept { return m_player; }
 
 			bool tryRemoveCoupons(std::uint32_t totalCouponsNeeded);
@@ -196,7 +197,6 @@ namespace Main
 
 			void setReceivedGiftboxes(const std::vector<Main::Structures::Giftbox>& giftboxes);
 
-			void setMailbox(const std::vector<Main::Structures::Mailbox>& mailbox, bool sent);
 
 			void sendAccountInfoConfirmation();
 
@@ -204,7 +204,6 @@ namespace Main
 
 			const AccountInfo& getAccountInfo() const;
 
-			void addBatteryObtainedInMatch(std::uint32_t newBattery);
 
 			void setMatchStartTime();
 
@@ -220,7 +219,6 @@ namespace Main
 
 			void sendFriendList(std::vector<Main::Structures::Friend>& pendingFriends, std::uint32_t serverId);
 
-			std::unordered_map<Main::Structures::Friend, std::weak_ptr<Session>>& getFriendSessions();
 
 			void sendFriendRequest(std::shared_ptr<Main::Network::Session> targetSession, const char* nickname);
 
@@ -238,9 +236,7 @@ namespace Main
 		public:
 			void sendAccountInfo(Common::Network::Packet& response);
 
-			void setPing(std::uint16_t ping);
 
-			void setFriendList(const std::vector<Main::Structures::Friend>& friendlist);
 
 			void logFriend(Main::Enums::FriendLogType logType, std::uint32_t targetAccountId);
 
@@ -254,7 +250,6 @@ namespace Main
 
 			void sendBlockedPlayers();
 
-			void setBlockedPlayers(const std::vector<Main::Structures::BlockedPlayer>& blockedPlayers);
 
 			void setIsInvisible(bool value);
 
@@ -348,7 +343,6 @@ namespace Main
 
 			void updateSingleWaveScore(std::uint32_t score, std::uint32_t stage);
 
-			void setLatestItemNumber(std::uint64_t itemNum);
 
 			bool banAccount(std::uint64_t daysDuration, const std::string& reason, Common::Enums::PlayerGrade grade = Common::Enums::GRADE_MOD);
 
@@ -366,9 +360,7 @@ namespace Main
 
 			bool enableVotekick();
 
-			void setRoomCreationDisabled();
 
-			void setVotekickDisabled();
 
 			void setMute(Main::Structures::MuteInfo val);
 
@@ -386,15 +378,11 @@ namespace Main
 
 			void setLuckyPoints(std::uint32_t points);
 
-			void setRoomNumber(std::uint16_t roomNumber);
 
-			void setPartyRoomNumber(std::uint16_t number);
 
 			void leaveRoom();
 
-			void decreaseRoomNumber();
 
-			void setIsInMatch(bool val);
 
 			void sendBattery(std::uint32_t battery);
 
@@ -415,19 +403,13 @@ namespace Main
 
 			void setLatestMonthlyRewardDate(const std::string& date) { m_player.setLatestMonthlyRewardDate(date); }
 
-			void setCurrentlyTradingWithAccountId(std::uint32_t targetAccountId);
 
-			std::uint32_t getCurrentlyTradingWithAccountId() const;
 
-			bool addTradedItem(std::uint32_t itemId, const Main::Structures::ItemSerialInfo& serialInfo);
 
 			bool canTradeItem(std::uint32_t itemNumber);
 
-			void removeTradedItem(const Main::Structures::ItemSerialInfo& serialInfo);
 
-			void resetTradedItems();
 
-			const std::vector<Main::Structures::TradeBasicItem>& getTradedItems() const;
 
 			void temporarilySealAllItems();
 
@@ -441,9 +423,7 @@ namespace Main
 
 			void addItemFromTrade(const Main::Structures::TradeBasicItem& tradeItem);
 
-			void lockTrade();
 
-			bool hasPlayerLocked() const;
 
 			void resetTradeInfo();
 

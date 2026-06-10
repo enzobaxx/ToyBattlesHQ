@@ -83,7 +83,7 @@ namespace Main
 			{
 				Main::Ipc::M2C_sendRoomNumber(session->getId(), room.getRoomNumber());
 				room.setStateFor(session->getAccountInfo().uniqueId, Common::Enums::STATE_WAITING);
-				session->setRoomNumber(room.getRoomNumber());
+				session->getPlayer().setRoomNumber(room.getRoomNumber());
 				const std::pair<std::uint16_t, std::uint16_t> roomInfo{ room.getRoomNumber() - 1, 2 }; // {roomNum, unk}
 				response.setExtra(RoomCreationExtra::CREATION_SUCCESS);
 				response.setData(reinterpret_cast<const std::uint8_t*>(&roomInfo), sizeof(roomInfo));

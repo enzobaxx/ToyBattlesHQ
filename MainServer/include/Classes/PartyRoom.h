@@ -58,7 +58,7 @@ namespace Main
 				waitingPlayerInfo.clanContribution = selfInfo.clanContribution;
 
 				m_players.emplace_back(waitingPlayerInfo, session);
-				session->setPartyRoomNumber(m_partyInfo.clanRoomNumber);
+				session->getPlayer().setPartyRoomNumber(m_partyInfo.clanRoomNumber);
 
 				session->sendMessage("Created party room number: " + std::to_string(clanRoomNumber), Main::Enums::TIP);
 				//logPartyState("Party Created");
@@ -79,7 +79,7 @@ namespace Main
 
 				m_players.emplace_back(waitingPlayerInfo, session);
 				++m_partyInfo.numPlayers;
-				session->setPartyRoomNumber(m_partyInfo.clanRoomNumber);
+				session->getPlayer().setPartyRoomNumber(m_partyInfo.clanRoomNumber);
 
 				session->sendMessage("Joined party room number: " + std::to_string(m_partyInfo.clanRoomNumber), Main::Enums::TIP);
 				//logPartyState("Player Added");
@@ -106,7 +106,7 @@ namespace Main
 							s->leaveRoom();
 							m_isRegistered = false;
 						}
-						s->setRoomNumber(num);
+						s->getPlayer().setRoomNumber(num);
 					}
 				}
 				//logPartyState("ClanMatchRoomNumber Set");
@@ -152,7 +152,7 @@ namespace Main
 					if (auto session = weakSession.lock())
 					{
 						session->asyncWrite(removePlayerPacket);
-						session->setPartyRoomNumber(0);
+						session->getPlayer().setPartyRoomNumber(0);
 						session->leaveRoom();
 					}
 				}
@@ -238,7 +238,7 @@ namespace Main
 
 				if (auto session = it->second.lock())
 				{
-					session->setPartyRoomNumber(0);
+					session->getPlayer().setPartyRoomNumber(0);
 					session->leaveRoom();
 					session->sendMessage("You left the party (party number: " + std::to_string(m_partyInfo.clanRoomNumber) + ")");
 				}

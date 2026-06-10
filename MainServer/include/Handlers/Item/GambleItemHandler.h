@@ -36,7 +36,7 @@ namespace Main
 				const auto& itemGambleItems = cdbItems::getGambleItems();
 				const auto& weaponGambleItems = cdbWeapons::getGambleItems();
 
-				const auto foundId = session->getPlayer().findItemIdBySerialInfo(itemSerialInfo);
+				const auto foundId = session->getPlayer().getInventory().findItemIdBySerialInfo(itemSerialInfo);
 				if (foundId == std::nullopt)
 				{
 					session->sendMessage("[Handlers::handleGambleItem] error: foundId == nullopt, please report this issue");

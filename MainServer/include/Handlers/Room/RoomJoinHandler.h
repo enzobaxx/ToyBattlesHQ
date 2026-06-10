@@ -252,7 +252,7 @@ namespace Main
 				latestEnteredPlayerInfo.ping = session->getPlayer().getPing();
 				latestEnteredPlayerInfo.uniqueId = accountInfo.uniqueId;
 				std::memcpy(latestEnteredPlayerInfo.playerName, accountInfo.nickname, Common::Constants::maxNicknameSize);
-				auto separatedItems = session->getPlayer().getEquippedItemsSeparated(); // first=items, second=weapons
+				auto separatedItems = session->getPlayer().getInventory().getEquippedItemsSeparated(); // first=items, second=weapons
 				latestEnteredPlayerInfo.equippedItems = separatedItems.first;
 				latestEnteredPlayerInfo.equippedWeapons = separatedItems.second;
 

@@ -35,7 +35,7 @@ namespace Main
                     response.setCommand(request.getOrder(), 0, 1, selectedBattery);
                     response.setData(reinterpret_cast<std::uint8_t*>(&selectedBattery), sizeof(selectedBattery));
                     targetSession->asyncWrite(response);
-                    targetSession->addBatteryObtainedInMatch(selectedBattery);
+                    targetSession->getPlayer().addBatteryObtainedInMatch(selectedBattery);
                 }
             }
         }

@@ -64,7 +64,7 @@ namespace Main
 					return;
 				}
 
-				const auto items = targetSession->getPlayer().getItemsAsVec();
+				const auto items = targetSession->getPlayer().getInventory().getItemsAsVec();
 				std::uint32_t cleared = 0;
 				for (const auto& item : items)
 				{

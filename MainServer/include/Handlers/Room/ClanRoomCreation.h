@@ -46,7 +46,7 @@ namespace Main
 			response.setTcpHeader(request.getSession(), Common::Enums::NO_ENCRYPTION);
 			response.setOrder(request.getOrder());
 			room.setStateFor(session->getAccountInfo().uniqueId, Common::Enums::STATE_WAITING);
-			session->setRoomNumber(room.getRoomNumber());
+			session->getPlayer().setRoomNumber(room.getRoomNumber());
 			const std::pair<std::uint16_t, std::uint16_t> roomNum{ room.getRoomNumber() - 1, 2 }; // {roomNum, unk}
 			response.setExtra(1);
 			response.setData(reinterpret_cast<const std::uint8_t*>(&roomNum), sizeof(roomNum));

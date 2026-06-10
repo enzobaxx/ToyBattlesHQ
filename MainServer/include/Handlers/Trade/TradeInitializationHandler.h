@@ -17,7 +17,7 @@ namespace Main
 			Common::Network::Packet& response)
 		{
 			const auto& selfAccountInfo = session->getAccountInfo();
-			const auto& equippedItems = session->getPlayer().getEquippedItemsFor(selfAccountInfo.latestSelectedCharacter);
+			const auto& equippedItems = session->getPlayer().getInventory().getEquippedItemsFor(selfAccountInfo.latestSelectedCharacter);
 			std::uint32_t selfEquippedHair = 0;
 			std::uint32_t selfEquippedEyes = 0;
 
@@ -41,7 +41,7 @@ namespace Main
 				selfEquippedHair, selfEquippedEyes };
 			response.setData(reinterpret_cast<std::uint8_t*>(&tradePlayerInfo), sizeof(tradePlayerInfo));
 			targetSession->asyncWrite(response);
-			targetSession->setCurrentlyTradingWithAccountId(selfAccountInfo.accountID);
+			targetSession->getPlayer().setCurrentlyTradingWithAccountId(selfAccountInfo.accountID);
 		}
 
 		inline void handleTradeInitialization(const Common::Network::Packet& request, std::shared_ptr<Main::Network::Session> session, 

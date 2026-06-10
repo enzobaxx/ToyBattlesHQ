@@ -169,7 +169,7 @@ namespace Main
 			Common::Network::Packet response = request;
 			response.setCommand(66, 0, 17, 2); // single wave ack
 
-			if (session->getPlayer().hasEnoughInventorySpace(1))
+			if (session->getPlayer().getInventory().hasEnoughInventorySpace(1))
 			{
 				constexpr std::uint64_t threeMinsMs = 3 * 60 * 1000;
 				constexpr std::uint64_t sevenMinsMs = 7 * 60 * 1000;
@@ -177,8 +177,8 @@ namespace Main
 				if (req.type == 1 && req.stage == 10 && (now - session->m_matchStartTime >= threeMinsMs))
 				{
 					Main::Structures::BoughtItem reward{ Common::Constants::singlewaveEasyBox };
-					reward.serialInfo.itemNumber = session->getPlayer().getLatestItemNumber() + 1;
-					session->setLatestItemNumber(reward.serialInfo.itemNumber);
+					reward.serialInfo.itemNumber = session->getPlayer().getInventory().getLatestItemNumber() + 1;
+					session->getPlayer().getInventory().setLatestItemNumber(reward.serialInfo.itemNumber);
 					response.setData(reinterpret_cast<std::uint8_t*>(&reward), sizeof(reward));
 					session->addItem(Main::Structures::Item{ reward });
 					session->m_matchStartTime = now;
@@ -188,8 +188,8 @@ namespace Main
 					if (req.stage == 20 && (now - session->m_matchStartTime >= sevenMinsMs))
 					{
 						Main::Structures::BoughtItem reward{ Common::Constants::singlewaveHardBox };
-						reward.serialInfo.itemNumber = session->getPlayer().getLatestItemNumber() + 1;
-						session->setLatestItemNumber(reward.serialInfo.itemNumber);
+						reward.serialInfo.itemNumber = session->getPlayer().getInventory().getLatestItemNumber() + 1;
+						session->getPlayer().getInventory().setLatestItemNumber(reward.serialInfo.itemNumber);
 						response.setData(reinterpret_cast<std::uint8_t*>(&reward), sizeof(reward));
 						session->addItem(Main::Structures::Item{ reward });
 						session->m_matchStartTime = now;
@@ -256,7 +256,7 @@ namespace Main
 
 			std::uint32_t totalExpBonus = 0;
 			std::uint32_t totalMpBonus = 0;
-			const auto& equippedItems = targetSession->getPlayer().getEquippedItemsFor(targetSession->getAccountInfo().latestSelectedCharacter);
+			const auto& equippedItems = targetSession->getPlayer().getInventory().getEquippedItemsFor(targetSession->getAccountInfo().latestSelectedCharacter);
 			for (const auto& currentItem : equippedItems)
 			{
 				if (currentItem.serialInfo.itemNumber == 0) continue;

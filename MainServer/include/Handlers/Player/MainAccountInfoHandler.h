@@ -39,7 +39,7 @@ namespace Main
 
 			const auto friends = scheduler.immediatePersist(std::source_location::current(),
 				&Main::Persistence::PersistentDatabase::loadFriends, accountInfo.accountID);
-			session->setFriendList(friends);
+			session->getPlayer().setFriendList(friends);
 			for (const auto& currentFriend : friends)
 			{
 				if (auto targetSession = sessionsManager.getSessionByAccountId(currentFriend.targetAccountId))
@@ -51,21 +51,21 @@ namespace Main
 			}
 
 			
-			session->setBlockedPlayers(scheduler.immediatePersist(std::source_location::current(),
+			session->getPlayer().setBlockedPlayers(scheduler.immediatePersist(std::source_location::current(),
 				&Main::Persistence::PersistentDatabase::loadBlockedPlayers, accountInfo.accountID));
 			session->setMute(scheduler.immediatePersist(std::source_location::current(), &Main::Persistence::PersistentDatabase::isMuted, accountInfo.accountID));
 			if (scheduler.immediatePersist(std::source_location::current(), &Main::Persistence::PersistentDatabase::isRoomCreationDisabled, accountInfo.accountID))
 			{
-				session->setRoomCreationDisabled();
+				session->getPlayer().disableRoomCreation();
 			}
 			if (scheduler.immediatePersist(std::source_location::current(), &Main::Persistence::PersistentDatabase::isVotekickDisabled, accountInfo.accountID))
 			{
-				session->setVotekickDisabled();
+				session->getPlayer().disableVotekick();
 			}
 			auto [sentMailboxes, receivedMailboxes] = scheduler.immediatePersist(std::source_location::current(), 
 				&Main::Persistence::PersistentDatabase::loadMailboxes, accountInfo.accountID);
-			session->setMailbox(sentMailboxes, true);
-			session->setMailbox(receivedMailboxes, false);
+			session->getPlayer().setMailbox(sentMailboxes, true);
+			session->getPlayer().setMailbox(receivedMailboxes, false);
 			session->setReceivedGiftboxes(scheduler.immediatePersist(std::source_location::current(), 
 				&Main::Persistence::PersistentDatabase::loadReceivedGiftboxes, accountInfo.accountID));
 			session->setLatestWeeklyRewardDate(scheduler.immediatePersist(std::source_location::current(),

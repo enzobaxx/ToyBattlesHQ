@@ -148,21 +148,6 @@ namespace Main
 			m_accountInfo.nickname[sizeof(m_accountInfo.nickname) - 1] = '\0';
 		}
 
-		bool Player::hasEnoughInventorySpace(std::uint16_t totalNewItems) const
-		{
-			return m_inventory.hasEnoughInventorySpace(totalNewItems);
-		}
-
-		Main::ClientData::CouponItemUseRet Player::tryRemoveCoupons(std::uint32_t totalCouponsNeeded)
-		{
-			return m_inventory.tryRemoveCoupons(totalCouponsNeeded);
-		}
-
-		Main::ClientData::CouponItemAddRet Player::addCoupon(std::uint32_t stockToAdd)
-		{
-			return m_inventory.addCoupon(stockToAdd);
-		}
-
 		void Player::setPlayerState(Common::Enums::PlayerState playerState)
 		{
 			m_playerState = playerState;
@@ -296,12 +281,6 @@ namespace Main
 			m_friends[ffriend] = std::weak_ptr<Session>{};
 		}
 
-		std::optional<Main::Structures::ItemSerialInfo> Player::getBossBattleTicket() const
-		{
-			return m_inventory.getBossBattleTicket();
-		}
-
-
 		std::optional<Main::Structures::Friend> Player::addOnlineFriend(std::shared_ptr<Main::Network::Session> session)
 		{
 			if (session)
@@ -325,174 +304,6 @@ namespace Main
 				}
 			}
 			return false;
-		}
-
-		void Player::setUnequippedItems(const std::vector<Item>& items)
-		{
-			m_inventory.setUnequippedItems(items);
-		}
-
-		std::optional<std::uint32_t> Player::findItemIdBySerialInfo(const Main::Structures::ItemSerialInfo& itemSerialInfo) const
-		{
-			return m_inventory.findItemIdBySerialInfo(itemSerialInfo);
-		}
-
-		std::optional<std::pair<std::uint32_t, std::uint32_t>>
-			Player::findItemIdAndDurabilityBySerialInfo(const Main::Structures::ItemSerialInfo& itemSerialInfo) const
-		{
-			return m_inventory.findItemIdAndDurabilityBySerialInfo(itemSerialInfo);
-		}
-
-		bool Player::isItemTradeable(const Main::Structures::ItemSerialInfo& itemSerialInfo) const
-		{
-			return m_inventory.isItemTradeable(itemSerialInfo);
-		}
-
-		std::optional<std::uint64_t> Player::findMaxItemNumber() const
-		{
-			return m_inventory.findMaxItemNumber();
-		}
-
-		bool Player::prolongItem(const Main::Structures::ItemSerialInfo& newItemSerialInfo)
-		{
-			return m_inventory.prolongItem(newItemSerialInfo);
-		}
-
-		std::vector<EquippedItem> Player::getEquippedItemsFor(std::uint16_t characterID) const
-		{
-			return m_inventory.getEquippedItemsFor(characterID);
-		}
-
-		std::vector<EquippedItem> Player::getUnlimitedEquippedWeaponsFor(std::uint16_t characterID) const
-		{
-			return m_inventory.getUnlimitedEquippedWeaponsFor(characterID);
-		}
-
-		const std::array<EquippedItem, Common::Enums::MAX_CHARACTERS * Common::Enums::MAX_ITEMTYPE>& Player::getEquippedItems() const
-		{
-			return m_inventory.getEquippedItems();
-		}
-
-		const std::unordered_map<std::uint64_t, Item>& Player::getItems() const
-		{
-			return m_inventory.getItems();
-		}
-
-		const std::vector<Item> Player::getItemsAsVec() const
-		{
-			return m_inventory.getItemsAsVec();
-		}
-
-		bool Player::deleteItemBasic(const Main::Structures::ItemSerialInfo& itemSerialInfo)
-		{
-			return m_inventory.deleteItemBasic(itemSerialInfo);
-		}
-
-		void Player::addItems(const std::vector<Item>& items)
-		{
-			m_inventory.addItems(items);
-		}
-
-		std::size_t Player::getTotalCoupons() const noexcept
-		{
-			return m_inventory.getTotalCoupons();
-		}
-
-		void Player::addTotalCouponItems(const Item& item)
-		{
-			m_inventory.addTotalCouponItems(item);
-		}
-
-		void Player::addItem(const Item& item)
-		{
-			m_inventory.addItem(item);
-		}
-
-		void Player::addItems(const std::vector<Main::Structures::BoxItem>& boxItems)
-		{
-			m_inventory.addItems(boxItems);
-		}
-
-		void Player::addItems(const std::vector<BoughtItem>& boughtItems)
-		{
-			m_inventory.addItems(boughtItems);
-		}
-
-		void Player::setEquippedItems(const std::unordered_map<std::uint16_t, std::vector<EquippedItem>>& equippedItems)
-		{
-			m_inventory.setEquippedItems(equippedItems);
-		}
-
-		std::pair<std::vector<Main::ClientData::SingleWeaponDurabilityDamage>,
-			std::vector<std::pair<std::uint32_t, std::uint64_t>>> Player::reduceEquippedItemsDurabilities(
-			std::size_t characterID, std::uint32_t weaponRestrictionValue)
-		{
-			return m_inventory.reduceEquippedItemsDurabilities(characterID, weaponRestrictionValue);
-		}
-
-		bool Player::updateItemDurabilityByNumber(std::uint32_t itemNumber, std::uint32_t newDurability)
-		{
-			return m_inventory.updateItemDurabilityByNumber(itemNumber, newDurability);
-		}
-
-		std::optional<std::pair<std::uint16_t, std::uint64_t>> Player::addEnergyToItem(const Main::Structures::ItemSerialInfo& itemSerialInfo, std::uint32_t energyAdded)
-		{
-			return m_inventory.addEnergyToItem(itemSerialInfo, energyAdded);
-		}
-
-		std::optional<std::uint16_t> Player::getItemEnergy(const Main::Structures::ItemSerialInfo& itemSerialInfo) const
-		{
-			return m_inventory.getItemEnergy(itemSerialInfo);
-		}
-
-		void Player::unequipItemImpl(std::uint64_t itemType, Main::Persistence::MainScheduler& scheduler, std::uint32_t character)
-		{
-			m_inventory.unequipItemImpl(itemType, scheduler, character);
-		}
-
-		void Player::equipItem(const std::uint16_t itemNumber, Main::Persistence::MainScheduler& scheduler, std::uint32_t character)
-		{
-			m_inventory.equipItem(itemNumber, scheduler, character);
-		}
-
-		std::optional<std::uint64_t> Player::unequipItem(std::uint64_t itemType, Main::Persistence::MainScheduler& scheduler)
-		{
-			return m_inventory.unequipItem(itemType, scheduler);
-		}
-
-		std::uint64_t Player::getTotalEquippedItems() const
-		{
-			return m_inventory.getTotalEquippedItems();
-		}
-
-		std::uint64_t Player::getLatestItemNumber() const
-		{
-			return m_inventory.getLatestItemNumber();
-		}
-
-		void Player::setLatestItemNumber(std::uint64_t itemNum)
-		{
-			m_inventory.setLatestItemNumber(itemNum);
-		}
-
-		std::pair<Common::Enums::MatchItemAction, std::uint32_t> Player::useInstantRespawn(std::uint64_t itemNum)
-		{
-			return m_inventory.useInstantRespawn(itemNum);
-		}
-
-		bool Player::unequipItemIfEquipped(std::uint64_t itemNumber, std::uint32_t characterId, Main::Persistence::MainScheduler& scheduler)
-		{
-			return m_inventory.unequipItemIfEquipped(itemNumber, characterId, scheduler);
-		}
-
-		void Player::equipItemIfNotEquipped(std::uint64_t itemNumber, std::uint32_t characterId, Main::Persistence::MainScheduler& scheduler)
-		{
-			m_inventory.equipItemIfNotEquipped(itemNumber, characterId, scheduler);
-		}
-
-		std::pair<std::array<std::uint32_t, 10>, std::array<std::uint32_t, 7>> Player::getEquippedItemsSeparated() const
-		{
-			return m_inventory.getEquippedItemsSeparated();
 		}
 
 		bool Player::blockAccount(std::uint32_t accountId, const char* nickname)
@@ -699,15 +510,6 @@ namespace Main
 		}
 
 		// Trade system
-		std::vector<Main::Structures::Item> Player::addItems(const std::vector<Main::Structures::TradeBasicItem>& tradedItems)
-		{
-			return m_inventory.addItems(tradedItems);
-		}
-
-		Item Player::addItemFromTrade(TradedItem tradeItem)
-		{
-			return m_inventory.addItemFromTrade(tradeItem);
-		}
 
 		void Player::lockTrade()
 		{

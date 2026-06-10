@@ -26,27 +26,27 @@ namespace Main
 			response.setOrder(request.getOrder());
 
 			std::uint32_t itemID = 0;
-			const auto itemId = session->getPlayer().findItemIdBySerialInfo(itemSerialInfo);
+			const auto itemId = session->getPlayer().getInventory().findItemIdBySerialInfo(itemSerialInfo);
 			if (itemId.has_value()) itemID = *itemId;
 			else return;
 
 			const auto& accountInfo = session->getAccountInfo();
-			if (auto targetSession = sessionsManager.getSessionByAccountId(session->getCurrentlyTradingWithAccountId()))
+			if (auto targetSession = sessionsManager.getSessionByAccountId(session->getPlayer().getCurrentlyTradingWithAccountId()))
 			{
 				Main::Structures::TradeAddedItemDetailed tradeItem{ session->getAccountInfo().accountID, itemSerialInfo, itemID};
 				const auto& targetAccountInfo = targetSession->getAccountInfo();
 
-				const bool targetHasEnoughSpace = targetSession->getPlayer().hasEnoughInventorySpace(session->getTradedItems().size() + 1);
+				const bool targetHasEnoughSpace = targetSession->getPlayer().getInventory().hasEnoughInventorySpace(session->getPlayer().getTradedItems().size() + 1);
 				if (!targetHasEnoughSpace)
 				{
 					response.setExtra(Enums::TradeSystemExtra::TARGET_NOT_ENOUGH_INVENTORY_SPACE);
 					tradeItem.originalItemOwnerAccountId = targetAccountInfo.accountID;
 				}
-				else if (session->getTradedItems().size() > 10)
+				else if (session->getPlayer().getTradedItems().size() > 10)
 				{
 					response.setExtra(Enums::TradeSystemExtra::MAX_NUM_OF_ITEMS_AT_ONCE_REACHED);
 				}
-				else if (accountInfo.microPoints < (5000 * (session->getTradedItems().size() + 1)))
+				else if (accountInfo.microPoints < (5000 * (session->getPlayer().getTradedItems().size() + 1)))
 				{
 					std::vector<std::uint8_t> error(8);
 					std::memcpy(error.data() + 4, &accountInfo.accountID, sizeof(accountInfo.accountID));
@@ -58,7 +58,7 @@ namespace Main
 					session->asyncWrite(response);
 					return;
 				}
-				else if (!session->getPlayer().isItemTradeable(itemSerialInfo))
+				else if (!session->getPlayer().getInventory().isItemTradeable(itemSerialInfo))
 				{ // exploit attempt
 					session->closeSocket();
 					return;
@@ -69,7 +69,7 @@ namespace Main
 					session->sendMessage("[ERROR] This item cannot be traded!");
 					return;
 				}
-				else if (session->addTradedItem(itemID, itemSerialInfo))
+				else if (session->getPlayer().addTradedItem(itemID, itemSerialInfo))
 				{
 					response.setExtra(Enums::TradeSystemExtra::TRADE_SUCCESS);
 				}

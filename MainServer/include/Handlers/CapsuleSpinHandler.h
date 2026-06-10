@@ -168,7 +168,7 @@ namespace Main
 					session->asyncWrite(response);
 					return;
 				}
-				else if (!session->getPlayer().hasEnoughInventorySpace(totalSpins))
+				else if (!session->getPlayer().getInventory().hasEnoughInventorySpace(totalSpins))
 				{
 					response.setExtra(Main::Enums::CapsuleSpinExtra::CAPSULE_SPIN_INVENTORY_FULL);
 					session->asyncWrite(response);
@@ -223,9 +223,9 @@ namespace Main
 					}
 
 					Main::Structures::ItemSerialInfo serialInfo;
-					serialInfo.itemNumber = session->getPlayer().getLatestItemNumber() + 1;
+					serialInfo.itemNumber = session->getPlayer().getInventory().getLatestItemNumber() + 1;
 					Main::Structures::CapsuleSpin capsuleSpin{ wonItemIdAndType->first, serialInfo };
-					session->setLatestItemNumber(capsuleSpin.itemSerialInfo.itemNumber);
+					session->getPlayer().getInventory().setLatestItemNumber(capsuleSpin.itemSerialInfo.itemNumber);
 					Main::Structures::Item capsuleItem{ capsuleSpin };
 					if (session->addItem(capsuleItem))
 					{
