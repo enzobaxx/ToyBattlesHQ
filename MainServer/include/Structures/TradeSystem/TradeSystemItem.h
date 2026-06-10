@@ -2,7 +2,7 @@
 #define TRADE_ADDED_ITEM_H
 
 #include <cstdint>
-#include "../Item/MainItemSerialInfo.h"
+#include "Structures/Item/MainItemSerialInfo.h"
 #include "Macros.h"
 
 // Whenever one player adds an item to the trade system this structure is used

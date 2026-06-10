@@ -1,9 +1,9 @@
 #ifndef TRADE_LOCK_HANDLER_HEADER
 #define TRADE_LOCK_HANDLER_HEADER
 
-#include "../../../include/Network/MainSession.h"
-#include "../../../include/Network/MainSessionManager.h"
-#include "../../../include/MainEnums.h"
+#include "Network/Sessions/MainSession.h"
+#include "Network/MainSessionManager.h"
+#include "MainEnums.h"
 #include "Enums/GameEnums.h"
 #include "Network/Packet.h"
 #include <vector>

@@ -1,11 +1,11 @@
 #ifndef TRADE_ACK_HANDLER_HEADER
 #define TRADE_ACK_HANDLER_HEADER
 
-#include "../../../include/Network/MainSession.h"
-#include "../../../include/Network/MainSessionManager.h"
+#include "Network/Sessions/MainSession.h"
+#include "Network/MainSessionManager.h"
 #include "Enums/GameEnums.h"
-#include "../../../include/MainEnums.h"
-#include "../../../include/Structures/TradeSystem/TradeAck.h"
+#include "MainEnums.h"
+#include "Structures/TradeSystem/TradeAck.h"
 #include "Network/Packet.h"
 #include <vector>
 #include <cstdint>

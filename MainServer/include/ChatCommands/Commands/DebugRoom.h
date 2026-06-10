@@ -2,11 +2,11 @@
 #define DEBUGROOM_COMMAND_HEADER
 
 
-#include "../ICommand.h"
+#include "ChatCommands/ICommand.h"
 #include "Utils/Utils.h"
-#include "../ChatCommands.h"
-#include "../../MainServer.h"
-#include "../../Classes/Room.h"
+#include "ChatCommands/ChatCommands.h"
+#include "MainServer.h"
+#include "Rooms/Room.h"
 
 namespace Main
 {

@@ -1,11 +1,11 @@
 #ifndef COMMAND_GET_ITEM_FAMILY_HEADER
 #define COMMAND_GET_ITEM_FAMILY_HEADER
 
-#include "../ChatCommands.h"
-#include "../ICommand.h"
+#include "ChatCommands/ChatCommands.h"
+#include "ChatCommands/ICommand.h"
 #include "Utils/Utils.h"
-#include "../../MainServer.h"
-#include "../../Detail/CdbUtils.h"
+#include "MainServer.h"
+#include "Detail/CdbUtils.h"
 #include <array>
 #include <vector>
 #include <string>

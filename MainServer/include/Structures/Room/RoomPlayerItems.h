@@ -3,7 +3,7 @@
 
 #include <cstdint>
 #include <array>
-#include "../AccountInfo/MainAccountUniqueId.h"
+#include "Structures/AccountInfo/MainAccountUniqueId.h"
 #include "Macros.h"
 
 // This structure represents the (equipped) items of a single player in a given room

@@ -2,10 +2,10 @@
 #define ONLINE_SIMPLECOMMAND_HEADER
 
 
-#include "../ICommand.h"
+#include "ChatCommands/ICommand.h"
 #include "Utils/Utils.h"
-#include "../ChatCommands.h"
-#include "../../MainServer.h"
+#include "ChatCommands/ChatCommands.h"
+#include "MainServer.h"
 
 namespace Main
 {

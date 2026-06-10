@@ -1,12 +1,12 @@
 #ifndef JOINROOM_INVISIBLE_HEADER
 #define JOINROOM_INVISIBLE_HEADER
 
-#include "../ChatCommands.h"
-#include "../ICommand.h"
+#include "ChatCommands/ChatCommands.h"
+#include "ChatCommands/ICommand.h"
 #include "Utils/Utils.h"
-#include "../../MainServer.h"
-#include "../../Handlers/Room/RoomJoinHandler.h"
-#include "../../Handlers/Room/RoomStartHandler.h"
+#include "MainServer.h"
+#include "Handlers/Room/RoomJoinHandler.h"
+#include "Handlers/Room/RoomStartHandler.h"
 
 namespace Main
 {

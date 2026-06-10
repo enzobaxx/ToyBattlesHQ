@@ -2,11 +2,11 @@
 
 #include <unordered_map>
 #include <functional>
-#include "../../include/Network/MainSessionManager.h"
-#include "../../include/Handlers/Room/RoomLeaveHandler.h"
-#include "../../include/Handlers/Clan/ClanRoomLeaveHandler.h"
-#include "../../include/Classes/Room.h"
-#include "../../include/Handlers/Room/MatchLeaveHandler.h"
+#include "Network/MainSessionManager.h"
+#include "Handlers/Room/RoomLeaveHandler.h"
+#include "Handlers/Clan/ClanRoomLeaveHandler.h"
+#include "Rooms/Room.h"
+#include "Handlers/Room/MatchLeaveHandler.h"
 
 namespace Main
 {

@@ -1,12 +1,12 @@
 #ifndef ITEM_ENERGY_INSERTION_HANDLER
 #define ITEM_ENERGY_INSERTION_HANDLER
 
-#include "../../../include/Network/MainSession.h"
-#include "../../../include/Network/MainSessionManager.h"
+#include "Network/Sessions/MainSession.h"
+#include "Network/MainSessionManager.h"
 #include "Network/Packet.h"
-#include "../../Structures/PlayerLists/Friend.h"
-#include "DeleteItemHandler.h"
-#include "../../Structures/Item/SpawnedItem.h"
+#include "Structures/PlayerLists/Friend.h"
+#include "Handlers/Item/DeleteItemHandler.h"
+#include "Structures/Item/SpawnedItem.h"
 
 #include <Utils/Utils.h>
 

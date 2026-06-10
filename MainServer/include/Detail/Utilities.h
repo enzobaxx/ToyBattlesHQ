@@ -2,7 +2,7 @@
 #define DETAILS_HEADER_MAIN_H
 
 #include <ConstantDatabase/Structures/SetItemInfo.h>
-#include "../Network/MainSession.h"
+#include "Network/Sessions/MainSession.h"
 #include "Network/Packet.h"
 #include "Utils/Utils.h"
 #include "Utils/Constants.h"

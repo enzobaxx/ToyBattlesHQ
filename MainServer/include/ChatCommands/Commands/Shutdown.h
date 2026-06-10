@@ -2,9 +2,9 @@
 #define SHUTDOWN_SIMPLECOMMAND_HEADER
 
 
-#include "../ICommand.h"
-#include "../ChatCommands.h"
-#include "../../MainServer.h"
+#include "ChatCommands/ICommand.h"
+#include "ChatCommands/ChatCommands.h"
+#include "MainServer.h"
 
 namespace Main
 {

@@ -1,13 +1,13 @@
 #ifndef ROOM_CREATION_HANDLER_H
 #define ROOM_CREATION_HANDLER_H
 
-#include "../../Network/MainSession.h"
+#include "Network/Sessions/MainSession.h"
 #include "Network/Packet.h"
-#include "../../MainEnums.h"
-#include "../../Structures/Room/ClientRoomCreationInfo.h"
-#include "../../Classes/RoomsManager.h"
-#include "../../Classes/Room.h"
-#include "../../Detail/IpcUtils.h"
+#include "MainEnums.h"
+#include "Structures/Room/ClientRoomCreationInfo.h"
+#include "Managers/RoomsManager.h"
+#include "Rooms/Room.h"
+#include "Detail/IpcUtils.h"
 #include <cstring> 
 
 namespace Main

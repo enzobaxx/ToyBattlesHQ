@@ -1,11 +1,11 @@
 #ifndef CLAN_PARTY_JOIN_HANDLER_H
 #define CLAN_PARTY_JOIN_HANDLER_H
 
-#include "../../Network/MainSession.h"
+#include "Network/Sessions/MainSession.h"
 #include "Network/Packet.h"
-#include "../../Classes/PartiesManager.h"
-#include "../../Structures/Clan/ClanStructures.h"
-#include "OtherClanJoinHandler.h"
+#include "Managers/PartiesManager.h"
+#include "Structures/Clan/ClanStructures.h"
+#include "Handlers/Clan/OtherClanJoinHandler.h"
 #include <Utils/Utils.h>
 
 namespace Main

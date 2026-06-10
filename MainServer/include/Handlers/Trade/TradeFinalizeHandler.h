@@ -1,15 +1,15 @@
 #ifndef TRADE_FINALIZE_HANDLER_H
 #define TRADE_FINALIZE_HANDLER_H
 
-#include "../../../include/Network/MainSession.h"
-#include "../../../include/Network/MainSessionManager.h"
+#include "Network/Sessions/MainSession.h"
+#include "Network/MainSessionManager.h"
 #include "Enums/GameEnums.h"
 #include "Network/Packet.h"
 #include <vector>
 #include <cstdint>
 #include <optional>
 #include <array>
-#include "../../Structures/TradeSystem/TradeAck.h"
+#include "Structures/TradeSystem/TradeAck.h"
 #include "Macros.h"
 
 namespace Main

@@ -1,10 +1,10 @@
 #ifndef TRANSFERCLAN_COMMAND_HEADER
 #define TRANSFERCLAN_COMMAND_HEADER
 
-#include "../ICommand.h"
-#include "../ChatCommands.h"
+#include "ChatCommands/ICommand.h"
+#include "ChatCommands/ChatCommands.h"
 #include "Utils/Utils.h"
-#include "../../MainServer.h"
+#include "MainServer.h"
 #include <source_location>
 #include <charconv>
 

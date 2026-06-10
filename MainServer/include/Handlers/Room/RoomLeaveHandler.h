@@ -1,12 +1,12 @@
 #ifndef ROOM_LEAVE_HANDLER_H
 #define ROOM_LEAVE_HANDLER_H
 
-#include "../../Network/MainSession.h"
-#include "../../Classes/RoomsManager.h"
+#include "Network/Sessions/MainSession.h"
+#include "Managers/RoomsManager.h"
 #include "Network/Packet.h"
-#include "../../Network/MainSessionManager.h"
-#include "../../Classes/Room.h"
-#include "../Clan/ClanRoomLeaveHandler.h"
+#include "Network/MainSessionManager.h"
+#include "Rooms/Room.h"
+#include "Handlers/Clan/ClanRoomLeaveHandler.h"
 
 namespace Main
 {

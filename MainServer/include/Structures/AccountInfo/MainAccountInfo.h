@@ -5,8 +5,8 @@
 #include <chrono>
 #include "Enums/GameEnums.h"
 #include "Enums/MiscellaneousEnums.h"
-#include "MainAccountUniqueId.h"
-#include "MainAccountAchievements.h"
+#include "Structures/AccountInfo/MainAccountUniqueId.h"
+#include "Structures/AccountInfo/MainAccountAchievements.h"
 #include "Macros.h"
 
 namespace Main

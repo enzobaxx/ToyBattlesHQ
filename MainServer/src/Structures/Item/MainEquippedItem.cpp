@@ -3,9 +3,9 @@
 
 #include <cstdint>
 #include <ctime> 
-#include "../../../include/Structures/Item/MainItem.h"
-#include "../../../include/Detail/CdbUtils.h"
-#include "../../../include/Structures/Item/MainEquippedItem.h"
+#include "Structures/Item/MainItem.h"
+#include "Detail/CdbUtils.h"
+#include "Structures/Item/MainEquippedItem.h"
 #include "Enums/GameEnums.h"
 #include <ConstantDatabase/Structures/SetItemInfo.h>
 #include "Macros.h"

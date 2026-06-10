@@ -2,9 +2,9 @@
 #define CAPSULE_SPIN_STRUCT_H
 
 #include <cstdint>
-#include "../Item/MainItemSerialInfo.h"
-#include "../../MainEnums.h"
-#include "../../Detail/CdbUtils.h"
+#include "Structures/Item/MainItemSerialInfo.h"
+#include "MainEnums.h"
+#include "Detail/CdbUtils.h"
 #include "Macros.h"
 
 

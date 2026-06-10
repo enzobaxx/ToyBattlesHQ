@@ -1,10 +1,10 @@
 #ifndef ROOMS_LIST_HANDLER_H
 #define ROOMS_LIST_HANDLER_H
 
-#include "../../Network/MainSession.h"
+#include "Network/Sessions/MainSession.h"
 #include "Network/Packet.h"
-#include "../../MainEnums.h"
-#include "../../Classes/RoomsManager.h"
+#include "MainEnums.h"
+#include "Managers/RoomsManager.h"
 #include <memory>
 #include <cstring> 
 

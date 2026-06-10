@@ -1,10 +1,10 @@
 #ifndef COMMAND_SEND_UNTRADEABLE_HEADER
 #define COMMAND_SEND_UNTRADEABLE_HEADER
 
-#include "../ChatCommands.h"
-#include "../ICommand.h"
+#include "ChatCommands/ChatCommands.h"
+#include "ChatCommands/ICommand.h"
 #include "Utils/Utils.h"
-#include "../../MainServer.h"
+#include "MainServer.h"
 #include <charconv>
 #include <source_location>
 

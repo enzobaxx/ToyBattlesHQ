@@ -5,14 +5,14 @@
 #include <array>
 #include <bit>
 #include <unordered_map>
-#include "../../../include/Network/MainSession.h"
-#include "../../Structures/Item/MainBoughtItem.h"
-#include "../../Detail/CdbUtils.h"
-#include "../../MainEnums.h"
-#include "../../Structures/Item/MainItem.h"
-#include "../../Structures/AccountInfo/MainAccountInfo.h"
+#include "Network/Sessions/MainSession.h"
+#include "Structures/Item/MainBoughtItem.h"
+#include "Detail/CdbUtils.h"
+#include "MainEnums.h"
+#include "Structures/Item/MainItem.h"
+#include "Structures/AccountInfo/MainAccountInfo.h"
 #include <Utils/Utils.h>
-#include "../../Detail/Utilities.h"
+#include "Detail/Utilities.h"
 
 namespace Main
 {

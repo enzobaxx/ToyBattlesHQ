@@ -3,11 +3,11 @@
 
 #include "Network/Session.h"
 #include "Network/Packet.h"
-#include "../../MainEnums.h"
-#include "../../Structures/AccountInfo/MainAccountInfo.h"
-#include "../../../include/Network/MainSession.h"
-#include "../../../include/Network/MainSessionManager.h"
-#include "../../../include/Structures/AccountInfo/MuteInfo.h"
+#include "MainEnums.h"
+#include "Structures/AccountInfo/MainAccountInfo.h"
+#include "Network/Sessions/MainSession.h"
+#include "Network/MainSessionManager.h"
+#include "Structures/AccountInfo/MuteInfo.h"
 #include <source_location>
 
 namespace Main

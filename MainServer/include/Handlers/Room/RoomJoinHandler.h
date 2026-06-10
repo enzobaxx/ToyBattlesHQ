@@ -1,12 +1,12 @@
 #ifndef ROOM_JOIN_HANDLER_H
 #define ROOM_JOIN_HANDLER_H
 
-#include "../../Network/MainSession.h"
+#include "Network/Sessions/MainSession.h"
 #include "Network/Packet.h"
-#include "../../Classes/RoomsManager.h"
-#include "../../Structures/Room/RoomJoinLatestInfo.h"
+#include "Managers/RoomsManager.h"
+#include "Structures/Room/RoomJoinLatestInfo.h"
 #include <Enums/PlayerEnums.h>
-#include "../../Structures/Room/RoomJoinLatestInfo.h"
+#include "Structures/Room/RoomJoinLatestInfo.h"
 #include <cstring> 
 
 namespace Main

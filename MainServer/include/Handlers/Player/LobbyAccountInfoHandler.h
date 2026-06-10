@@ -3,10 +3,10 @@
 
 #include "Network/Session.h"
 #include "Network/Packet.h"
-#include "../../Structures/AccountInfo/MainLobbyAccountInfo.h"
-#include "../../MainEnums.h"
-#include "../../../include/Network/MainSession.h"
-#include "../../../include/Network/MainSessionManager.h"
+#include "Structures/AccountInfo/MainLobbyAccountInfo.h"
+#include "MainEnums.h"
+#include "Network/Sessions/MainSession.h"
+#include "Network/MainSessionManager.h"
 #include <ConstantDatabase/Structures/SetItemInfo.h>
 
 namespace Main

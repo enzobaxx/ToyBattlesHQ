@@ -4,8 +4,8 @@
 #include <cstdint>
 #include <chrono>
 #include <array>
-#include "MainAccountAchievements.h"
-#include "MainAccountInfo.h"
+#include "Structures/AccountInfo/MainAccountAchievements.h"
+#include "Structures/AccountInfo/MainAccountInfo.h"
 #include "Macros.h"
 #include <cstring> 
 

@@ -3,8 +3,8 @@
 
 #include <string>
 #include "Network/Packet.h"
-#include "../Network/MainSession.h"
-#include "../Network/MainSessionManager.h"
+#include "Network/Sessions/MainSession.h"
+#include "Network/MainSessionManager.h"
 #include "Enums/PlayerEnums.h"
 #include "Utils/Utils.h"
 

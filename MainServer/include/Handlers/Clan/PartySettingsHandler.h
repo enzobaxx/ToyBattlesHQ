@@ -1,9 +1,9 @@
 #ifndef CLAN_PARTY_SETTINGS_HANDLER_H
 #define CLAN_PARTY_SETTINGS_HANDLER_H
 
-#include "../../Network/MainSession.h"
+#include "Network/Sessions/MainSession.h"
 #include "Network/Packet.h"
-#include "../../Classes/PartiesManager.h"
+#include "Managers/PartiesManager.h"
 #include <memory>
 
 namespace Main

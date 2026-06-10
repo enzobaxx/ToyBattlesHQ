@@ -4,9 +4,9 @@
 #include <unordered_map>
 #include <vector>
 #include <functional>
-#include "MainSession.h"
-#include "../Classes/RoomsManager.h"
-#include "../Classes/PartiesManager.h"
+#include "Network/Sessions/MainSession.h"
+#include "Managers/RoomsManager.h"
+#include "Managers/PartiesManager.h"
 
 namespace Main
 {

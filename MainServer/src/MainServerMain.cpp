@@ -3,8 +3,8 @@
 #include <chrono>
 #include <format>
 #include <asio/execution_context.hpp>
-#include "../include/MainServer.h"
-#include "../include/Structures/AccountInfo/MainAccountInfo.h"
+#include "MainServer.h"
+#include "Structures/AccountInfo/MainAccountInfo.h"
 #include "../include/ConstantDatabase/CdbSingleton.h"
 #include <thread>
 
@@ -22,7 +22,7 @@
 #include <ConstantDatabase/Structures/CdbCollectionInfo.h>
 #include <ConstantDatabase/Structures/CdbMissionEventInfo.h>
 
-#include "../include/Detail/Utilities.h"
+#include "Detail/Utilities.h"
 #include "Utils/Logger.h"
 
 void printInitialInformation()

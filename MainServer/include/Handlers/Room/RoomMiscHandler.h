@@ -1,12 +1,12 @@
 #ifndef ROOM_MISC_HANDLER_HEADER
 #define ROOM_MISC_HANDLER_HEADER
 
-#include "../../Network/MainSession.h"
-#include "../../../include/Structures/AccountInfo/MainAccountInfo.h"
-#include "../../../include/Structures/Room/RoomSettingsUpdate.h"
+#include "Network/Sessions/MainSession.h"
+#include "Structures/AccountInfo/MainAccountInfo.h"
+#include "Structures/Room/RoomSettingsUpdate.h"
 #include "Network/Packet.h"
-#include "../Room/RoomJoinHandler.h"
-#include "../Room/RoomLeaveHandler.h"
+#include "Handlers/Room/RoomJoinHandler.h"
+#include "Handlers/Room/RoomLeaveHandler.h"
 #include <cstring> 
 
 namespace Main

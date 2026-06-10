@@ -2,9 +2,9 @@
 #define MAILBOX_HANDLERS_H
 
 #include "Network/Packet.h"
-#include "../../../Network/MainSession.h"
-#include "../../../../include/MainEnums.h"
-#include "../../../Network/MainSessionManager.h"
+#include "Network/Sessions/MainSession.h"
+#include "MainEnums.h"
+#include "Network/MainSessionManager.h"
 #include "Utils/Constants.h"
 #include <cstring> 
 #include <Macros.h>

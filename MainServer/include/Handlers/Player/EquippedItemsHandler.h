@@ -1,10 +1,10 @@
 #ifndef EQUIPPED_ITEMS_HANDLER
 #define EQUIPPED_ITEMS_HANDLER
 
-#include "../../Network/MainSession.h"
+#include "Network/Sessions/MainSession.h"
 #include "Network/Packet.h"
-#include "../../MainEnums.h"
-#include "../../Structures/Item/MainBoughtItem.h"
+#include "MainEnums.h"
+#include "Structures/Item/MainBoughtItem.h"
 
 namespace Main
 {

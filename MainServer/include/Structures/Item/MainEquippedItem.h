@@ -3,7 +3,7 @@
 
 #include <cstdint>
 #include <array>
-#include "MainItemSerialInfo.h"
+#include "Structures/Item/MainItemSerialInfo.h"
 #include "Macros.h"
 
 namespace Main

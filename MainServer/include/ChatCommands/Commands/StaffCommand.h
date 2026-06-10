@@ -1,10 +1,10 @@
 #ifndef COMMAND_STAFF_H
 #define COMMAND_STAFF_H
 
-#include "../ChatCommands.h"
-#include "../ICommand.h"
+#include "ChatCommands/ChatCommands.h"
+#include "ChatCommands/ICommand.h"
 #include "Utils/Utils.h"
-#include "../../MainServer.h"
+#include "MainServer.h"
 
 namespace Main
 {

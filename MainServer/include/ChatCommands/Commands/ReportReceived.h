@@ -1,13 +1,13 @@
 #ifndef REPORTRECEIVED_COMPLEXCOMMAND_HEADER
 #define REPORTRECEIVED_COMPLEXCOMMAND_HEADER
 
-#include "../ICommand.h"
-#include "../ChatCommands.h"
+#include "ChatCommands/ICommand.h"
+#include "ChatCommands/ChatCommands.h"
 #include "Utils/Utils.h"
 #include "Utils/Constants.h"
-#include "../../MainServer.h"
-#include "../../Classes/ReportManager.h"
-#include "../../Structures/Mailbox.h"
+#include "MainServer.h"
+#include "Managers/ReportManager.h"
+#include "Structures/Mailbox/Mailbox.h"
 #include <source_location>
 
 namespace Main

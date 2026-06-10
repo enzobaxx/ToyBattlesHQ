@@ -5,18 +5,18 @@
 #include <optional>
 #include <asio.hpp>
 
-#include "../include/Persistence/MainScheduler.h"
+#include "Persistence/MainScheduler.h"
 #include "Network/MainSessionManager.h"
 #include "ChatCommands/ChatCommands.h"
-#include "Classes/RoomsManager.h"
-#include "Classes/PartiesManager.h"
+#include "Managers/RoomsManager.h"
+#include "Managers/PartiesManager.h"
 
 #include <iostream>
 #include <boost/asio/io_context.hpp>
 #include <boost/asio.hpp>
 
 #include <AntiCheat/AntiCheat.h>
-#include <Classes/ReportManager.h>
+#include <Managers/ReportManager.h>
 #include <EmailDispatcher.h>
 
 namespace Main

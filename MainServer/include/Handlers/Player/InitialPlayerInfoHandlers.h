@@ -3,12 +3,12 @@
 
 
 #include "Network/Session.h"
-#include "MainAccountInfoHandler.h"
-#include "../EventsHandlers.h"
-#include "AuthorizationHandler.h"
-#include "../../Detail/Utilities.h"
+#include "Handlers/Player/MainAccountInfoHandler.h"
+#include "Handlers/Events/EventsHandlers.h"
+#include "Handlers/Player/AuthorizationHandler.h"
+#include "Detail/Utilities.h"
 #include <chrono>
-#include <Classes/ReportManager.h>
+#include <Managers/ReportManager.h>
 
 namespace Main
 {

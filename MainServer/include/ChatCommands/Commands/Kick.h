@@ -1,11 +1,11 @@
 #ifndef KICK_COMMAND_HEADER
 #define KICK_COMMAND_HEADER
 
-#include "../ICommand.h"
-#include "../ChatCommands.h"
+#include "ChatCommands/ICommand.h"
+#include "ChatCommands/ChatCommands.h"
 #include "Utils/Utils.h"
-#include "../../MainServer.h"
-#include "../../Classes/Room.h"
+#include "MainServer.h"
+#include "Rooms/Room.h"
 
 namespace Main
 {

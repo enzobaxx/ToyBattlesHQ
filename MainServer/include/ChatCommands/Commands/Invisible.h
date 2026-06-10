@@ -2,10 +2,10 @@
 #define INVISIBLE_COMMAND_H
 
 
-#include "../ICommand.h"
-#include "../ChatCommands.h"
-#include "../../MainServer.h"
-#include "../../Detail/IpcUtils.h"
+#include "ChatCommands/ICommand.h"
+#include "ChatCommands/ChatCommands.h"
+#include "MainServer.h"
+#include "Detail/IpcUtils.h"
 
 namespace Main
 {

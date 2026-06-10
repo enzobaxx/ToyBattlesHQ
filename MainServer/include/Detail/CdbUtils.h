@@ -7,7 +7,7 @@
 #include <functional>
 #include <chrono>
 
-#include "../../include/MainEnums.h"
+#include "MainEnums.h"
 #include "ConstantDatabase/CdbSingleton.h"
 #include "ConstantDatabase/Structures/CdbItemInfo.h"
 #include "ConstantDatabase/Structures/CdbWeaponsInfo.h"
@@ -15,7 +15,7 @@
 #include "ConstantDatabase/Structures/CdbCapsuleInfo.h"
 #include "ConstantDatabase/Structures/CdbCapsulePackageInfo.h"
 #include "ConstantDatabase/Structures/CdbMapInfo.h"
-#include "../Structures/Capsule/CapsuleList.h"
+#include "Structures/Capsule/CapsuleList.h"
 #include "ConstantDatabase/Structures/CdbRewardInfo.h"
 #include "ConstantDatabase/Structures/CdbGradeInfo.h"
 #include "ConstantDatabase/Structures/CdbVendor.h"

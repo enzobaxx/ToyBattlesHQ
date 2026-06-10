@@ -2,14 +2,14 @@
 #define BOUGHT_ITEM_H
 
 #include <cstdint>
-#include "../AccountInfo/MainAccountUniqueId.h"
-#include "MainItemSerialInfo.h"
+#include "Structures/AccountInfo/MainAccountUniqueId.h"
+#include "Structures/Item/MainItemSerialInfo.h"
 #include "ConstantDatabase/Cdb.h"
-#include "../../MainEnums.h"
+#include "MainEnums.h"
 #include "ConstantDatabase/CdbSingleton.h"
 #include "ConstantDatabase/Structures/CdbItemInfo.h"
 #include "ConstantDatabase/Structures/CdbWeaponsInfo.h"
-#include "ItemId.h"
+#include "Structures/Item/ItemId.h"
 #include "Macros.h"
 
 

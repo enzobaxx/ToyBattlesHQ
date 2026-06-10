@@ -1,8 +1,8 @@
 #ifndef CLAN_PARTYLIST_HANDLER_H
 #define CLAN_PARTYLIST_HANDLER_H
 
-#include "../../Network/MainSession.h"
-#include "../../Classes/PartiesManager.h"
+#include "Network/Sessions/MainSession.h"
+#include "Managers/PartiesManager.h"
 #include "Network/Packet.h"
 
 namespace Main

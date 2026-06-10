@@ -1,10 +1,10 @@
 #ifndef COMMAND_ITEM_INFO_HEADER
 #define COMMAND_ITEM_INFO_HEADER
 
-#include "../ChatCommands.h"
-#include "../ICommand.h"
+#include "ChatCommands/ChatCommands.h"
+#include "ChatCommands/ICommand.h"
 #include "Utils/Utils.h"
-#include "../../MainServer.h"
+#include "MainServer.h"
 
 namespace Main
 {

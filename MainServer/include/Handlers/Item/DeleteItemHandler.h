@@ -1,8 +1,8 @@
 #ifndef DELETE_ITEM_HANDLER_H
 #define DELETE_ITEM_HANDLER_H
 
-#include "../../Network/MainSession.h"
-#include "../../../include/Structures/AccountInfo/MainAccountInfo.h"
+#include "Network/Sessions/MainSession.h"
+#include "Structures/AccountInfo/MainAccountInfo.h"
 #include "Network/Packet.h"
 #include <cstring> 
 

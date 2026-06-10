@@ -1,10 +1,10 @@
 #ifndef DISCONNECT_COMMAND_HEADER
 #define DISCONNECT_COMMAND_HEADER
 
-#include "../ICommand.h"
-#include "../ChatCommands.h"
+#include "ChatCommands/ICommand.h"
+#include "ChatCommands/ChatCommands.h"
 #include "Utils/Utils.h"
-#include "../../MainServer.h"
+#include "MainServer.h"
 
 namespace Main
 {

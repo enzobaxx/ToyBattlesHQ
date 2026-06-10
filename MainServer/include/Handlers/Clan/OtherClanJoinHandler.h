@@ -4,13 +4,13 @@
 #define OTHER_CLAN_JOIN_HANDLER_H
 
 #include "Network/Packet.h"
-#include "../../Classes/PartiesManager.h"
-#include "../Room/ClanRoomCreation.h"
-#include "../../Network/MainSession.h"
-#include "../../Classes/RoomsManager.h"
-#include "../../Structures/Room/RoomJoinLatestInfo.h"
+#include "Managers/PartiesManager.h"
+#include "Handlers/Room/ClanRoomCreation.h"
+#include "Network/Sessions/MainSession.h"
+#include "Managers/RoomsManager.h"
+#include "Structures/Room/RoomJoinLatestInfo.h"
 #include <Enums/PlayerEnums.h>
-#include "../Room/RoomJoinHandler.h"
+#include "Handlers/Room/RoomJoinHandler.h"
 #include <cstring> 
 
 namespace Main

@@ -3,7 +3,7 @@
 
 #include <cstdint>
 #include <string>
-#include "../AccountInfo/MainAccountUniqueId.h"
+#include "Structures/AccountInfo/MainAccountUniqueId.h"
 #include <functional>
 #include "Macros.h"
 

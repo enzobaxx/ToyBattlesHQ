@@ -2,8 +2,8 @@
 #define CLAN_STRUCTURES_HEADER
 
 #include <cstdint>
-#include "../AccountInfo/MainAccountUniqueId.h"
-#include "../ClientData/Structures.h"
+#include "Structures/AccountInfo/MainAccountUniqueId.h"
+#include "Structures/ClientData/Structures.h"
 #include "Macros.h"
 #include <cstring> 
 

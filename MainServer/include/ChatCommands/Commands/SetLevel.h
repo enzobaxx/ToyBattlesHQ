@@ -1,10 +1,10 @@
 #ifndef COMMAND_SET_LEVEL_HEADER
 #define COMMAND_SET_LEVEL_HEADER
 
-#include "../ChatCommands.h"
-#include "../ICommand.h"
+#include "ChatCommands/ChatCommands.h"
+#include "ChatCommands/ICommand.h"
 #include "Utils/Utils.h"
-#include "../../MainServer.h"
+#include "MainServer.h"
 
 namespace Main
 {

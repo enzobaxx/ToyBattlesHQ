@@ -5,14 +5,14 @@
 #include <thread>
 #include <mutex>
 #include <utility>
-#include "../MainEnums.h"
+#include "MainEnums.h"
 #include "Utils/SetupParser.h"
 #include "Utils/Logger.h"
 #include "Utils/Constants.h"
 
 #include <mariadb/conncpp.hpp>
 #include <mariadb/conncpp/Connection.hpp>
-#include "../Structures/AccountInfo/MuteInfo.h"
+#include "Structures/AccountInfo/MuteInfo.h"
 #include <expected>
 
 namespace Main 

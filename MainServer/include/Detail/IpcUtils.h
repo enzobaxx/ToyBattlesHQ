@@ -5,8 +5,8 @@
 #include <Utils/SetupParser.h>
 #include <Utils/Constants.h>
 #include <Network/Packet.h>
-#include "../Structures/AccountInfo/MainAccountUniqueId.h"
-#include "../Structures/ClientData/Structures.h"
+#include "Structures/AccountInfo/MainAccountUniqueId.h"
+#include "Structures/ClientData/Structures.h"
 
 namespace Main
 {

@@ -2,8 +2,8 @@
 #define CAST_MAIN_IPC_CALLBACKS_H
 
 #include "Network/Packet.h"
-#include "../../Network/MainSessionManager.h"
-#include "../../Network/AuthSession.h"
+#include "Network/MainSessionManager.h"
+#include "Network/Sessions/AuthSession.h"
 
 namespace Main
 {

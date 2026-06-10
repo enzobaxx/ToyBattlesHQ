@@ -1,15 +1,15 @@
 #ifndef CLAN_MATCH_LEAVE_HANDLER_H
 #define CLAN_MATCH_LEAVE_HANDLER_H
 
-#include "../../Network/MainSession.h"
+#include "Network/Sessions/MainSession.h"
 #include "Network/Packet.h"
-#include "../../Classes/PartiesManager.h"
-#include "../../Structures/Clan/ClanStructures.h"
-#include "../../Classes/Room.h"
-#include "PartyJoinHandler.h"
+#include "Managers/PartiesManager.h"
+#include "Structures/Clan/ClanStructures.h"
+#include "Rooms/Room.h"
+#include "Handlers/Clan/PartyJoinHandler.h"
 
 #include <memory>
-#include "PartyCreationHandler.h"
+#include "Handlers/Clan/PartyCreationHandler.h"
 #include <Structures/ClientData/Structures.h>
 
 namespace Main

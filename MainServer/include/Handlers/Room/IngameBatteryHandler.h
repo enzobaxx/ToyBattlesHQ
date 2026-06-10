@@ -1,9 +1,9 @@
 #ifndef ROOM_INGAME_BATTERYHANDLER_H
 #define ROOM_INGAME_BATTERYHANDLER_H
 
-#include "../../Network/MainSession.h"
+#include "Network/Sessions/MainSession.h"
 #include "Network/Packet.h"
-#include "../../Classes/RoomsManager.h"
+#include "Managers/RoomsManager.h"
 #include <array>
 #include <random>
 

@@ -2,10 +2,10 @@
 #define GAMBLE_ITEM_HANDLER_H
 
 #include "Network/Packet.h"
-#include "../../../include/Network/MainSession.h"
-#include "DeleteItemHandler.h"
+#include "Network/Sessions/MainSession.h"
+#include "Handlers/Item/DeleteItemHandler.h"
 #include <random>
-#include "../../Detail/Utilities.h"
+#include "Detail/Utilities.h"
 
 namespace Main
 {

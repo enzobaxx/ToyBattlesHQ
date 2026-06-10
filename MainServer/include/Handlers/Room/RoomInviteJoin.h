@@ -1,15 +1,15 @@
 #ifndef ROOM_INVITE_JOIN_HANDLER_H
 #define ROOM_INVITE_JOIN_HANDLER_H
 
-#include "../../Network/MainSession.h"
-#include "../../../include/Structures/AccountInfo/MainAccountInfo.h"
-#include "../../../include/Structures/Room/RoomSettingsUpdate.h"
+#include "Network/Sessions/MainSession.h"
+#include "Structures/AccountInfo/MainAccountInfo.h"
+#include "Structures/Room/RoomSettingsUpdate.h"
 #include "Network/Packet.h"
 #include <span>
-#include "../Room/RoomJoinHandler.h"
-#include "../Room/RoomLeaveHandler.h"
-#include "../../Detail/Utilities.h"
-#include "../../Structures/ClientData/Structures.h"
+#include "Handlers/Room/RoomJoinHandler.h"
+#include "Handlers/Room/RoomLeaveHandler.h"
+#include "Detail/Utilities.h"
+#include "Structures/ClientData/Structures.h"
 
 
 namespace Main

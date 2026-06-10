@@ -4,9 +4,9 @@
 #include <unordered_map>
 #include <string>
 #include <memory>
-#include "../Network/MainSession.h"
+#include "Network/Sessions/MainSession.h"
 #include "Network/Packet.h"
-#include "ICommand.h"
+#include "ChatCommands/ICommand.h"
 #include <memory>
 #include "asio.hpp"
 

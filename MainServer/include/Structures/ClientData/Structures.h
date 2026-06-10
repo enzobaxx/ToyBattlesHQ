@@ -2,7 +2,7 @@
 #define CLIENT_REQUEST_STRUCTURES_H
 
 #include <cstdint>
-#include "../Item/MainItemSerialInfo.h"
+#include "Structures/Item/MainItemSerialInfo.h"
 #include "Macros.h"
 
 // NOTE:

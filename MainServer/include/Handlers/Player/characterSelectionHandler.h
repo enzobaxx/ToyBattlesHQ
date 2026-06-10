@@ -1,11 +1,11 @@
 #ifndef CHARACTER_SELECTION_HANDLER_H
 #define CHARACTER_SELECTION_HANDLER_H
 
-#include "../../Network/MainSession.h"
-#include "../../Classes/RoomsManager.h"
+#include "Network/Sessions/MainSession.h"
+#include "Managers/RoomsManager.h"
 #include "Network/Packet.h"
-#include "../../MainEnums.h"
-#include "../../Detail/Utilities.h"
+#include "MainEnums.h"
+#include "Detail/Utilities.h"
 
 namespace Main
 {

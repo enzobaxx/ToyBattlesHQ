@@ -1,10 +1,10 @@
 #ifndef ROOM_SETTINGS_SIMPLE_ROOM_SETTING_HANDLER_HEADER
 #define ROOM_SETTINGS_SIMPLE_ROOM_SETTING_HANDLER_HEADER
 
-#include "../../Network/MainSession.h"
-#include "../../../include/Structures/AccountInfo/MainAccountInfo.h"
+#include "Network/Sessions/MainSession.h"
+#include "Structures/AccountInfo/MainAccountInfo.h"
 #include "Network/Packet.h"
-#include "../include/Classes/RoomsManager.h"
+#include "Managers/RoomsManager.h"
 
 namespace Main
 {

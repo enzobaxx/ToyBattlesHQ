@@ -1,11 +1,11 @@
 #ifndef SENDREWARDS_COMPLEXCOMMAND_H
 #define SENDREWARDS_COMPLEXCOMMAND_H
 
-#include "../ICommand.h"
-#include "../ChatCommands.h"
+#include "ChatCommands/ICommand.h"
+#include "ChatCommands/ChatCommands.h"
 #include "Utils/Utils.h"
 #include "Utils/Constants.h"
-#include "../../MainServer.h"
+#include "MainServer.h"
 #include <source_location>
 
 namespace Main

@@ -2,14 +2,14 @@
 #define ELIMINATION_NEXT_ROUND_HANDLER_H
 
 #include <algorithm>
-#include "../../Network/MainSession.h"
-#include "../../../include/Structures/AccountInfo/MainAccountInfo.h"
+#include "Network/Sessions/MainSession.h"
+#include "Structures/AccountInfo/MainAccountInfo.h"
 #include "Network/Packet.h"
-#include "../../Classes/RoomsManager.h"
-#include "../../Structures/EndScoreboard.h"
-#include "RoomStartHandler.h"
+#include "Managers/RoomsManager.h"
+#include "Structures/Match/EndScoreboard.h"
+#include "Handlers/Room/RoomStartHandler.h"
 #include "Detail/IpcUtils.h"
-#include "../../Classes/PartiesManager.h"
+#include "Managers/PartiesManager.h"
 
 namespace Main
 {

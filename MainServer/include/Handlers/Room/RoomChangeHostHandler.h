@@ -1,9 +1,9 @@
 #ifndef ROOM_CHANGE_HOST_HANDLER
 #define ROOM_CHANGE_HOST_HANDLER
 
-#include "../../Network/MainSession.h"
+#include "Network/Sessions/MainSession.h"
 #include "Network/Packet.h"
-#include "../../Classes/RoomsManager.h"
+#include "Managers/RoomsManager.h"
 
 namespace Main
 {

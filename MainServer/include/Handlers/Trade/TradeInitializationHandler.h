@@ -1,10 +1,10 @@
 #ifndef TRADE_REQUEST_HANDLER_H
 #define TRADE_REQUEST_HANDLER_H
 
-#include "../../../include/Network/MainSession.h"
-#include "../../../include/Network/MainSessionManager.h"
-#include "../../../include/MainEnums.h"
-#include "../../../include/Structures/TradeSystem/TradePlayerInfo.h"
+#include "Network/Sessions/MainSession.h"
+#include "Network/MainSessionManager.h"
+#include "MainEnums.h"
+#include "Structures/TradeSystem/TradePlayerInfo.h"
 #include "Network/Packet.h"
 #include <vector>
 #include <cstdint>

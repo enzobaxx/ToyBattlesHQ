@@ -1,11 +1,11 @@
 #ifndef CLAN_PARTY_CREATION_HANDLER_H
 #define CLAN_PARTY_CREATION_HANDLER_H
 
-#include "../../Network/MainSession.h"
+#include "Network/Sessions/MainSession.h"
 #include "Network/Packet.h"
-#include "../../Classes/PartiesManager.h"
-#include "../../Structures/Clan/ClanStructures.h"
-#include "../../Classes/PartyRoom.h"
+#include "Managers/PartiesManager.h"
+#include "Structures/Clan/ClanStructures.h"
+#include "Rooms/PartyRoom.h"
 
 namespace Main
 {

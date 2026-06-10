@@ -1,12 +1,12 @@
 #ifndef REPORT_COMPLEXCOMMAND_HEADER
 #define REPORT_COMPLEXCOMMAND_HEADER
 
-#include "../ICommand.h"
-#include "../ChatCommands.h"
+#include "ChatCommands/ICommand.h"
+#include "ChatCommands/ChatCommands.h"
 #include "Utils/Utils.h"
 #include "Utils/Constants.h"
-#include "../../MainServer.h"
-#include "../../Classes/ReportManager.h"
+#include "MainServer.h"
+#include "Managers/ReportManager.h"
 #include <source_location>
 
 namespace Main

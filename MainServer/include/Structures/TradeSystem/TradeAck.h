@@ -2,7 +2,7 @@
 #define TRADE_ACK_STRUCTURE_H
 
 #include <cstdint>
-#include "../AccountInfo/MainAccountUniqueId.h"
+#include "Structures/AccountInfo/MainAccountUniqueId.h"
 #include "Macros.h"
 
 namespace Main	

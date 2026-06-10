@@ -1,15 +1,15 @@
 #ifndef AUTHORIZATION_HANDLER_H
 #define AUTHORIZATION_HANDLER_H
 
-#include "../../Network/MainSession.h"
-#include "../../../include/Structures/AccountInfo/MainAccountInfo.h"
+#include "Network/Sessions/MainSession.h"
+#include "Structures/AccountInfo/MainAccountInfo.h"
 #include "Network/Packet.h"
 #include "Utils/Constants.h"
 #include <optional>
 #include <source_location>
 #include <string>
 
-#include "../../Detail/Utilities.h"
+#include "Detail/Utilities.h"
 #include <Enums/PlayerEnums.h>
 
 namespace Main

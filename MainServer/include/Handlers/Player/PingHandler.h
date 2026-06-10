@@ -1,13 +1,13 @@
 #ifndef PING_HANDLER_H
 #define PING_HANDLER_H
 
-#include "../../Network/MainSession.h"
-#include "../../../include/Structures/AccountInfo/MainAccountInfo.h"
+#include "Network/Sessions/MainSession.h"
+#include "Structures/AccountInfo/MainAccountInfo.h"
 #include "Network/Packet.h"
-#include "../../../include/Classes/RoomsManager.h"
-#include "../../Structures/ClientData/Structures.h"
+#include "Managers/RoomsManager.h"
+#include "Structures/ClientData/Structures.h"
 #include <Utils/Utils.h>
-#include "../../Classes/Room.h"
+#include "Rooms/Room.h"
 
 namespace Main
 {

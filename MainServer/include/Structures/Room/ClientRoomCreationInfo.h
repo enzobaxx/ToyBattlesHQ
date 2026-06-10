@@ -4,7 +4,7 @@
 #include <cstdint>
 #include <iostream> 
 #include "../../Common/include/Enums/RoomEnums.h"
-#include "../../Detail/Utilities.h"
+#include "Detail/Utilities.h"
 #include "Macros.h"
 #include <cstring> 
 

@@ -1,7 +1,7 @@
 
-#include "../../include/Detail/Utilities.h"
-#include "../../include/Classes/Room.h"
-#include "../../include/Classes/RoomsManager.h"
+#include "Detail/Utilities.h"
+#include "Rooms/Room.h"
+#include "Managers/RoomsManager.h"
 
 
 namespace Main

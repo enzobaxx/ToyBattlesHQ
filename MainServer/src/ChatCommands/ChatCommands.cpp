@@ -1,9 +1,9 @@
 
-#include "../../include/ChatCommands/ICommand.h"
-#include "../../include/ChatCommands/ChatCommands.h"
+#include "ChatCommands/ICommand.h"
+#include "ChatCommands/ChatCommands.h"
 #include <algorithm>
 #include <string>
-#include "../../include/MainServer.h"
+#include "MainServer.h"
 
 namespace Main
 {

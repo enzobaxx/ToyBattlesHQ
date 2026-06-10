@@ -1,5 +1,5 @@
 #include <cstdint>
-#include "../../Detail/CdbUtils.h"
+#include "Detail/CdbUtils.h"
 #ifndef ITEM_ID_H
 #define ITEM_ID_H
 

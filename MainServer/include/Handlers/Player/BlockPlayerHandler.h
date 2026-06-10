@@ -1,9 +1,9 @@
 #ifndef BLOCK_PLAYER_HANDLER_H
 #define BLOCK_PLAYER_HANDLER_H
 
-#include "../../Network/MainSession.h"
-#include "../../Network/MainSessionManager.h"
-#include "../../Persistence/MainDatabaseManager.h"
+#include "Network/Sessions/MainSession.h"
+#include "Network/MainSessionManager.h"
+#include "Persistence/MainDatabaseManager.h"
 #include "Network/Packet.h"
 #include <source_location>
 

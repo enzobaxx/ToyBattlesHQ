@@ -3,9 +3,9 @@
 #ifndef ACTIVE_CLANS_LIST_HANDLER_H
 #define ACTIVE_CLANS_LIST_HANDLER_H
 
-#include "../../Network/MainSession.h"
+#include "Network/Sessions/MainSession.h"
 #include "Network/Packet.h"
-#include "../../Classes/PartiesManager.h"
+#include "Managers/PartiesManager.h"
 
 namespace Main
 {

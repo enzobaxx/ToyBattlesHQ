@@ -1,9 +1,9 @@
 #ifndef ITEM_AND_CAPSULE_SPIN_HANDLER_H
 #define ITEM_AND_CAPSULE_SPIN_HANDLER_H
 
-#include "../../../include/Network/MainSession.h"
+#include "Network/Sessions/MainSession.h"
 #include "Network/Packet.h"
-#include "../../Detail/CdbUtils.h"
+#include "Detail/CdbUtils.h"
 #include <Utils/Utils.h>
 
 namespace Main

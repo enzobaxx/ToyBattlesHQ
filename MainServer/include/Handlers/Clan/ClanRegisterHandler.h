@@ -1,8 +1,8 @@
 #ifndef CLANMATCH_REGISTER_HANDLER_H
 #define CLANMATCH_REGISTER_HANDLER_H
 
-#include "../../Network/MainSession.h"
-#include "../../Classes/PartiesManager.h"
+#include "Network/Sessions/MainSession.h"
+#include "Managers/PartiesManager.h"
 #include "Network/Packet.h"
 
 namespace Main

@@ -6,11 +6,11 @@
 #include <chrono>
 #include <mutex>
 
-#include "../../include/Structures/AccountInfo/MainAccountInfo.h"
-#include "../../include/Structures/Item/MainItem.h"
-#include "../../include/Structures/Item/MainEquippedItem.h"
-#include "../../include/Persistence/MainDatabaseManager.h"
-#include "../../include/Persistence/MainScheduler.h"
+#include "Structures/AccountInfo/MainAccountInfo.h"
+#include "Structures/Item/MainItem.h"
+#include "Structures/Item/MainEquippedItem.h"
+#include "Persistence/MainDatabaseManager.h"
+#include "Persistence/MainScheduler.h"
 
 namespace Main
 {

@@ -1,7 +1,7 @@
 #ifndef SINGLE_LOBBY_LIST_H
 #define SINGLE_LOBBY_LIST_H
 
-#include "../../../include/Structures/AccountInfo/MainAccountUniqueId.h"
+#include "Structures/AccountInfo/MainAccountUniqueId.h"
 #include "Macros.h"
 
 namespace Main

@@ -1,10 +1,10 @@
 #ifndef FRIENDS_GENERAL_HANDLER_HEADER
 #define FRIENDS_GENERAL_HANDLER_HEADER
 
-#include "../../Network/MainSession.h"
-#include "../../Network/MainSessionManager.h"
-#include "../../MainEnums.h"
-#include "../../Structures/PlayerLists/Friend.h"
+#include "Network/Sessions/MainSession.h"
+#include "Network/MainSessionManager.h"
+#include "MainEnums.h"
+#include "Structures/PlayerLists/Friend.h"
 #include "Network/Packet.h"
 #include <cstring>
 

@@ -11,10 +11,10 @@
 #include <condition_variable>
 #include <functional>
 
-#include "../Structures/AccountInfo/MainAccountInfo.h"
-#include "../Structures/Item/MainItem.h"
-#include "../Structures/Item/MainEquippedItem.h"
-#include "../Persistence/MainDatabaseManager.h"
+#include "Structures/AccountInfo/MainAccountInfo.h"
+#include "Structures/Item/MainItem.h"
+#include "Structures/Item/MainEquippedItem.h"
+#include "Persistence/MainDatabaseManager.h"
 #include <source_location>
 
 // Used to accept overloaded member functions inside Database.h when calling MainScheduler::immediatePersist(...)

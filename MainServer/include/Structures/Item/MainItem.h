@@ -2,14 +2,14 @@
 #define MAIN_ITEM_INFO_H
 
 #include <cstdint>
-#include "MainItemSerialInfo.h"
-#include "SpawnedItem.h"
-#include "MainBoughtItem.h"
-#include "MainEquippedItem.h"
-#include "../Capsule/CapsuleSpin.h"
-#include "../../Detail/CdbUtils.h"
-#include "../Mailbox.h"
-#include "../TradeSystem/TradeSystemItem.h"
+#include "Structures/Item/MainItemSerialInfo.h"
+#include "Structures/Item/SpawnedItem.h"
+#include "Structures/Item/MainBoughtItem.h"
+#include "Structures/Item/MainEquippedItem.h"
+#include "Structures/Capsule/CapsuleSpin.h"
+#include "Detail/CdbUtils.h"
+#include "Structures/Mailbox/Mailbox.h"
+#include "Structures/TradeSystem/TradeSystemItem.h"
 #include "Macros.h"
 
 namespace Main

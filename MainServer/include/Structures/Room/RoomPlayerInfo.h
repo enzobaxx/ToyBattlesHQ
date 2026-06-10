@@ -2,7 +2,7 @@
 #define ROOM_PLAYER_INFO_H
 
 #include <cstdint>
-#include "../AccountInfo/MainAccountUniqueId.h"
+#include "Structures/AccountInfo/MainAccountUniqueId.h"
 #include "Utils/Constants.h"
 #include <array>
 #include "Macros.h"

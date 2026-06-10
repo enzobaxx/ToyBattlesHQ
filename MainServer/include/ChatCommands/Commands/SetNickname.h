@@ -1,10 +1,10 @@
 #ifndef COMMAND_SET_NICKNAME_H
 #define COMMAND_SET_NICKNAME_H
 
-#include "../ChatCommands.h"
-#include "../ICommand.h"
+#include "ChatCommands/ChatCommands.h"
+#include "ChatCommands/ICommand.h"
 #include "Utils/Utils.h"
-#include "../../MainServer.h"
+#include "MainServer.h"
 #include <cstring>
 #include "../../../../Common/include/Network/Packet.h"
 #include "../../../../Common/include/Enums/MiscellaneousEnums.h"

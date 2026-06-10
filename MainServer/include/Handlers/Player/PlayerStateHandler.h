@@ -1,14 +1,14 @@
 #ifndef PLAYER_STATE_HANDLER_H
 #define PLAYER_STATE_HANDLER_H
 
-#include "../../Network/MainSession.h"
-#include "../../Network/MainSessionManager.h"
+#include "Network/Sessions/MainSession.h"
+#include "Network/MainSessionManager.h"
 #include "Network/Packet.h"
 #include <ConstantDatabase/Structures/SetItemInfo.h>
 #include <Utils/Utils.h>
-#include "../../Classes/Room.h"
+#include "Rooms/Room.h"
 
-#include "../../Detail/CdbUtils.h"
+#include "Detail/CdbUtils.h"
 
 namespace Main
 {

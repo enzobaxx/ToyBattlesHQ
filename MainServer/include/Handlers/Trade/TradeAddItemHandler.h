@@ -1,10 +1,10 @@
 #ifndef TRADE_ADD_ITEM_HANDLER_H
 #define TRADE_ADD_ITEM_HANDLER_H
 
-#include "../../../include/Network/MainSession.h"
-#include "../../../include/Network/MainSessionManager.h"
-#include "../../../include/MainEnums.h"
-#include "../../../include/Structures/TradeSystem/TradeSystemItem.h"
+#include "Network/Sessions/MainSession.h"
+#include "Network/MainSessionManager.h"
+#include "MainEnums.h"
+#include "Structures/TradeSystem/TradeSystemItem.h"
 #include "Enums/GameEnums.h"
 #include "Network/Packet.h"
 #include <vector>
