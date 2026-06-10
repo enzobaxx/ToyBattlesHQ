@@ -5,20 +5,21 @@
 #include <vector>
 #include <string>
 #include <expected>
+#include <optional>
+#include <algorithm>
 
 #include "Network/Sessions/MainSession.h"
 #include "Structures/Clan/ClanStructures.h"
 #include "Structures/Room/RoomPlayerInfo.h"
 #include "Structures/Room/ClientRoomCreationInfo.h"
 #include <source_location>
-#include <expected>
-#include <cstring> 
+#include <cstring>
 
 namespace Main
 {
 	namespace Classes
 	{
-		struct RemovePlayerResult 
+		struct RemovePlayerResult
 		{
 			bool roomEmpty;
 			size_t originalIndex;
@@ -37,53 +38,9 @@ namespace Main
 		public:
 			PartyRoom() = default;
 
-			explicit PartyRoom(std::shared_ptr<Main::Network::Session> session, std::uint16_t clanRoomNumber, const Main::ClientData::ClanRoomSettings& settings)
-				: m_settings{ settings }
-			{
-				const auto& selfInfo = session->getAccountInfo();
+			explicit PartyRoom(std::shared_ptr<Main::Network::Session> session, std::uint16_t clanRoomNumber, const Main::ClientData::ClanRoomSettings& settings);
 
-				std::memcpy(m_partyInfo.leaderName, selfInfo.nickname, Common::Constants::maxNicknameSize);
-				m_partyInfo.leaderLevel = selfInfo.playerLevel;
-				m_partyInfo.clanRoomId = selfInfo.clanId;
-				m_partyInfo.clanRoomNumber = clanRoomNumber;
-				m_partyInfo.numPlayers = 1;
-
-				Main::Structures::PartyPlayerInfo waitingPlayerInfo;
-				waitingPlayerInfo.uid = selfInfo.uniqueId;
-				waitingPlayerInfo.level = selfInfo.playerLevel;
-				std::memcpy(waitingPlayerInfo.nickname, selfInfo.nickname, Common::Constants::maxNicknameSize);
-				waitingPlayerInfo.totalClanDraws = selfInfo.clanDraws;
-				waitingPlayerInfo.totalClanLosses = selfInfo.clanLosses;
-				waitingPlayerInfo.totalClanWins = selfInfo.clanWins;
-				waitingPlayerInfo.clanContribution = selfInfo.clanContribution;
-
-				m_players.emplace_back(waitingPlayerInfo, session);
-				session->getPlayer().setPartyRoomNumber(m_partyInfo.clanRoomNumber);
-
-				session->sendMessage("Created party room number: " + std::to_string(clanRoomNumber), Main::Enums::TIP);
-				//logPartyState("Party Created");
-			}
-
-			void addPlayer(std::shared_ptr<Main::Network::Session> session)
-			{
-				const auto& selfInfo = session->getAccountInfo();
-
-				Main::Structures::PartyPlayerInfo waitingPlayerInfo;
-				waitingPlayerInfo.uid = selfInfo.uniqueId;
-				waitingPlayerInfo.level = selfInfo.playerLevel;
-				std::memcpy(waitingPlayerInfo.nickname, selfInfo.nickname, Common::Constants::maxNicknameSize);
-				waitingPlayerInfo.totalClanDraws = selfInfo.clanDraws;
-				waitingPlayerInfo.totalClanLosses = selfInfo.clanLosses;
-				waitingPlayerInfo.totalClanWins = selfInfo.clanWins;
-				waitingPlayerInfo.clanContribution = selfInfo.clanContribution;
-
-				m_players.emplace_back(waitingPlayerInfo, session);
-				++m_partyInfo.numPlayers;
-				session->getPlayer().setPartyRoomNumber(m_partyInfo.clanRoomNumber);
-
-				session->sendMessage("Joined party room number: " + std::to_string(m_partyInfo.clanRoomNumber), Main::Enums::TIP);
-				//logPartyState("Player Added");
-			}
+			void addPlayer(std::shared_ptr<Main::Network::Session> session);
 
 			auto findPlayer(std::uint32_t sessionId)
 			{
@@ -94,453 +51,48 @@ namespace Main
 					});
 			}
 
-			void setClanMatchRoomNumber(std::uint16_t num)
-			{
-				m_clanMatchRoomNumber = num;
-				for (auto& [info, session] : m_players)
-				{
-					if (auto s = session.lock())
-					{
-						if (num == 0)
-						{
-							s->leaveRoom();
-							m_isRegistered = false;
-						}
-						s->getPlayer().setRoomNumber(num);
-					}
-				}
-				//logPartyState("ClanMatchRoomNumber Set");
-			}
-
-			std::uint16_t getClanMatchRoomNumber() const noexcept
-			{
-				return m_clanMatchRoomNumber;
-			}
-
-			bool isPlayerInRoom(std::uint32_t sessionId) const
-			{
-				for (const auto& [playerInfo, weakSession] : m_players)
-				{
-					if (auto session = weakSession.lock())
-					{
-						if (session->getAccountInfo().uniqueId.session == sessionId)
-							return true;
-					}
-				}
-				return false;
-			}
-
-			void updatePartyStatus(bool hasStarted)
-			{
-				m_partyInfo.hasMatchStarted = hasStarted;
-				//logPartyState("Party Status Updated");
-			}
-
-			bool hasMatchStarted() const noexcept
-			{
-				return m_partyInfo.hasMatchStarted;
-			}
-
-			void removeAllPlayers()
-			{
-				Common::Network::Packet removePlayerPacket;
-				removePlayerPacket.setTcpHeader(0, Common::Enums::NO_ENCRYPTION);
-				removePlayerPacket.setCommand(111, 0, 1, 0);
-
-				for (auto& [partyInfo, weakSession] : m_players)
-				{
-					if (auto session = weakSession.lock())
-					{
-						session->asyncWrite(removePlayerPacket);
-						session->getPlayer().setPartyRoomNumber(0);
-						session->leaveRoom();
-					}
-				}
-
-				m_partyInfo = {};
-				m_settings = {};
-				m_isRegistered = {};
-				m_team = {};
-				m_players.clear();
-				//logPartyState("All Players Removed");
-			}
-
-			void broadcastChatMessage(const std::string& message)
-			{
-				for (auto& [partyInfo, weakSession] : m_players)
-				{
-					if (auto session = weakSession.lock())
-						session->sendMessage(message);
-				}
-			}
-
-			std::optional<std::uint32_t> getPlayerIndex(std::uint32_t sessionId)
-			{
-				for (std::uint32_t idx = 0; const auto & [_, weakSession] : m_players)
-				{
-					if (auto session = weakSession.lock(); session && session->getAccountInfo().uniqueId.session == sessionId)
-					{
-						return idx;
-					}
-					++idx;
-				}
-				return std::nullopt;
-			}
-
-			std::expected<RemovePlayerResult, std::string> removePlayer(std::uint32_t sessionId)
-			{
-				auto it = findPlayer(sessionId);
-				if (it == m_players.end())
-				{
-					broadcastMessage("Player to be removed was not found in the room, please report this issue with steps-to-reproduce");
-					return std::unexpected("Player not found");
-				}
-
-				auto lockedSession = it->second.lock();
-				const auto sessionToRemove = lockedSession->getAccountInfo().uniqueId.session;
-				size_t originalIndex = std::distance(m_players.begin(), it);
-				size_t lastIndex = m_players.size() - 1;
-
-				if (isLeader(sessionToRemove) && m_players.size() > 1)
-				{
-					auto newLeaderIdxOpt = changeLeaderToFirstAvailable();
-					if (!newLeaderIdxOpt)
-					{
-						broadcastMessage("newLeaderIdxOpt nullopt - New leader could not be chosen, please report this issue with steps-to-reproduce");
-						return std::unexpected("Failed to find new leader");
-					}
-
-					if (*newLeaderIdxOpt != lastIndex)
-					{
-						std::swap(m_players[*newLeaderIdxOpt], m_players[lastIndex]); // Leaving player always swapped with last player in the list client side
-					}
-					originalIndex = *newLeaderIdxOpt;  // The old leader is now in this index
-
-					Common::Network::Packet response;
-					response.setTcpHeader(0, Common::Enums::NO_ENCRYPTION);
-					response.setCommand(114, 0, 0, *newLeaderIdxOpt); 
-					broadcast(response);
-				}
-				else if (!isLeader(sessionToRemove) && m_players.size() > 1)
-				{
-					if (originalIndex != lastIndex)
-					{
-						std::swap(m_players[originalIndex], m_players[lastIndex]); // Leaving player always swapped with last player in the list client side
-					}
-				}
-
-				it = findPlayer(sessionId);
-				if (it == m_players.end())
-				{
-					broadcastMessage("[2] Player to be removed was not found in the room, please report this issue with steps-to-reproduce");
-					return std::unexpected("Player disappeared during swap");
-				}
-
-				if (auto session = it->second.lock())
-				{
-					session->getPlayer().setPartyRoomNumber(0);
-					session->leaveRoom();
-					session->sendMessage("You left the party (party number: " + std::to_string(m_partyInfo.clanRoomNumber) + ")");
-				}
-
-				if (m_partyInfo.numPlayers)
-					--m_partyInfo.numPlayers;
-
-				m_players.erase(it);
-				return RemovePlayerResult{ m_players.empty(), originalIndex };
-			}
-
-			std::uint32_t getRoomNumber() const noexcept
-			{
-				return m_partyInfo.clanRoomNumber;
-			}
-
-			std::uint32_t getClanId() const	noexcept
-			{
-				return m_partyInfo.clanRoomId;
-			}
-
-			void updateMap(std::uint16_t map)
-			{
-				if (map >= Common::Enums::MAPS_MAX) return;
-				m_settings.map = map;
-				//logPartyState("Map Updated");
-			}
-
-			std::shared_ptr<Main::Network::Session> getLeaderSession() const
-			{
-				return m_players.empty() ? nullptr : m_players[0].second.lock();
-			}
-
-			Main::Structures::RoomSettings getRoomSettings() const
-			{
-				const std::uint32_t time = m_settings.mode == Common::Enums::Clan_TeamDeathMatch ? 10 : 2;
-				return Main::Structures::RoomSettings{ time, Common::Enums::WeaponRestriction::All, 0, m_settings.mode, 0,
-					0, m_settings.playersPerTeam, m_settings.map, 0
-				};
-			}
-
-			std::uint32_t getSpecificSetting() const noexcept
-			{
-				return m_settings.mode == Common::Enums::Clan_TeamDeathMatch ? 80 : 5;
-			}
-
-			void updateMode(std::uint16_t mode)
-			{
-				if (mode >= Common::Enums::CLANMODES_MAX) return;
-				m_settings.mode = mode;
-				//logPartyState("Mode Updated");
-			}
-
-			bool isLeader(std::uint32_t sessionId) const noexcept
-			{
-				if (m_players.empty())
-					return false;
-
-				if (auto leaderSession = m_players[0].second.lock())
-					return leaderSession->getAccountInfo().uniqueId.session == sessionId;
-
-				return false;
-			}
-
-			bool canRegister() const noexcept
-			{
-				return m_players.size() >= m_partyInfo.maxPlayers;
-			}
-
-			bool changeLeaderTo(std::uint16_t idx)
-			{
-				if (idx == 0 || idx >= m_players.size())
-				{
-					return false;
-				}
-
-				auto sessionPtr = m_players[idx].second.lock();
-				if (!sessionPtr) return false;
-
-				broadcastMessage("Leader changed to: " + std::string(sessionPtr->getAccountInfo().nickname));
-
-				std::swap(m_players[0], m_players[idx]);
-				m_partyInfo.leaderLevel = m_players[0].first.level;
-				std::memcpy(m_partyInfo.leaderName, m_players[0].first.nickname, Common::Constants::maxNicknameSize);
-				//logPartyState("Leader Changed");
-				return true;
-			}
-
-			std::optional<std::size_t> changeLeaderToFirstAvailable()
-			{
-				for (std::size_t idx = 1; idx < m_players.size(); ++idx)
-				{
-					if (auto session = m_players[idx].second.lock())
-					{
-						if (!changeLeaderTo(static_cast<std::uint16_t>(idx)))
-							continue;
-
-						return idx;
-					}
-				}
-				return std::nullopt;
-			}
-
-			void updatePlayersPerTeam(std::uint16_t playersPerTeam)
-			{
-				m_settings.playersPerTeam = playersPerTeam;
-				m_partyInfo.maxPlayers = playersPerTeam;
-				//logPartyState("Players Per Team Updated");
-			}
-
-			std::pair<std::uint16_t, std::uint16_t> getRoomId() const
-			{
-				return std::pair{ m_partyInfo.clanRoomId, m_partyInfo.clanRoomNumber };
-			}
-
-			const Main::Structures::ClanRoomSettings& getSettings() const noexcept
-			{
-				return m_settings;
-			}
-
-			bool isFull() const noexcept
-			{
-				return m_partyInfo.numPlayers >= m_partyInfo.maxPlayers;
-			}
-
-			std::size_t getPlayersSize() const noexcept
-			{
-				return m_players.size();
-			}
-
-			std::vector<Main::Structures::PartyPlayerInfo> getPlayers() const noexcept
-			{
-				std::vector<Main::Structures::PartyPlayerInfo> waitingPlayers;
-				for (const auto& [playerInfo, session] : m_players)
-				{
-					waitingPlayers.push_back(playerInfo);
-				}
-				return waitingPlayers;
-			}
-
-			std::vector<std::shared_ptr<Main::Network::Session>> getPlayerSessions() noexcept
-			{
-				std::vector<std::shared_ptr<Main::Network::Session>> waitingPlayers;
-				for (const auto& [playerInfo, sessionWeak] : m_players)
-				{
-					if (auto session = sessionWeak.lock())
-					{
-						waitingPlayers.push_back(session);
-					}
-				}
-				return waitingPlayers;
-			}
-
-			const Main::Structures::PartyInfo& getClanMatchInfo() const noexcept
-			{
-				return m_partyInfo;
-			}
-
-			void broadcast(Common::Network::Packet& packet)
-			{
-				for (const auto& [u, sessionWeak] : m_players)
-				{
-					if (auto session = sessionWeak.lock())
-					{
-						packet.setTcpHeader(session->getId(), Common::Enums::NO_ENCRYPTION);
-						session->asyncWrite(packet);
-					}
-				}
-			}
-
-			void broadcastMessage(const std::string& message)
-			{
-				for (const auto& [u, sessionWeak] : m_players)
-				{
-					if (auto session = sessionWeak.lock())
-					{
-						session->sendMessage(message, Main::Enums::TIP);
-					}
-				}
-			}
-
-			bool isRegistered() const noexcept
-			{
-				return m_isRegistered;
-			}
-
-			void switchRegistered()
-			{
-				m_isRegistered = !m_isRegistered;
-				//logPartyState("Registered Switched, Is Registered: " + std::to_string(m_isRegistered));
-			}
-
-			void broadcastExceptSelf(const Common::Network::Packet& packet, std::uint16_t sessionId)
-			{
-				for (const auto& [u, sessionWeak] : m_players)
-				{
-					if (u.uid.session == sessionId) continue;
-					if (auto session = sessionWeak.lock())
-					{
-						session->asyncWrite(packet);
-					}
-				}
-			}
-
-			std::optional<Main::Structures::RegisteredClanInfo> getInfo() const
-			{
-				if (m_players.empty())
-				{
-					return std::nullopt;
-				}
-
-				auto session = m_players[0].second.lock();
-				if (!session)
-				{
-					return std::nullopt;
-				}
-
-				const auto& leaderInfo = session->getAccountInfo();
-				return Main::Structures::RegisteredClanInfo{
-					static_cast<std::uint64_t>(m_settings.mode),
-					static_cast<std::uint64_t>(m_settings.playersPerTeam * 2),
-					static_cast<std::uint64_t>(m_settings.map),
-					static_cast<std::uint64_t>(leaderInfo.playerLevel),
-					static_cast<std::uint16_t>(leaderInfo.clanLogoFrontId),
-					static_cast<std::uint16_t>(leaderInfo.clanLogoBackId),
-					leaderInfo.clanName,
-					leaderInfo.nickname,
-					m_partyInfo.clanRoomId,
-					m_partyInfo.clanRoomNumber
-				};
-			}
-
-			void setTeam(Common::Enums::Team team)
-			{
-				m_team = team;
-				//logPartyState("Team Set");
-			}
-
-			Common::Enums::Team getTeam() const noexcept
-			{
-				return m_team;
-			}
-
-			void storeStats(Main::Persistence::MainScheduler& scheduler, const Main::ClientData::ClientEndingMatchHeader& stats)
-			{
-				Main::Enums::MatchEnd type = Main::Enums::MatchEnd::MATCH_DRAW;
-
-				if ((stats.blueScore > stats.redScore && m_team == Common::Enums::TEAM_BLUE)
-					|| (stats.redScore > stats.blueScore && m_team == Common::Enums::TEAM_RED))
-				{
-					type = Main::Enums::MATCH_WON;
-				}
-				else if ((stats.blueScore > stats.redScore && m_team == Common::Enums::TEAM_RED)
-					|| (stats.redScore > stats.blueScore && m_team == Common::Enums::TEAM_BLUE))
-				{
-					type = Main::Enums::MATCH_LOST;
-				}
-
-				scheduler.immediatePersist(std::source_location::current(),
-					&Main::Persistence::PersistentDatabase::updateClanStats, m_partyInfo.clanRoomId, type);
-				//logPartyState("Stats Stored");
-			}
+			void setClanMatchRoomNumber(std::uint16_t num);
+			std::uint16_t getClanMatchRoomNumber() const noexcept;
+			bool isPlayerInRoom(std::uint32_t sessionId) const;
+			void updatePartyStatus(bool hasStarted);
+			bool hasMatchStarted() const noexcept;
+			void removeAllPlayers();
+			void broadcastChatMessage(const std::string& message);
+			std::optional<std::uint32_t> getPlayerIndex(std::uint32_t sessionId);
+			std::expected<RemovePlayerResult, std::string> removePlayer(std::uint32_t sessionId);
+			std::uint32_t getRoomNumber() const noexcept;
+			std::uint32_t getClanId() const noexcept;
+			void updateMap(std::uint16_t map);
+			std::shared_ptr<Main::Network::Session> getLeaderSession() const;
+			Main::Structures::RoomSettings getRoomSettings() const;
+			std::uint32_t getSpecificSetting() const noexcept;
+			void updateMode(std::uint16_t mode);
+			bool isLeader(std::uint32_t sessionId) const noexcept;
+			bool canRegister() const noexcept;
+			bool changeLeaderTo(std::uint16_t idx);
+			std::optional<std::size_t> changeLeaderToFirstAvailable();
+			void updatePlayersPerTeam(std::uint16_t playersPerTeam);
+			std::pair<std::uint16_t, std::uint16_t> getRoomId() const;
+			const Main::Structures::ClanRoomSettings& getSettings() const noexcept;
+			bool isFull() const noexcept;
+			std::size_t getPlayersSize() const noexcept;
+			std::vector<Main::Structures::PartyPlayerInfo> getPlayers() const noexcept;
+			std::vector<std::shared_ptr<Main::Network::Session>> getPlayerSessions() noexcept;
+			const Main::Structures::PartyInfo& getClanMatchInfo() const noexcept;
+			void broadcast(Common::Network::Packet& packet);
+			void broadcastMessage(const std::string& message);
+			bool isRegistered() const noexcept;
+			void switchRegistered();
+			void broadcastExceptSelf(const Common::Network::Packet& packet, std::uint16_t sessionId);
+			std::optional<Main::Structures::RegisteredClanInfo> getInfo() const;
+			void setTeam(Common::Enums::Team team);
+			Common::Enums::Team getTeam() const noexcept;
+			void storeStats(Main::Persistence::MainScheduler& scheduler, const Main::ClientData::ClientEndingMatchHeader& stats);
 
 			/********** DEBUG PURPOSES /**********/
-			std::string getPlayersNicknames() const
-			{
-				if (m_players.empty())
-					return "Players: None";
-
-				std::string result = "Waiting Players: ";
-				for (const auto& [playerInfo, weakSession] : m_players)
-				{
-					if (result != "Players: ")
-						result += ", ";
-
-					result += playerInfo.toString();
-
-					if (auto session = weakSession.lock())
-					{
-						result += " (Room: " + std::to_string(session->getPlayer().getRoomNumber()) +
-							", PartyRoom: " + std::to_string(session->getPlayer().getPartyRoomNumber()) + ")";
-					}
-					else
-					{
-						result += " (Session expired)";
-					}
-				}
-				return result;
-			}
-
-			std::string getFormattedPartyInfo() const
-			{
-				return "Party Info: " + m_partyInfo.toString();
-			}
-
-			void sendDebugMessage()
-			{
-				broadcastMessage(getPlayersNicknames());
-				broadcastMessage(getFormattedPartyInfo());
-			}
-
-			
+			std::string getPlayersNicknames() const;
+			std::string getFormattedPartyInfo() const;
+			void sendDebugMessage();
 			/******** DEBUG PURPOSES END /********/
 		};
 	}
