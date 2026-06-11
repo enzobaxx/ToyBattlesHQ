@@ -38,14 +38,6 @@ namespace Main
 			matchContext.batteryObtainedInMatch = 0;
 		}
 
-		void Player::decreaseRoomNumber()
-		{
-			if (matchContext.roomNumber > 0)
-			{
-				--matchContext.roomNumber;
-			}
-		}
-
 		void Player::storeBatteryObtainedInMatch()
 		{
 			if (accountInfo.battery + matchContext.batteryObtainedInMatch >= accountInfo.maxBattery)

@@ -29,14 +29,12 @@ namespace Main
 {
 	namespace Classes
 	{
-		class Player
+		struct Player
 		{
-		private:
 			using AccountInfo = Main::Structures::AccountInfo;
 			using ModerationInfo = Main::Structures::ModerationInfo;
 			using MatchContext = Main::Structures::MatchContext;
 
-		public:
 			AccountInfo accountInfo{};
 			Inventory inventory{ accountInfo };
 			SocialInfo socialInfo{};
@@ -52,7 +50,6 @@ namespace Main
 			void setPlayerName(const char* playerName);
 			bool isInLobby() const;
 			bool isInMatch() const;
-			void decreaseRoomNumber();
 			void leaveRoom();
 			void storeBatteryObtainedInMatch();
 		};
