@@ -1,11 +1,11 @@
-#ifndef MODERATION_INFO_CLASS_H
-#define MODERATION_INFO_CLASS_H
+#ifndef MODERATION_INFO_H
+#define MODERATION_INFO_H
 
 #include <string>
 
 namespace Main
 {
-	namespace Classes
+	namespace Structures
 	{
 		struct ModerationInfo
 		{

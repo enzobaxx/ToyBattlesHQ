@@ -14,7 +14,7 @@
 #include "Entities/Inventory.h"
 #include "Entities/SocialInfo.h"
 #include "Entities/TradeInfo.h"
-#include "Entities/ModerationInfo.h"
+#include "Structures/ModerationInfo.h"
 #include "Entities/Mailbox.h"
 
 #include <unordered_map>
@@ -41,6 +41,7 @@ namespace Main
 			using Friend = Main::Structures::Friend;
 			using Mailbox = Main::Structures::Mailbox;
 			using Giftbox = Main::Structures::Giftbox;
+			using ModerationInfo = Main::Structures::ModerationInfo;
 
 			AccountInfo m_accountInfo{};
 			Inventory m_inventory{ m_accountInfo };
