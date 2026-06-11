@@ -86,15 +86,15 @@ PACK_POP()
 					}
 					session->getPlayer().inventory.setLatestItemNumber(selfLatestItemNumber);
 					targetSession->asyncWrite(response);
-					session->deleteItems(session->getPlayer().tradeInfo.getTradedItems(), "Item deleted after it was traded to " + std::string{targetSession->getPlayer().getPlayerName()}
+					session->deleteItems(session->getPlayer().tradeInfo.getTradedItems(), "Item deleted after it was traded to " + std::string{targetSession->getPlayer().accountInfo.nickname}
 						+ " (target AID: " + std::to_string(targetSession->getAccountInfo().accountID) + ")");
 					session->resetTradeInfo();
 
-					targetSession->deleteItems(targetSession->getPlayer().tradeInfo.getTradedItems(), "Item deleted after it was traded to " + std::string{ session->getPlayer().getPlayerName() }
+					targetSession->deleteItems(targetSession->getPlayer().tradeInfo.getTradedItems(), "Item deleted after it was traded to " + std::string{ session->getPlayer().accountInfo.nickname }
 						+ " (target AID: " + std::to_string(session->getAccountInfo().accountID) + ")");
-					targetSession->spawnItems(selfTradedItems, "Item received from trade, from user " + std::string{ session->getPlayer().getPlayerName() }
+					targetSession->spawnItems(selfTradedItems, "Item received from trade, from user " + std::string{ session->getPlayer().accountInfo.nickname }
 					+ " (AID: " + std::to_string(session->getAccountInfo().accountID) + ")");
-					session->spawnItems(targetTradedItems, "Item received from trade, from user " + std::string{ targetSession->getPlayer().getPlayerName() }
+					session->spawnItems(targetTradedItems, "Item received from trade, from user " + std::string{ targetSession->getPlayer().accountInfo.nickname }
 					    + " (AID: " + std::to_string(targetSession->getAccountInfo().accountID) + ")");
 					targetSession->resetTradeInfo();
 

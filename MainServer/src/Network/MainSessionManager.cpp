@@ -151,7 +151,7 @@ namespace Main
 		std::shared_ptr<Main::Network::Session> SessionsManager::findSessionByName(const char* nickname)
 		{
 			auto it = std::ranges::find_if(m_sessionsVector, [&](const auto& currentSession) {
-				return std::strcmp(currentSession->getPlayer().getPlayerName(), nickname) == 0;
+				return std::strcmp(currentSession->getPlayer().accountInfo.nickname, nickname) == 0;
 				});
 			return it != m_sessionsVector.end() ? *it : nullptr;
 		}

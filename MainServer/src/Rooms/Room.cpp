@@ -57,7 +57,7 @@ namespace Main
 		{
 			const auto& accountInfo = session->getAccountInfo();
 			return Main::Structures::RoomPlayerInfo{ accountInfo.uniqueId, static_cast<std::uint32_t>(accountInfo.latestSelectedCharacter),
-				team, static_cast<std::uint32_t>(accountInfo.playerLevel), accountInfo.nickname, Common::Enums::STATE_WAITING, session->getPlayer().getPing() };
+				team, static_cast<std::uint32_t>(accountInfo.playerLevel), accountInfo.nickname, Common::Enums::STATE_WAITING, session->getPlayer().ping };
 		}
 
 		void Room::addPlayer(std::shared_ptr<Main::Network::Session> session, std::uint32_t team)
@@ -271,9 +271,9 @@ namespace Main
 				const auto& player = session->getPlayer();
 				const bool isInMatch = player.isInMatch();
 
-				if (selfId != session->getId() && (checkInMatch ? isInMatch : !isInMatch) && player.getPing() < bestMs)
+				if (selfId != session->getId() && (checkInMatch ? isInMatch : !isInMatch) && player.ping < bestMs)
 				{
-					bestMs = player.getPing();
+					bestMs = player.ping;
 					bestMsPlayerIdx = currentIdx;
 					foundBestMs = true;
 				}
@@ -526,7 +526,7 @@ namespace Main
 
 			return Main::Structures::SingleRoom{m_title.c_str(), static_cast<std::uint16_t>(m_number - 1), static_cast<std::uint16_t>(m_settings.map),
 				m_settings.mode,getPlayersPerTeam(), static_cast<std::uint16_t>(m_players.size()), m_hasMatchStarted, !m_password.empty(),
-				m_settings.weaponRestriction, m_settings.isObserverModeOn, session->getPlayer().getPing()
+				m_settings.weaponRestriction, m_settings.isObserverModeOn, session->getPlayer().ping
 			};
 		}
 
@@ -749,7 +749,7 @@ namespace Main
 					if (roomInfo.uniqueId.session != givenSession->getAccountInfo().uniqueId.session &&
 						roomInfo.team == targetTeam &&
 						session->getPlayer().isInMatch() == isInMatch &&
-						session->getPlayer().getPlayerState() == Common::Enums::STATE_DYING)
+						session->getPlayer().playerState == Common::Enums::STATE_DYING)
 					{
 						session->asyncWrite(packet);
 					}
@@ -862,7 +862,7 @@ namespace Main
 				auto session = pair.second.lock();
 				if (!session) continue;
 
-				auto playerState = session->getPlayer().getPlayerState();
+				auto playerState = session->getPlayer().playerState;
 
 				if (playerState == Common::Enums::STATE_INVENTORY
 					|| playerState == Common::Enums::STATE_LOBBY
@@ -1488,7 +1488,7 @@ namespace Main
 
 				if (auto session = weakSession.lock())
 				{
-					if (session->getPlayer().getPlayerState() == PlayerState::STATE_READY)
+					if (session->getPlayer().playerState == PlayerState::STATE_READY)
 					{
 						if (info.team == Team::TEAM_RED) ++redReady;
 						else if (info.team == Team::TEAM_BLUE) blueReady;
@@ -1517,7 +1517,7 @@ namespace Main
 					bool isEligible = false;
 					if (fromReadyPlayers)
 					{
-						isEligible = session->getPlayer().getPlayerState() == Common::Enums::STATE_READY || idx == 0;
+						isEligible = session->getPlayer().playerState == Common::Enums::STATE_READY || idx == 0;
 					}
 					else
 					{
@@ -1525,7 +1525,7 @@ namespace Main
 					}
 					if (isEligible)
 					{
-						candidates.emplace_back(info.uniqueId, session->getPlayer().getPlayerName());
+						candidates.emplace_back(info.uniqueId, session->getPlayer().accountInfo.nickname);
 					}
 				}
 

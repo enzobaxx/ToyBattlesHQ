@@ -56,7 +56,7 @@ namespace Main
 				{
 					session->sendMessage("the room is currently muted");
 				}
-				else if (session->getPlayer().getPlayerState() == Common::Enums::STATE_DYING)
+				else if (session->getPlayer().playerState == Common::Enums::STATE_DYING)
 				{
 					room->broadcastToDeadExceptSelf(response, session, request.getExtra());
 				}

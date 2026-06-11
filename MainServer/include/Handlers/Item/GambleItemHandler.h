@@ -26,7 +26,7 @@ namespace Main
 				return;
 			}
 
-			if (session->getPlayer().getPlayerState() == Common::Enums::STATE_INVENTORY)
+			if (session->getPlayer().playerState == Common::Enums::STATE_INVENTORY)
 			{
 				Main::Structures::ItemSerialInfo itemSerialInfo = Main::Details::parseData<Main::Structures::ItemSerialInfo>(request);
 

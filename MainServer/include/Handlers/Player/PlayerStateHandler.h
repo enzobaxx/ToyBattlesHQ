@@ -17,7 +17,7 @@ namespace Main
 		inline void handlePlayerState(const Common::Network::Packet& request, std::shared_ptr<Main::Network::Session>session, Main::Classes::RoomsManager& roomsManager,
 			const Main::Structures::CapsuleListDatabase& capsuleListDb)
 		{
-			auto previousPlayerState = session->getPlayer().getPlayerState();
+			auto previousPlayerState = session->getPlayer().playerState;
 			const bool mustBroadcastItems = previousPlayerState == Common::Enums::STATE_INVENTORY || previousPlayerState == Common::Enums::STATE_SHOP 
 				|| Common::Enums::STATE_CAPSULE;
 

@@ -143,7 +143,7 @@ namespace Main
 				Main::Structures::RoomLatestEnteredPlayerInfo latestEnteredPlayerInfo;
 				latestEnteredPlayerInfo.character = accountInfo.latestSelectedCharacter;
 				latestEnteredPlayerInfo.level = accountInfo.playerLevel;
-				latestEnteredPlayerInfo.ping = session->getPlayer().getPing();
+				latestEnteredPlayerInfo.ping = session->getPlayer().ping;
 				latestEnteredPlayerInfo.uniqueId = accountInfo.uniqueId;
 				std::memcpy(latestEnteredPlayerInfo.playerName, accountInfo.nickname, Common::Constants::maxNicknameSize);
 				auto separatedItems = session->getPlayer().inventory.getEquippedItemsSeparated(); // first=items, second=weapons

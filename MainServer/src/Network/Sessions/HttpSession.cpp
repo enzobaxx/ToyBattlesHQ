@@ -1084,7 +1084,7 @@ namespace Main
                             (currentPlayer.first.team == 4) ? "obs" : "unknown";
                         playerObj["PlayerName"] = currentPlayer.first.playerName;
                         playerObj["Team"] = teamName;
-                        playerObj["Ping"] = currentPlayer.second->getPlayer().getPing();
+                        playerObj["Ping"] = currentPlayer.second->getPlayer().ping;
                         playerObj["SEID"] = currentPlayer.second->getId();
                         playerObj["PlayerState"] = Common::Enums::playerStateToString(currentPlayer.first.state);
                         playersArray.push_back(playerObj);

@@ -171,30 +171,30 @@ namespace Main
 		void Session::addMailboxReceived(const Main::Structures::Mailbox& mailbox)
 		{
 			m_player.mailbox.addMailboxReceived(mailbox);
-			m_scheduler.addRepetitiveCallback(std::source_location::current(), m_player.getAccountID(), &Main::Persistence::PersistentDatabase::storeMailbox,
-				mailbox, m_player.getAccountID(), false);
+			m_scheduler.addRepetitiveCallback(std::source_location::current(), m_player.accountInfo.accountID, &Main::Persistence::PersistentDatabase::storeMailbox,
+				mailbox, m_player.accountInfo.accountID, false);
 		}
 
 		void Session::addGiftboxReceived(const Main::Structures::Giftbox& giftbox)
 		{
 			m_player.mailbox.addGiftboxReceived(giftbox);
-			m_scheduler.addRepetitiveCallback(std::source_location::current(), m_player.getAccountID(), LIFT_MEMBER(storeGiftbox),
-				giftbox, m_player.getAccountID());
+			m_scheduler.addRepetitiveCallback(std::source_location::current(), m_player.accountInfo.accountID, LIFT_MEMBER(storeGiftbox),
+				giftbox, m_player.accountInfo.accountID);
 		}
 
 		void Session::addMailboxSent(const Main::Structures::Mailbox& mailbox)
 		{
 			m_player.mailbox.addMailboxSent(mailbox);
-			m_scheduler.addRepetitiveCallback(std::source_location::current(), m_player.getAccountID(), &Main::Persistence::PersistentDatabase::storeMailbox,
-				mailbox, m_player.getAccountID(), true);
+			m_scheduler.addRepetitiveCallback(std::source_location::current(), m_player.accountInfo.accountID, &Main::Persistence::PersistentDatabase::storeMailbox,
+				mailbox, m_player.accountInfo.accountID, true);
 		}
 
 		bool Session::deleteSentMailbox(std::uint32_t timestamp)
 		{
 			if (m_player.mailbox.deleteSentMailbox(timestamp))
 			{
-				m_scheduler.addRepetitiveCallback(std::source_location::current(), m_player.getAccountID(), &Main::Persistence::PersistentDatabase::deleteMailbox,
-					timestamp, m_player.getAccountID(), true);
+				m_scheduler.addRepetitiveCallback(std::source_location::current(), m_player.accountInfo.accountID, &Main::Persistence::PersistentDatabase::deleteMailbox,
+					timestamp, m_player.accountInfo.accountID, true);
 				return true;
 			}
 			sendMessage("[Session::deleteSentMailbox] Error while deleting sent mailbox");
@@ -205,8 +205,8 @@ namespace Main
 		{
 			if (m_player.mailbox.deleteReceivedMailbox(timestamp))
 			{
-				m_scheduler.addRepetitiveCallback(std::source_location::current(), m_player.getAccountID(), &Main::Persistence::PersistentDatabase::deleteMailbox,
-					timestamp, m_player.getAccountID(), false);
+				m_scheduler.addRepetitiveCallback(std::source_location::current(), m_player.accountInfo.accountID, &Main::Persistence::PersistentDatabase::deleteMailbox,
+					timestamp, m_player.accountInfo.accountID, false);
 				return true;
 			}
 			sendMessage("[Session::deleteReceivedMailbox] Error while deleting received mailbox");
@@ -264,7 +264,7 @@ namespace Main
 		void Session::setAccountInfo(const AccountInfo& accountInfo)
 		{
 			this->setAccountId(accountInfo.accountID);
-			m_player.setAccountInfo(accountInfo);
+			m_player.accountInfo = accountInfo;
 
 			m_packet.setTcpHeader(m_id, Common::Enums::USER_LARGE_ENCRYPTION);
 			m_packet.setCommand(413, 0, 1, 0);
@@ -342,7 +342,7 @@ namespace Main
 			}
 			m_packet.setExtra(Main::Enums::AddFriendServerExtra::SEND_REQUEST_TO_TARGET);
 			Main::Structures::Friend friendStruct{ accountInfo.uniqueId, accountInfo.accountID };
-			std::memcpy(friendStruct.targetNickname, m_player.getPlayerName(), 16);
+			std::memcpy(friendStruct.targetNickname, m_player.accountInfo.nickname, 16);
 			m_packet.setData(reinterpret_cast<std::uint8_t*>(&friendStruct), sizeof(friendStruct));
 			
 			if (targetSession->getPlayer().isInMatch())
@@ -394,7 +394,7 @@ namespace Main
 				m_player.socialInfo.addOnlineFriend(senderSession);
 				senderSession->addOnlineFriend(std::static_pointer_cast<Main::Network::Session>(shared_from_this()));
 				m_scheduler.immediatePersist(std::source_location::current(), &Main::Persistence::PersistentDatabase::addFriend, 
-					m_player.getAccountID(), senderSession->getAccountInfo().accountID);
+					m_player.accountInfo.accountID, senderSession->getAccountInfo().accountID);
 				asyncWrite(m_packet);
 			}
 		}
@@ -457,8 +457,8 @@ namespace Main
 				m_packet.setCommand(52, 0, 1, 0);
 				m_packet.setData(nullptr, 0);
 				asyncWrite(m_packet);
-				m_scheduler.addRepetitiveCallback(std::source_location::current(), m_player.getAccountID(), &Main::Persistence::PersistentDatabase::blockPlayer,
-					m_player.getAccountID(), accountId);
+				m_scheduler.addRepetitiveCallback(std::source_location::current(), m_player.accountInfo.accountID, &Main::Persistence::PersistentDatabase::blockPlayer,
+					m_player.accountInfo.accountID, accountId);
 				return true;
 			}
 			else
@@ -473,15 +473,15 @@ namespace Main
 			using CollectionInfo = Common::ConstantDatabase::CdbSingleton<Common::ConstantDatabase::CdbCollectionInfo>;
 			if (auto entryOpt = CollectionInfo::getInstance().getEntry(idx))
 			{
-				m_player.addAchievementTier1(idx);
+				m_player.accountInfo.achievements.setAchievementTier1(idx);
 				setAccountMicroPoints(m_player.accountInfo.microPoints + entryOpt->ci_reward_point);
 				sendCurrency();
-				m_scheduler.addRepetitiveCallback(std::source_location::current(), m_player.getAccountID(), &Main::Persistence::PersistentDatabase::addPlayerAchievement,
-					m_player.getAccountID(), idx);
+				m_scheduler.addRepetitiveCallback(std::source_location::current(), m_player.accountInfo.accountID, &Main::Persistence::PersistentDatabase::addPlayerAchievement,
+					m_player.accountInfo.accountID, idx);
 			}
 			else
 			{
-				::Utils::Logger::log("Achievement EntryOpt was nullopt AID: " + std::to_string(m_player.getAccountID()),
+				::Utils::Logger::log("Achievement EntryOpt was nullopt AID: " + std::to_string(m_player.accountInfo.accountID),
 					::Utils::LogType::Error, "Session::addAchievement");
 			}
 		}
@@ -493,8 +493,8 @@ namespace Main
 			bool unblockSuccess = false;
 			if (m_player.socialInfo.unblockAccount(accountId))
 			{
-				m_scheduler.addRepetitiveCallback(std::source_location::current(), m_player.getAccountID(), &Main::Persistence::PersistentDatabase::unblockPlayer,
-					m_player.getAccountID(), accountId);
+				m_scheduler.addRepetitiveCallback(std::source_location::current(), m_player.accountInfo.accountID, &Main::Persistence::PersistentDatabase::unblockPlayer,
+					m_player.accountInfo.accountID, accountId);
 				unblockSuccess = true;
 			}
 			m_packet.setTcpHeader(m_id, Common::Enums::NO_ENCRYPTION);
@@ -533,7 +533,7 @@ namespace Main
 			const bool deletedFriend = m_player.socialInfo.deleteFriend(targetAccountId);
 			if (persist)
 			{
-				m_scheduler.immediatePersist(std::source_location::current(), &Main::Persistence::PersistentDatabase::removeFriend, m_player.getAccountID(), targetAccountId);
+				m_scheduler.immediatePersist(std::source_location::current(), &Main::Persistence::PersistentDatabase::removeFriend, m_player.accountInfo.accountID, targetAccountId);
 			}
 		}
 
@@ -547,7 +547,7 @@ namespace Main
 			m_packet.setData(reinterpret_cast<const std::uint8_t*>(toProlongItems.data()), toProlongItems.size() * sizeof(Main::Structures::BoughtItemToProlong));
 			asyncWrite(m_packet);
 
-			m_scheduler.addRepetitiveCallback(std::source_location::current(), m_player.getAccountID(), &Main::Persistence::PersistentDatabase::prolongItems, m_player.getAccountID(),
+			m_scheduler.addRepetitiveCallback(std::source_location::current(), m_player.accountInfo.accountID, &Main::Persistence::PersistentDatabase::prolongItems, m_player.accountInfo.accountID,
 					toProlongItems, itemDurations, static_cast<time32_t>(std::time(0)));
 			return true;
 		}
@@ -652,9 +652,9 @@ namespace Main
 		{
 			if (m_player.inventory.deleteItemBasic(itemSerialInfo))
 			{
-				m_scheduler.addRepetitiveCallback(std::source_location::current(), m_player.getAccountID(), 
+				m_scheduler.addRepetitiveCallback(std::source_location::current(), m_player.accountInfo.accountID, 
 					&Main::Persistence::PersistentDatabase::removePlayerItem,
-					m_player.getAccountID(), static_cast<std::uint64_t>(itemSerialInfo.itemNumber), "Session::deletetemBasic");
+					m_player.accountInfo.accountID, static_cast<std::uint64_t>(itemSerialInfo.itemNumber), "Session::deletetemBasic");
 				return true;
 			}
 
@@ -664,8 +664,8 @@ namespace Main
 		void Session::addItems(const std::vector<Item>& items)
 		{
 			m_player.inventory.addItems(items);
-			m_scheduler.addRepetitiveCallback(std::source_location::current(), m_player.getAccountID(),
-				&Main::Persistence::PersistentDatabase::addPlayerItems, m_player.getAccountID(), items, -1);
+			m_scheduler.addRepetitiveCallback(std::source_location::current(), m_player.accountInfo.accountID,
+				&Main::Persistence::PersistentDatabase::addPlayerItems, m_player.accountInfo.accountID, items, -1);
 		}
 
 		// Important notes: before using this function:
@@ -682,8 +682,8 @@ namespace Main
 			}
 			else
 			{
-				m_scheduler.addRepetitiveCallback(std::source_location::current(), m_player.getAccountID(),
-					&Main::Persistence::PersistentDatabase::addPlayerItem, item, m_player.getAccountID(), -1);
+				m_scheduler.addRepetitiveCallback(std::source_location::current(), m_player.accountInfo.accountID,
+					&Main::Persistence::PersistentDatabase::addPlayerItem, item, m_player.accountInfo.accountID, -1);
 			}
 			m_player.inventory.addItem(item);
 			return true;
@@ -707,8 +707,8 @@ namespace Main
 			const std::uint32_t duration = Main::CdbUtils::getItemDuration(item.id);
 			convertedItem.expirationDate = duration <= 3 ? duration : convertedItem.serialInfo.itemCreationDate + duration;
 
-			m_scheduler.addRepetitiveCallback(std::source_location::current(), m_player.getAccountID(),
-				&Main::Persistence::PersistentDatabase::addPlayerItem, convertedItem, m_player.getAccountID(), -1);
+			m_scheduler.addRepetitiveCallback(std::source_location::current(), m_player.accountInfo.accountID,
+				&Main::Persistence::PersistentDatabase::addPlayerItem, convertedItem, m_player.accountInfo.accountID, -1);
 			m_player.inventory.addItem(convertedItem);
 			return true;
 		}
@@ -730,12 +730,12 @@ namespace Main
 
 			m_player.inventory.setLatestItemNumber(boxItems.back().serialInfo.itemNumber);
 			m_player.inventory.addItems(boxItems);
-			m_scheduler.addRepetitiveCallback(std::source_location::current(), m_player.getAccountID(),
-				&Main::Persistence::PersistentDatabase::addPlayerBoxItems, m_player.getAccountID(),
+			m_scheduler.addRepetitiveCallback(std::source_location::current(), m_player.accountInfo.accountID,
+				&Main::Persistence::PersistentDatabase::addPlayerBoxItems, m_player.accountInfo.accountID,
 				boxItems, -1);
 
-			m_scheduler.addRepetitiveCallback(std::source_location::current(), m_player.getAccountID(), &Main::Persistence::PersistentDatabase::logBoxItems,
-				m_player.getAccountID(), boxItems);
+			m_scheduler.addRepetitiveCallback(std::source_location::current(), m_player.accountInfo.accountID, &Main::Persistence::PersistentDatabase::logBoxItems,
+				m_player.accountInfo.accountID, boxItems);
 		}
 
 		bool Session::useInstantRespawn(const Main::Structures::ItemSerialInfo& serialInfo, const Common::Network::Packet& request)
@@ -752,8 +752,8 @@ namespace Main
 			else if (result.first == Common::Enums::MATCHITEM_STOCKS_REDUCED_SUCCESS)
 			{
 				asyncWrite(response);
-				m_scheduler.addRepetitiveCallback(std::source_location::current(), m_player.getAccountID(),
-					&Main::Persistence::PersistentDatabase::updateItemStock, m_player.getAccountID(),
+				m_scheduler.addRepetitiveCallback(std::source_location::current(), m_player.accountInfo.accountID,
+					&Main::Persistence::PersistentDatabase::updateItemStock, m_player.accountInfo.accountID,
 					serialInfo.itemNumber, result.second);
 				return true;
 			}
@@ -777,8 +777,8 @@ namespace Main
 			}
 			else if (result.action == Common::Enums::MATCHITEM_STOCKS_REDUCED_SUCCESS)
 			{
-				m_scheduler.addRepetitiveCallback(std::source_location::current(), m_player.getAccountID(),
-					&Main::Persistence::PersistentDatabase::updateItemStock, m_player.getAccountID(),
+				m_scheduler.addRepetitiveCallback(std::source_location::current(), m_player.accountInfo.accountID,
+					&Main::Persistence::PersistentDatabase::updateItemStock, m_player.accountInfo.accountID,
 					result.serialInfo.itemNumber, result.newStock);
 				return true;
 			}
@@ -809,8 +809,8 @@ namespace Main
 			else if (result.first == Common::Enums::MATCHITEM_STOCKS_REDUCED_SUCCESS)
 			{
 				asyncWrite(response);
-				m_scheduler.addRepetitiveCallback(std::source_location::current(), m_player.getAccountID(),
-					&Main::Persistence::PersistentDatabase::updateItemStock, m_player.getAccountID(),
+				m_scheduler.addRepetitiveCallback(std::source_location::current(), m_player.accountInfo.accountID,
+					&Main::Persistence::PersistentDatabase::updateItemStock, m_player.accountInfo.accountID,
 					serialInfo.itemNumber, result.second);
 				return true;
 			}
@@ -843,11 +843,11 @@ namespace Main
 			m_player.inventory.setLatestItemNumber(boughtItems.back().serialInfo.itemNumber);
 			m_player.inventory.addItems(boughtItems);
 
-			m_scheduler.addRepetitiveCallback(std::source_location::current(), m_player.getAccountID(), &Main::Persistence::PersistentDatabase::addPlayerBoughtItems, 
-				m_player.getAccountID(), boughtItems, -1);
+			m_scheduler.addRepetitiveCallback(std::source_location::current(), m_player.accountInfo.accountID, &Main::Persistence::PersistentDatabase::addPlayerBoughtItems, 
+				m_player.accountInfo.accountID, boughtItems, -1);
 
-			m_scheduler.addRepetitiveCallback(std::source_location::current(), m_player.getAccountID(), &Main::Persistence::PersistentDatabase::logBoughtItems,
-				m_player.getAccountID(), boughtItems, areCouponItems);
+			m_scheduler.addRepetitiveCallback(std::source_location::current(), m_player.accountInfo.accountID, &Main::Persistence::PersistentDatabase::logBoughtItems,
+				m_player.accountInfo.accountID, boughtItems, areCouponItems);
 
 			return true;
 		}
@@ -856,8 +856,8 @@ namespace Main
 		{
 			if (rt > 0x3FFFFFFF) return false;
 			m_player.accountInfo.rockTotens = rt;
-			m_scheduler.addCallback(std::source_location::current(), m_player.getAccountID(), 1, &Main::Persistence::PersistentDatabase::updatePlayerCurrencyByType,
-				m_player.getAccountID(), rt, Main::Enums::ItemCurrencyType::ITEM_RT);
+			m_scheduler.addCallback(std::source_location::current(), m_player.accountInfo.accountID, 1, &Main::Persistence::PersistentDatabase::updatePlayerCurrencyByType,
+				m_player.accountInfo.accountID, rt, Main::Enums::ItemCurrencyType::ITEM_RT);
 			return true;
 		}
 
@@ -865,8 +865,8 @@ namespace Main
 		{
 			if (mp > 0x7FFFFFFF) return false;
 			m_player.accountInfo.microPoints = mp;
-			m_scheduler.addCallback(std::source_location::current(), m_player.getAccountID(), 2, &Main::Persistence::PersistentDatabase::updatePlayerCurrencyByType,
-				m_player.getAccountID(), mp, Main::Enums::ItemCurrencyType::ITEM_MP);
+			m_scheduler.addCallback(std::source_location::current(), m_player.accountInfo.accountID, 2, &Main::Persistence::PersistentDatabase::updatePlayerCurrencyByType,
+				m_player.accountInfo.accountID, mp, Main::Enums::ItemCurrencyType::ITEM_MP);
 			return true;
 		}
 
@@ -874,16 +874,16 @@ namespace Main
 		{
 			if (coins > 0x7F) return false;
 			m_player.accountInfo.coins = coins;
-			m_scheduler.addCallback(std::source_location::current(), m_player.getAccountID(), 3, &Main::Persistence::PersistentDatabase::updatePlayerCurrencyByType,
-				m_player.getAccountID(), coins, Main::Enums::ItemCurrencyType::ITEM_COIN);
+			m_scheduler.addCallback(std::source_location::current(), m_player.accountInfo.accountID, 3, &Main::Persistence::PersistentDatabase::updatePlayerCurrencyByType,
+				m_player.accountInfo.accountID, coins, Main::Enums::ItemCurrencyType::ITEM_COIN);
 			return true;
 		}
 
 		void Session::setAccountLatestCharacterSelected(std::uint16_t latestCharacterSelected)
 		{
 			m_player.accountInfo.latestSelectedCharacter = latestCharacterSelected;
-			m_scheduler.addCallback(std::source_location::current(), m_player.getAccountID(), 5, &Main::Persistence::PersistentDatabase::updateLatestSelectedCharacter,
-				m_player.getAccountID(), latestCharacterSelected);
+			m_scheduler.addCallback(std::source_location::current(), m_player.accountInfo.accountID, 5, &Main::Persistence::PersistentDatabase::updateLatestSelectedCharacter,
+				m_player.accountInfo.accountID, latestCharacterSelected);
 		}
 
 		bool Session::setLevel(std::uint16_t level)
@@ -894,7 +894,7 @@ namespace Main
 			}
 			m_player.accountInfo.playerLevel = level + 1;
 			m_scheduler.addCallback(std::source_location::current(), 
-				m_player.getAccountID(), 6, &Main::Persistence::PersistentDatabase::updatePlayerLevel, m_player.getAccountID(), level);
+				m_player.accountInfo.accountID, 6, &Main::Persistence::PersistentDatabase::updatePlayerLevel, m_player.accountInfo.accountID, level);
 			return true;
 		}
 
@@ -902,7 +902,7 @@ namespace Main
 		{
 			m_player.accountInfo.experience = experience;
 			m_scheduler.addCallback(std::source_location::current(),
-				m_player.getAccountID(), 7, &Main::Persistence::PersistentDatabase::updatePlayerExperience, m_player.getAccountID(), experience);
+				m_player.accountInfo.accountID, 7, &Main::Persistence::PersistentDatabase::updatePlayerExperience, m_player.accountInfo.accountID, experience);
 			return true;
 		}
 
@@ -933,7 +933,7 @@ namespace Main
 
 			auto result = m_scheduler.immediatePersist(std::source_location::current(),
 				&Main::Persistence::PersistentDatabase::updatePlayerName,
-				m_player.getAccountID(),
+				m_player.accountInfo.accountID,
 				playerName.c_str(),
 				isStaff);
 
@@ -982,8 +982,8 @@ namespace Main
 				asyncWrite(m_packet);
 
 				m_scheduler.addRepetitiveCallback(std::source_location::current(), 
-					m_player.getAccountID(), &Main::Persistence::PersistentDatabase::insertEnergyToItem,
-					m_player.getAccountID(), static_cast<std::uint32_t>(itemAddEnergy.serialInfo.itemNumber), result->first, static_cast<std::uint32_t>(result->second));
+					m_player.accountInfo.accountID, &Main::Persistence::PersistentDatabase::insertEnergyToItem,
+					m_player.accountInfo.accountID, static_cast<std::uint32_t>(itemAddEnergy.serialInfo.itemNumber), result->first, static_cast<std::uint32_t>(result->second));
 			}
 		}
 
@@ -991,7 +991,7 @@ namespace Main
 		{
 			m_player.socialInfo.addOfflineFriend(ffriend);
 			m_scheduler.immediatePersist(std::source_location::current(), 
-				&Main::Persistence::PersistentDatabase::addFriend, m_player.getAccountID(), ffriend.targetAccountId);
+				&Main::Persistence::PersistentDatabase::addFriend, m_player.accountInfo.accountID, ffriend.targetAccountId);
 		}
 
 		std::optional<Main::Structures::Friend> Session::addOnlineFriend(std::shared_ptr<Main::Network::Session> session)
@@ -1035,12 +1035,12 @@ namespace Main
 			m_player.inventory.setLatestItemNumber(spawnedItem.serialInfo.itemNumber);
 			asyncWrite(m_packet);
 
-			m_scheduler.addRepetitiveCallback(std::source_location::current(), m_player.getAccountID(),
-				&Main::Persistence::PersistentDatabase::replaceItemResetEnergy, m_player.getAccountID(), static_cast<std::uint64_t>(spawnedItem.serialInfo.itemNumber), newItemId);
+			m_scheduler.addRepetitiveCallback(std::source_location::current(), m_player.accountInfo.accountID,
+				&Main::Persistence::PersistentDatabase::replaceItemResetEnergy, m_player.accountInfo.accountID, static_cast<std::uint64_t>(spawnedItem.serialInfo.itemNumber), newItemId);
 
 			Main::Structures::ItemLogInfo log{ serialInfo.itemNumber, *itemIdOpt, 0, action};
 			m_scheduler.addRepetitiveCallback(std::source_location::current(),
-				m_player.getAccountID(), &Main::Persistence::PersistentDatabase::insertItemLog, m_player.getAccountID(), log);
+				m_player.accountInfo.accountID, &Main::Persistence::PersistentDatabase::insertItemLog, m_player.accountInfo.accountID, log);
 
 			return true;
 		}
@@ -1049,7 +1049,7 @@ namespace Main
 		{
 			Main::Structures::ItemLogInfo log{ itemNumber, itemId, expiration, action };
 			m_scheduler.addRepetitiveCallback(std::source_location::current(),
-				m_player.getAccountID(), &Main::Persistence::PersistentDatabase::insertItemLog, m_player.getAccountID(), log);
+				m_player.accountInfo.accountID, &Main::Persistence::PersistentDatabase::insertItemLog, m_player.accountInfo.accountID, log);
 		}
 
 		bool Session::spawnItemCommand(const std::uint32_t itemId, const std::string& action)
@@ -1099,8 +1099,8 @@ namespace Main
 			spawnedItem.expirationDate = duration <= 3 ? static_cast<time32_t>(duration) : static_cast<time_t>(std::time(0)) + duration;
 
 			const Item item{ spawnedItem };
-			m_scheduler.addRepetitiveCallback(std::source_location::current(), m_player.getAccountID(),
-				&Main::Persistence::PersistentDatabase::addUntradeablePlayerItem, item, m_player.getAccountID(), -1);
+			m_scheduler.addRepetitiveCallback(std::source_location::current(), m_player.accountInfo.accountID,
+				&Main::Persistence::PersistentDatabase::addUntradeablePlayerItem, item, m_player.accountInfo.accountID, -1);
 			m_player.inventory.addItem(item);
 
 			m_packet.setCommand(66, 0, 51, 2);
@@ -1174,8 +1174,8 @@ namespace Main
 						"Coupon item spawned automatically in Session::spawnCouponCommon");
 				}
 
-				m_scheduler.addRepetitiveCallback(std::source_location::current(), m_player.getAccountID(), &Main::Persistence::PersistentDatabase::updateItemStock,
-					m_player.getAccountID(), res.serialInfo.itemNumber, res.newStock);
+				m_scheduler.addRepetitiveCallback(std::source_location::current(), m_player.accountInfo.accountID, &Main::Persistence::PersistentDatabase::updateItemStock,
+					m_player.accountInfo.accountID, res.serialInfo.itemNumber, res.newStock);
 				return true;
 			}
 
@@ -1208,7 +1208,7 @@ namespace Main
 		{
 			m_player.mailbox.deleteGiftbox(timestamp);
 			m_scheduler.addRepetitiveCallback(std::source_location::current(), 
-				m_player.getAccountID(), &Main::Persistence::PersistentDatabase::deleteReceivedGiftbox, m_player.getAccountID(), timestamp);
+				m_player.accountInfo.accountID, &Main::Persistence::PersistentDatabase::deleteReceivedGiftbox, m_player.accountInfo.accountID, timestamp);
 		}
 
 		void Session::displayGiftboxes(Main::Enums::MailboxMission type)
@@ -1286,7 +1286,7 @@ namespace Main
 			{
 				Main::Structures::ItemLogInfo itemLog{itemSerialInfoToDelete.itemNumber, *itemIdOpt, 0, action};
 				m_scheduler.addRepetitiveCallback(std::source_location::current(),
-					m_player.getAccountID(), &Main::Persistence::PersistentDatabase::insertItemLog, m_player.getAccountID(), itemLog);
+					m_player.accountInfo.accountID, &Main::Persistence::PersistentDatabase::insertItemLog, m_player.accountInfo.accountID, itemLog);
 			}
 
 			const bool removed = deleteItemBasic(itemSerialInfoToDelete, "Session::deleteItem");
@@ -1342,8 +1342,8 @@ namespace Main
 			auto weaponDurabilityDamages = cont.first;
 			auto weaponsToDamageIds = cont.second;
 
-			m_scheduler.addRepetitiveCallback(std::source_location::current(), m_player.getAccountID(), &Main::Persistence::PersistentDatabase::reduceDurability,
-				m_player.getAccountID(), weaponsToDamageIds);
+			m_scheduler.addRepetitiveCallback(std::source_location::current(), m_player.accountInfo.accountID, &Main::Persistence::PersistentDatabase::reduceDurability,
+				m_player.accountInfo.accountID, weaponsToDamageIds);
 
 			m_packet.setOrder(93);
 			m_packet.setOption(weaponDurabilityDamages.size());
@@ -1355,7 +1355,7 @@ namespace Main
 		void Session::updateItemDurability(std::uint32_t itemNumber, std::uint32_t newDurability)
 		{
 			m_scheduler.addRepetitiveCallback(std::source_location::current(),
-				m_player.getAccountID(), &Main::Persistence::PersistentDatabase::updateItemDurability, m_player.getAccountID(), itemNumber, newDurability);
+				m_player.accountInfo.accountID, &Main::Persistence::PersistentDatabase::updateItemDurability, m_player.accountInfo.accountID, itemNumber, newDurability);
 			m_player.inventory.updateItemDurabilityByNumber(itemNumber, newDurability);
 		}
 
@@ -1394,12 +1394,12 @@ namespace Main
 				if (ainfo.highestSingleWaveScore < score)
 				{
 					ainfo.highestSingleWaveScore = score;
-					m_player.setAccountInfo(ainfo);
+					m_player.accountInfo = ainfo;
 				}
 				if (ainfo.highestSinglewaveStage < stage)
 				{
 					ainfo.highestSinglewaveStage = stage;
-					m_player.setAccountInfo(ainfo);
+					m_player.accountInfo = ainfo;
 				}
 				m_scheduler.addRepetitiveCallback(std::source_location::current(), 
 					ainfo.accountID, &Main::Persistence::PersistentDatabase::updatePlayerStats, ainfo.accountID, ainfo);
@@ -1412,7 +1412,7 @@ namespace Main
 			if (ainfo.isTutorialDone) return;
 
 			ainfo.isTutorialDone = true;
-			m_player.setAccountInfo(ainfo);
+			m_player.accountInfo = ainfo;
 
 			m_scheduler.addRepetitiveCallback(std::source_location::current(), 
 				ainfo.accountID, &Main::Persistence::PersistentDatabase::updatePlayerStats, ainfo.accountID, ainfo);
@@ -1614,12 +1614,12 @@ namespace Main
 
 		void Session::clear()
 		{
-			m_scheduler.persistFor(m_player.getAccountID());
+			m_scheduler.persistFor(m_player.accountInfo.accountID);
 		}
 
 		void Session::setPlayerState(Common::Enums::PlayerState playerState)
 		{
-			m_player.setPlayerState(playerState);
+			m_player.playerState = playerState;
 			if (playerState == Common::Enums::STATE_NORMAL)
 			{
 				m_player.matchContext.isInMatch = true;
@@ -1634,14 +1634,14 @@ namespace Main
 		{
 			m_player.accountInfo.luckyPoints += points; 
 			m_scheduler.immediatePersist(std::source_location::current(), 
-				&Persistence::PersistentDatabase::updatePlayerLuckyPoints, m_player.getAccountID(), static_cast<std::uint32_t>(m_player.accountInfo.luckyPoints));
+				&Persistence::PersistentDatabase::updatePlayerLuckyPoints, m_player.accountInfo.accountID, static_cast<std::uint32_t>(m_player.accountInfo.luckyPoints));
 		}
 
 		void Session::setLuckyPoints(std::uint32_t points)
 		{
 			m_player.accountInfo.luckyPoints = points;
 			m_scheduler.immediatePersist(std::source_location::current(), 
-				&Persistence::PersistentDatabase::updatePlayerLuckyPoints, m_player.getAccountID(), static_cast<std::uint32_t>(m_player.accountInfo.luckyPoints));
+				&Persistence::PersistentDatabase::updatePlayerLuckyPoints, m_player.accountInfo.accountID, static_cast<std::uint32_t>(m_player.accountInfo.luckyPoints));
 		}
 
 		void Session::leaveRoom()
@@ -1661,8 +1661,8 @@ namespace Main
 			const std::uint32_t totalNewBattery = accountInfo.battery;
 			if (totalNewBattery > oldBatteryQuantity)
 			{
-				m_scheduler.addRepetitiveCallback(std::source_location::current(),m_player.getAccountID(),
-					&Main::Persistence::PersistentDatabase::updateBattery,m_player.getAccountID(),totalNewBattery);
+				m_scheduler.addRepetitiveCallback(std::source_location::current(),m_player.accountInfo.accountID,
+					&Main::Persistence::PersistentDatabase::updateBattery,m_player.accountInfo.accountID,totalNewBattery);
 			}
 		}
 
@@ -1721,7 +1721,7 @@ namespace Main
 			using std::chrono::system_clock;
 			using std::chrono::current_zone;
 
-			const std::string& latestOpenedRewardDate = m_player.getLatestWeeklyRewardDate();
+			const std::string& latestOpenedRewardDate = m_player.latestWeeklyRewardDay;
 			const std::string todayDate = std::format("{:%F}", system_clock::now());
 			if (latestOpenedRewardDate != todayDate)
 			{
@@ -1752,7 +1752,7 @@ namespace Main
 					m_packet.setData(reinterpret_cast<std::uint8_t*>(&spawnedItem), sizeof(spawnedItem));
 					asyncWrite(m_packet);
 					m_scheduler.immediatePersist(std::source_location::current(), 
-						&Main::Persistence::PersistentDatabase::updateLatestRewardDay, "LatestWeeklyRewardDay", m_player.getAccountID(), todayDate);
+						&Main::Persistence::PersistentDatabase::updateLatestRewardDay, "LatestWeeklyRewardDay", m_player.accountInfo.accountID, todayDate);
 				}
 			}
 			END_BENCHMARK(Session::sendWeeklyReward, (*this))
@@ -1764,7 +1764,7 @@ namespace Main
 			using std::chrono::system_clock;
 			using std::chrono::current_zone;
 
-			const std::string& latestOpenedRewardDate = m_player.getLatestMonthlyRewardDate();
+			const std::string& latestOpenedRewardDate = m_player.latestMonthlyRewardDay;
 			const std::string todayDate = std::format("{:%F}", system_clock::now());
 			if (latestOpenedRewardDate != todayDate)
 			{
@@ -1793,7 +1793,7 @@ namespace Main
 					m_packet.setData(reinterpret_cast<std::uint8_t*>(&spawnedItem), sizeof(spawnedItem));
 					asyncWrite(m_packet);
 					m_scheduler.immediatePersist(std::source_location::current(), 
-						&Main::Persistence::PersistentDatabase::updateLatestRewardDay, "LatestMonthlyRewardDay", m_player.getAccountID(), todayDate);
+						&Main::Persistence::PersistentDatabase::updateLatestRewardDay, "LatestMonthlyRewardDay", m_player.accountInfo.accountID, todayDate);
 				}
 			}
 			END_BENCHMARK(Session::sendMonthlyReward, (*this))
@@ -1931,8 +1931,8 @@ namespace Main
 				asyncWrite(m_packet);
 
 				m_scheduler.addRepetitiveCallback(std::source_location::current(),
-					m_player.getAccountID(), &Main::Persistence::PersistentDatabase::savePlayerMissions,
-					m_player.getAccountID(), m_eventMissions);
+					m_player.accountInfo.accountID, &Main::Persistence::PersistentDatabase::savePlayerMissions,
+					m_player.accountInfo.accountID, m_eventMissions);
 			}
 			else
 			{
@@ -1967,7 +1967,7 @@ namespace Main
 					asyncWrite(packet);
 
 					m_scheduler.addRepetitiveCallback(std::source_location::current(),
-						m_player.getAccountID(), &Main::Persistence::PersistentDatabase::updatePlayerMissionProgress, m_player.getAccountID(),
+						m_player.accountInfo.accountID, &Main::Persistence::PersistentDatabase::updatePlayerMissionProgress, m_player.accountInfo.accountID,
 						eventIndex, Common::Constants::eventMissionTotal);
 
 					sendRt(20'000);
@@ -2032,21 +2032,21 @@ namespace Main
 				ainfo.clanContribution = stats.newTotalClanContribution;
 			}
 			if (hasLeveledUp) ainfo.playerLevel += 1;
-			m_player.setAccountInfo(ainfo);
+			m_player.accountInfo = ainfo;
 			m_scheduler.addRepetitiveCallback(std::source_location::current(), 
 				ainfo.accountID, &Main::Persistence::PersistentDatabase::updatePlayerStats, ainfo.accountID, ainfo);
 
 			m_player.storeBatteryObtainedInMatch();
 			const std::uint32_t updatedBattery = m_player.accountInfo.battery;
 			m_scheduler.addRepetitiveCallback(std::source_location::current(),
-				m_player.getAccountID(), &Main::Persistence::PersistentDatabase::updateBattery, m_player.getAccountID(),
+				m_player.accountInfo.accountID, &Main::Persistence::PersistentDatabase::updateBattery, m_player.accountInfo.accountID,
 				updatedBattery);
 		}
 
 		void Session::storeEvent()
 		{
 			m_scheduler.addRepetitiveCallback(std::source_location::current(),
-				m_player.getAccountID(), &Main::Persistence::PersistentDatabase::updateEvent, m_player.getAccountID());
+				m_player.accountInfo.accountID, &Main::Persistence::PersistentDatabase::updateEvent, m_player.accountInfo.accountID);
 		}
 
 		// Trade system
@@ -2104,14 +2104,14 @@ PACK_POP()
 		{
 			unsealAllItems();
 			m_player.tradeInfo.reset();
-			m_player.setPlayerState(Common::Enums::PlayerState::STATE_INVENTORY);
+			m_player.playerState = Common::Enums::PlayerState::STATE_INVENTORY;
 		}
 
 
 		bool Session::canTradeItem(std::uint32_t itemNumber)
 		{
 			return m_scheduler.immediatePersist(std::source_location::current(), &Main::Persistence::PersistentDatabase::isItemTradeable,
-				m_player.getAccountID(), itemNumber);
+				m_player.accountInfo.accountID, itemNumber);
 		}
 
 
@@ -2138,15 +2138,15 @@ PACK_POP()
 		void Session::addItems(const std::vector<Main::Structures::TradeBasicItem>& tradedItems)
 		{
 			auto items = m_player.inventory.addItems(tradedItems);
-			m_scheduler.addRepetitiveCallback(std::source_location::current(), m_player.getAccountID(), 
-				&Main::Persistence::PersistentDatabase::addPlayerItems, m_player.getAccountID(), items, -1);
+			m_scheduler.addRepetitiveCallback(std::source_location::current(), m_player.accountInfo.accountID, 
+				&Main::Persistence::PersistentDatabase::addPlayerItems, m_player.accountInfo.accountID, items, -1);
 		}
 
 		void Session::addItemFromTrade(const Main::Structures::TradeBasicItem& tradeItem)
 		{
 			auto item = m_player.inventory.addItemFromTrade(tradeItem);
-			m_scheduler.addRepetitiveCallback(std::source_location::current(), m_player.getAccountID(),
-				&Main::Persistence::PersistentDatabase::addPlayerItem, item, m_player.getAccountID(), -1);
+			m_scheduler.addRepetitiveCallback(std::source_location::current(), m_player.accountInfo.accountID,
+				&Main::Persistence::PersistentDatabase::addPlayerItem, item, m_player.accountInfo.accountID, -1);
 		}
 
 
@@ -2167,7 +2167,7 @@ PACK_POP()
 			{
 				Main::Structures::ItemLogInfo log{ itemSerialInfo.itemNumber, itemId, 0, action };
 				m_scheduler.addRepetitiveCallback(std::source_location::current(),
-					m_player.getAccountID(), &Main::Persistence::PersistentDatabase::insertItemLog, m_player.getAccountID(), log);
+					m_player.accountInfo.accountID, &Main::Persistence::PersistentDatabase::insertItemLog, m_player.accountInfo.accountID, log);
 				return true;
 			}
 			else

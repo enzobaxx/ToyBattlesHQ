@@ -72,8 +72,8 @@ namespace Main
 
 			void persistNow()
 			{
-				::Utils::Logger::log("Persisting for: " + std::to_string(m_player.getAccountID()), ::Utils::LogType::Info, "MainSession::persistNow");
-				m_scheduler.persistFor(m_player.getAccountID());
+				::Utils::Logger::log("Persisting for: " + std::to_string(m_player.accountInfo.accountID), ::Utils::LogType::Info, "MainSession::persistNow");
+				m_scheduler.persistFor(m_player.accountInfo.accountID);
 			}
 
 		private:
@@ -399,9 +399,9 @@ namespace Main
 
 			void sendInventory(std::uint32_t accountID);
 
-			void setLatestWeeklyRewardDate(const std::string& date) { m_player.setLatestWeeklyRewardDate(date); }
+			void setLatestWeeklyRewardDate(const std::string& date) { m_player.latestWeeklyRewardDay = date; }
 
-			void setLatestMonthlyRewardDate(const std::string& date) { m_player.setLatestMonthlyRewardDate(date); }
+			void setLatestMonthlyRewardDate(const std::string& date) { m_player.latestMonthlyRewardDay = date; }
 
 
 

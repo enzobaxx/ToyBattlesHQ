@@ -63,7 +63,7 @@ namespace Main
 				response.setCommand(140, 0, 0, 0);
 				response.setData(reinterpret_cast<std::uint8_t*>(&joinInfo), sizeof(joinInfo));
 
-				if (session->getPlayer().getPlayerState() != Common::Enums::STATE_LOBBY || session->getPlayer().getMatchContext().roomNumber != 0)
+				if (session->getPlayer().playerState != Common::Enums::STATE_LOBBY || session->getPlayer().matchContext.roomNumber != 0)
 				{
 					session->sendMessage("error: You must be in the lobby when using this command");
 				}

@@ -56,7 +56,7 @@ namespace Main
 
 			if (auto targetSession = sessionsManager.getSessionByAccountId(targetAccountId))
 			{
-				const auto targetPlayerState = targetSession->getPlayer().getPlayerState();
+				const auto targetPlayerState = targetSession->getPlayer().playerState;
 				if (!session->getPlayer().socialInfo.isFriend(targetAccountId))
 				{
 					response.setExtra(Enums::TradeSystemExtra::PLAYERS_NOT_FRIENDS);

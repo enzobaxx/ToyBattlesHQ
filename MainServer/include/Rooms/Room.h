@@ -91,7 +91,7 @@ namespace Main
 					if (auto session = weakSession.lock())
 					{
 						if (roomInfo.uniqueId != givenSession->getAccountInfo().uniqueId &&
-							session->getPlayer().getPlayerState() == Common::Enums::STATE_DYING)
+							session->getPlayer().playerState == Common::Enums::STATE_DYING)
 						{
 							session->asyncWrite(packet);
 						}
@@ -400,7 +400,7 @@ namespace Main
 			{
 				if (index >= m_players.size()) return "error";
 				if (auto session = m_players[index].second.lock(); session)
-					return session->getPlayer().getPlayerName();
+					return session->getPlayer().accountInfo.nickname;
 				return "disconnected";
 			}
 		};

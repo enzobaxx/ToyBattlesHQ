@@ -26,7 +26,7 @@ namespace Main
 		{
 			START_BENCHMARK
 
-			if (session->getPlayer().getPlayerState() != Common::Enums::STATE_INVENTORY)
+			if (session->getPlayer().playerState != Common::Enums::STATE_INVENTORY)
 			{
 				session->sendMessage("Error: An item can be upgraded only while your state is STATE_INVENTORY!");
 				return;

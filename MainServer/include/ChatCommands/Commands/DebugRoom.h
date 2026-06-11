@@ -51,7 +51,7 @@ namespace Main
 
 						session->sendMessage("\t- " + std::string{ currentPlayer.first.playerName } +
 							" [team: " + teamName + "]" +
-							" [" + std::to_string(currentPlayer.second->getPlayer().getPing()) + "ms]" +
+							" [" + std::to_string(currentPlayer.second->getPlayer().ping) + "ms]" +
 							" [SEID: " + std::to_string(currentPlayer.second->getId()) + "]");
 					}
 				}

@@ -52,7 +52,7 @@ namespace Main
 			std::memcpy(roomCreator.playerName, selfAccountInfo.nickname, 16);
 			roomCreator.state = Common::Enums::STATE_WAITING;
 			roomCreator.uniqueId = selfAccountInfo.uniqueId;
-			roomCreator.ping = session->getPlayer().getPing();
+			roomCreator.ping = session->getPlayer().ping;
 			roomCreator.team = Common::Enums::TEAM_ALL;
 
 			const Main::Structures::CompleteRoomInfo roomInfo = Main::Details::parseData<Main::Structures::CompleteRoomInfo>(request);
