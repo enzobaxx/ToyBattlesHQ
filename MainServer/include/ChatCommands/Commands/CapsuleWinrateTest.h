@@ -6,6 +6,7 @@
 #include "Handlers/Item/CapsuleSpinHandler.h"
 #include "Detail/CdbUtils.h"
 #include <charconv>
+#include <filesystem>
 #include <fstream>
 #include <thread>
 #include <string>
@@ -48,14 +49,19 @@ namespace Main
 				}
 
 				const std::uint32_t iterations = m_iterations;
-				session->sendMessage("Capsule winrate test started (" + std::to_string(iterations) + " spins per capsule). Results will be written to CapsuleWinrates.txt.");
+				const std::filesystem::path outPath = std::filesystem::current_path() / "CapsuleWinrates.txt";
+				session->sendMessage("Capsule winrate test started (" + std::to_string(iterations) + " spins per capsule). Output: " + outPath.string());
 
-				std::thread([iterations]()
+				std::thread([iterations, session, outPath]()
 				{
 					const auto& capsuleEntries = Main::CdbUtils::cdbCapsuleInfos::getInstance().getEntries();
 
-					std::ofstream out("CapsuleWinrates.txt");
-					if (!out.is_open()) return;
+					std::ofstream out(outPath);
+					if (!out.is_open())
+					{
+						session->sendMessage("Error: could not open " + outPath.string() + " for writing.");
+						return;
+					}
 
 					out << "Total iterations per capsule: " << iterations << "\n\n";
 
@@ -76,6 +82,8 @@ namespace Main
 
 						out << name << " | " << winRate << "% | " << iterations << "\n";
 					}
+
+					session->sendMessage("Capsule winrate test complete. Results written to " + outPath.string());
 				}).detach();
 			}
 		};
