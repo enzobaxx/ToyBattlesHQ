@@ -45,7 +45,7 @@ namespace Main
 				}
 			}
 
-			if (Main::Classes::Room* room = roomsManager.getRoomByNumber(session->getPlayer().getMatchContext().roomNumber))
+			if (Main::Classes::Room* room = roomsManager.getRoomByNumber(session->getPlayer().matchContext.roomNumber))
 			{
 				std::uint32_t playerState = request.getOption();
 				if (session->getPlayer().isInMatch() && 

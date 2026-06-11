@@ -56,7 +56,7 @@ namespace Main
                 }
 
                 const auto& firstItemSerialInfo = itemSerialInfos.front(); 
-                const auto firstItemIdOpt = session->getPlayer().getInventory().findItemIdBySerialInfo(firstItemSerialInfo); // itemID of new weapon after upgrade
+                const auto firstItemIdOpt = session->getPlayer().inventory.findItemIdBySerialInfo(firstItemSerialInfo); // itemID of new weapon after upgrade
                 if (!firstItemIdOpt)
                 {
                     session->sendMessage("[handleItemUpgrade] error: itemIdOpt was nullopt for first item: " + std::to_string(firstItemSerialInfo.itemNumber));
@@ -74,7 +74,7 @@ namespace Main
                 bool useGlue = false;
                 for (const auto& itemSerialInfo : itemSerialInfos)
                 {
-                    const auto itemIdOpt = session->getPlayer().getInventory().findItemIdBySerialInfo(itemSerialInfo);
+                    const auto itemIdOpt = session->getPlayer().inventory.findItemIdBySerialInfo(itemSerialInfo);
                     if (!itemIdOpt)
                     {
                         session->sendMessage("[handleItemUpgrade] error: itemIdOpt was nullopt for item: " + std::to_string(itemSerialInfo.itemNumber));

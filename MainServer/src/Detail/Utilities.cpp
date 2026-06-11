@@ -11,12 +11,12 @@ namespace Main
 		void broadcastPlayerItems(Main::Classes::RoomsManager& roomsManager, std::shared_ptr<Main::Network::Session> session, const Common::Network::Packet& request)
 		{
 			const auto& player = session->getPlayer();
-			if (Main::Classes::Room* room = roomsManager.getRoomByNumber(player.getMatchContext().roomNumber))
+			if (Main::Classes::Room* room = roomsManager.getRoomByNumber(player.matchContext.roomNumber))
 			{
 				auto& setItemsInstance = Common::ConstantDatabase::CdbSingleton<Common::ConstantDatabase::SetItemInfo>::getInstance();
 				room->updatePlayerInfo(session);
 				std::pair<Main::Structures::UniqueId, Main::Structures::BasicEquippedItem> dataToSend{};
-				const auto& accountInfo = player.getAccountInfo();
+				const auto& accountInfo = player.accountInfo;
 				dataToSend.first = accountInfo.uniqueId;
 
 				// reset state -- needed for when the target user unequips an item!
@@ -27,7 +27,7 @@ namespace Main
 				}
 
 				const std::size_t offset = accountInfo.latestSelectedCharacter * Common::Enums::MAX_ITEMTYPE;
-				const auto& targetEquippedItems = player.getInventory().getEquippedItems();
+				const auto& targetEquippedItems = player.inventory.getEquippedItems();
 				for (std::size_t i = 0; i < Common::Enums::MAX_ITEMTYPE; ++i)
 				{
 					if (offset + i >= targetEquippedItems.size()) return;

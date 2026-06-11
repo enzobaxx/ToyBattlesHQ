@@ -35,7 +35,7 @@ namespace Main
 			Main::Classes::RoomsManager& roomsManager, Main::Classes::PartiesManager& partiesManager,  const Main::Structures::UniqueId& uniqueId)
 		{
 			const auto& ainfo = session->getAccountInfo();
-			const std::uint16_t selfRoomNumber = session->getPlayer().getMatchContext().roomNumber;
+			const std::uint16_t selfRoomNumber = session->getPlayer().matchContext.roomNumber;
 
 			if (Main::Classes::Room* room = roomsManager.getRoomByNumber(selfRoomNumber))
 			{
@@ -53,7 +53,7 @@ namespace Main
 				}
 				else
 				{ // normal leave
-					const std::uint16_t clanRoomNum = session->getPlayer().getMatchContext().partyRoomNumber;
+					const std::uint16_t clanRoomNum = session->getPlayer().matchContext.partyRoomNumber;
 					if (auto clanRoom = partiesManager.getExactRoomFor(ainfo.clanId, clanRoomNum))
 					{ // check if this is a clan room
 						Common::Network::Packet req;

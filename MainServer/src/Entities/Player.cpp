@@ -25,30 +25,25 @@ namespace Main
 		using Friend = Main::Structures::Friend;
 		using TradedItem = Main::Structures::TradeBasicItem;
 
-		void Player::setAccountInfo(const AccountInfo& accountInfo)
+		void Player::setAccountInfo(const AccountInfo& info)
 		{
-			m_accountInfo = accountInfo;
+			accountInfo = info;
 		}
 
 		void Player::storeBatteryObtainedInMatch()
 		{
-			if (m_accountInfo.battery + m_matchContext.batteryObtainedInMatch >= m_accountInfo.maxBattery)
+			if (accountInfo.battery + matchContext.batteryObtainedInMatch >= accountInfo.maxBattery)
 			{
-				m_accountInfo.battery = m_accountInfo.maxBattery;
+				accountInfo.battery = accountInfo.maxBattery;
 			}
 			else
 			{
-				m_accountInfo.battery += m_matchContext.batteryObtainedInMatch;
+				accountInfo.battery += matchContext.batteryObtainedInMatch;
 			}
-			m_matchContext.batteryObtainedInMatch = 0;
+			matchContext.batteryObtainedInMatch = 0;
 		}
 
-		const AccountInfo& Player::getAccountInfo() const
-		{
-			return m_accountInfo;
-		}
-
-		void Player::setPing(std::uint16_t ping)
+void Player::setPing(std::uint16_t ping)
 		{
 			m_ping = ping;
 		}
@@ -60,18 +55,18 @@ namespace Main
 
 		std::uint32_t Player::getAccountID() const
 		{
-			return m_accountInfo.accountID;
+			return accountInfo.accountID;
 		}
 
 		const char* const Player::getPlayerName() const
 		{
-			return m_accountInfo.nickname;
+			return accountInfo.nickname;
 		}
 
 		void Player::setPlayerName(const char* playerName)
 		{
-			strncpy(m_accountInfo.nickname, playerName, sizeof(m_accountInfo.nickname) - 1);
-			m_accountInfo.nickname[sizeof(m_accountInfo.nickname) - 1] = '\0';
+			strncpy(accountInfo.nickname, playerName, sizeof(accountInfo.nickname) - 1);
+			accountInfo.nickname[sizeof(accountInfo.nickname) - 1] = '\0';
 		}
 
 		void Player::setPlayerState(Common::Enums::PlayerState playerState)
@@ -86,12 +81,12 @@ namespace Main
 
 		bool Player::isInLobby() const
 		{
-			return m_matchContext.roomNumber == 0;
+			return matchContext.roomNumber == 0;
 		}
 
 		void Player::addAchievementTier1(std::uint32_t achievementId)
 		{
-			m_accountInfo.achievements.setAchievementTier1(achievementId);
+			accountInfo.achievements.setAchievementTier1(achievementId);
 		}
 
 
@@ -104,16 +99,16 @@ namespace Main
 
 		void Player::leaveRoom()
 		{
-			m_matchContext.roomNumber = 0;
-			m_matchContext.isInMatch = false;
-			m_matchContext.batteryObtainedInMatch = 0;
+			matchContext.roomNumber = 0;
+			matchContext.isInMatch = false;
+			matchContext.batteryObtainedInMatch = 0;
 		}
 
 		void Player::decreaseRoomNumber()
 		{
-			if (m_matchContext.roomNumber > 0)
+			if (matchContext.roomNumber > 0)
 			{
-				--m_matchContext.roomNumber;
+				--matchContext.roomNumber;
 			}
 		}
 

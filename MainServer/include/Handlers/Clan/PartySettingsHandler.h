@@ -23,7 +23,7 @@ namespace Main
             Main::Classes::PartiesManager& clansManager)
         {
             const auto& ainfo = session->getAccountInfo();
-            auto clanRoom = clansManager.getExactRoomFor(ainfo.clanId, session->getPlayer().getMatchContext().partyRoomNumber);
+            auto clanRoom = clansManager.getExactRoomFor(ainfo.clanId, session->getPlayer().matchContext.partyRoomNumber);
 
             if (!clanRoom || !clanRoom->isLeader(ainfo.uniqueId.session))
                 return;
@@ -48,7 +48,7 @@ namespace Main
         {
             const auto& ainfo = session->getAccountInfo();
             auto response = request;
-            if (auto clanRoom = clansManager.getExactRoomFor(ainfo.clanId, session->getPlayer().getMatchContext().partyRoomNumber))
+            if (auto clanRoom = clansManager.getExactRoomFor(ainfo.clanId, session->getPlayer().matchContext.partyRoomNumber))
             {
                 if (!clanRoom->isLeader(ainfo.uniqueId.session))
                 {

@@ -15,15 +15,15 @@ namespace Main
             Main::Network::SessionsManager& sessionsManager,
             Main::Classes::RoomsManager& roomsManager, Main::Classes::PartiesManager& partiesManager)
         {
-            if (Main::Classes::Room* room = roomsManager.getRoomByNumber(session->getPlayer().getMatchContext().roomNumber))
+            if (Main::Classes::Room* room = roomsManager.getRoomByNumber(session->getPlayer().matchContext.roomNumber))
             {
-                const std::uint16_t partyNumber = session->getPlayer().getMatchContext().partyRoomNumber;
+                const std::uint16_t partyNumber = session->getPlayer().matchContext.partyRoomNumber;
 
                 const std::uint32_t selfRoomNumber = room->getRoomNumber();
                 const auto ainfo = session->getAccountInfo();
 
                 // remove penalty mp
-                const auto currentMp = session->getPlayer().getAccountInfo().microPoints;
+                const auto currentMp = session->getPlayer().accountInfo.microPoints;
                 session->setAccountMicroPoints(currentMp <= 120 ? 0 : currentMp - 120);
                 session->sendCurrency();
 
@@ -55,7 +55,7 @@ namespace Main
         inline void handleMatchLeaveNormal(const Common::Network::Packet& request, std::shared_ptr<Main::Network::Session> session,
             Main::Network::SessionsManager& sessionsManager, Main::Classes::RoomsManager& roomsManager)
         {
-            if (Main::Classes::Room* room = roomsManager.getRoomByNumber(session->getPlayer().getMatchContext().roomNumber))
+            if (Main::Classes::Room* room = roomsManager.getRoomByNumber(session->getPlayer().matchContext.roomNumber))
             {
                 const std::uint32_t selfRoomNumber = room->getRoomNumber();
                 const auto ainfo = session->getAccountInfo();
@@ -77,7 +77,7 @@ namespace Main
                     }
                     else if (room->getTeamForSession(session->getId()).value_or(0) != Common::Enums::TEAM_OBSERVER)
                     { // remove penalty mp
-                        const auto currentMp = session->getPlayer().getAccountInfo().microPoints;
+                        const auto currentMp = session->getPlayer().accountInfo.microPoints;
                         session->setAccountMicroPoints(currentMp <= 120 ? 0 : currentMp - 120);
                         session->sendCurrency();
                     }
@@ -107,7 +107,7 @@ namespace Main
             Main::Network::SessionsManager& sessionsManager,
             Main::Classes::RoomsManager& roomsManager, Main::Classes::PartiesManager& partiesManager)
         {
-            if (session->getPlayer().getMatchContext().roomNumber >= Common::Constants::clanRoomNumberStart)
+            if (session->getPlayer().matchContext.roomNumber >= Common::Constants::clanRoomNumberStart)
             {
                 handleMatchLeaveClan(request, session, sessionsManager, roomsManager, partiesManager);
             }

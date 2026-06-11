@@ -23,14 +23,14 @@ namespace Main
 				response.setExtra(6);
 				response.setData(nullptr, 0);
 
-				if (auto clanRoom = clansManager.getExactRoomFor(ainfo.clanId, session->getPlayer().getMatchContext().partyRoomNumber))
+				if (auto clanRoom = clansManager.getExactRoomFor(ainfo.clanId, session->getPlayer().matchContext.partyRoomNumber))
 				{
 					clanRoom->broadcast(response);
 				}
 			}
 			else if constexpr (OrderId == 113)
 			{
-				if (auto clanRoom = clansManager.getExactRoomFor(ainfo.clanId, session->getPlayer().getMatchContext().partyRoomNumber))
+				if (auto clanRoom = clansManager.getExactRoomFor(ainfo.clanId, session->getPlayer().matchContext.partyRoomNumber))
 				{
 					auto response = request;
 					const auto allRegisteredClans = clansManager.getAllRegisteredClans();

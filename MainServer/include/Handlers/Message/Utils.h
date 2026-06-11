@@ -48,7 +48,7 @@ namespace Main
 			}
 			const std::string commandName = command.substr(0, command.find(' '));
 			Main::Command::ChatCommands::executeCommand(commandName, command, session, sessionsManager, roomsManager, scheduler,
-				session->getPlayer().getMatchContext().roomNumber, mainSv);
+				session->getPlayer().matchContext.roomNumber, mainSv);
 		}
 
 		inline bool executeCommon(const Common::Network::Packet& request, std::shared_ptr<Main::Network::Session> session,
@@ -61,7 +61,7 @@ namespace Main
 				executeCommand(session, request, response, roomsManager, chatCommands, sessionsManager, scheduler, accountInfo, mainSv);
 				return true;
 			}
-			else if (session->getPlayer().getModerationInfo().isMuted)
+			else if (session->getPlayer().moderationInfo.isMuted)
 			{
 				session->sendMessage("you have been muted by a moderator.");
 				return true;

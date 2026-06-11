@@ -62,7 +62,7 @@ namespace Main
                     return;
                 }
 
-                const std::uint32_t currentCoupons = session->getPlayer().getInventory().getTotalCoupons();
+                const std::uint32_t currentCoupons = session->getPlayer().inventory.getTotalCoupons();
                 if (currentCoupons >= maxCoupons)
                 {
                     session->sendMessage("Error: You already have the maximum of 250 coupons.");

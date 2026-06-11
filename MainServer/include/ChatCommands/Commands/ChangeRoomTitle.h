@@ -42,7 +42,7 @@ namespace Main
                     session->sendMessage("parse error");
                     return;
                 }
-                if (session->getPlayer().getMatchContext().roomNumber >= Common::Constants::clanRoomNumberStart)
+                if (session->getPlayer().matchContext.roomNumber >= Common::Constants::clanRoomNumberStart)
                 {
                     session->sendMessage("Error: changing title in clan war rooms is currently disabled!");
                     return;
@@ -53,7 +53,7 @@ namespace Main
                     session->sendMessage("error: the message must be smaller than 30 characters");
                     return;
                 }
-                if (Main::Classes::Room* room = roomsManager.getRoomByNumber(session->getPlayer().getMatchContext().roomNumber))
+                if (Main::Classes::Room* room = roomsManager.getRoomByNumber(session->getPlayer().matchContext.roomNumber))
                 {
                     if (room->hasMatchStarted())
                     {

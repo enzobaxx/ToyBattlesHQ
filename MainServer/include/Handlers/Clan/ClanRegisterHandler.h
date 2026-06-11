@@ -35,7 +35,7 @@ namespace Main
 				session->sendMessage("[INFO] Cannot register since there are already 30 registered clans, which is the current maximum");
 				return;
 			}
-			else if (auto clanRoom = clansManager.getExactRoomFor(ainfo.clanId, session->getPlayer().getMatchContext().partyRoomNumber))
+			else if (auto clanRoom = clansManager.getExactRoomFor(ainfo.clanId, session->getPlayer().matchContext.partyRoomNumber))
 			{
 				if (!clanRoom->isLeader(ainfo.uniqueId.session))
 				{

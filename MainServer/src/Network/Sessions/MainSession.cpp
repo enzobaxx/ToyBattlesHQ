@@ -97,7 +97,7 @@ namespace Main
 			m_packet.setOrder(104);
 			m_packet.setData(nullptr, 0);
 
-			if (m_player.getMailbox().getMailboxSent().size() > Common::Constants::maxMailbox)
+			if (m_player.mailbox.getMailboxSent().size() > Common::Constants::maxMailbox)
 			{
 				m_packet.setExtra(Main::Enums::MailboxExtra::SENDER_NO_SPACE_LEFT);
 				asyncWrite(m_packet);
@@ -107,11 +107,11 @@ namespace Main
 			// store the mailbox for the target (receiver)
 			const Main::Enums::MailboxExtra res =
 				m_scheduler.immediatePersist(std::source_location::current(), &Main::Persistence::PersistentDatabase::storeOfflineMailbox, 
-					mailbox, m_player.getAccountInfo().nickname);
+					mailbox, m_player.accountInfo.nickname);
 			if (res == Main::Enums::MailboxExtra::MAILBOX_SENT)
 			{
-				mailbox.accountId = m_player.getAccountInfo().accountID;
-				std::memcpy(mailbox.nickname, m_player.getAccountInfo().nickname, Common::Constants::maxNicknameSize);
+				mailbox.accountId = m_player.accountInfo.accountID;
+				std::memcpy(mailbox.nickname, m_player.accountInfo.nickname, Common::Constants::maxNicknameSize);
 				addMailboxSent(mailbox);
 				return true;
 			}
@@ -134,21 +134,21 @@ namespace Main
 			m_packet.setTcpHeader(m_id, Common::Enums::NO_ENCRYPTION);
 			m_packet.setOrder(104);
 			m_packet.setData(nullptr, 0);
-			const auto& selfAccountInfo = m_player.getAccountInfo();
+			const auto& selfAccountInfo = m_player.accountInfo;
 
-			if (m_player.getMailbox().getMailboxSent().size() > Common::Constants::maxMailbox)
+			if (m_player.mailbox.getMailboxSent().size() > Common::Constants::maxMailbox)
 			{
 				m_packet.setExtra(Main::Enums::MailboxExtra::SENDER_NO_SPACE_LEFT);
 				asyncWrite(m_packet);
 				return false;
 			}
-			else if (target->getPlayer().getMailbox().getMailboxReceived().size() > Common::Constants::maxMailbox)
+			else if (target->getPlayer().mailbox.getMailboxReceived().size() > Common::Constants::maxMailbox)
 			{
 				m_packet.setExtra(Main::Enums::MailboxExtra::RECEIVER_NO_SPACE_LEFT);
 				asyncWrite(m_packet);
 				return false;
 			}
-			else if (target->getPlayer().getSocialInfo().hasBlocked(selfAccountInfo.accountID))
+			else if (target->getPlayer().socialInfo.hasBlocked(selfAccountInfo.accountID))
 			{
 				m_packet.setExtra(Main::Enums::MailboxExtra::MAILBOX_RECEIVER_BLOCKED_SENDER);
 				asyncWrite(m_packet);
@@ -170,28 +170,28 @@ namespace Main
 
 		void Session::addMailboxReceived(const Main::Structures::Mailbox& mailbox)
 		{
-			m_player.getMailbox().addMailboxReceived(mailbox);
+			m_player.mailbox.addMailboxReceived(mailbox);
 			m_scheduler.addRepetitiveCallback(std::source_location::current(), m_player.getAccountID(), &Main::Persistence::PersistentDatabase::storeMailbox,
 				mailbox, m_player.getAccountID(), false);
 		}
 
 		void Session::addGiftboxReceived(const Main::Structures::Giftbox& giftbox)
 		{
-			m_player.getMailbox().addGiftboxReceived(giftbox);
+			m_player.mailbox.addGiftboxReceived(giftbox);
 			m_scheduler.addRepetitiveCallback(std::source_location::current(), m_player.getAccountID(), LIFT_MEMBER(storeGiftbox),
 				giftbox, m_player.getAccountID());
 		}
 
 		void Session::addMailboxSent(const Main::Structures::Mailbox& mailbox)
 		{
-			m_player.getMailbox().addMailboxSent(mailbox);
+			m_player.mailbox.addMailboxSent(mailbox);
 			m_scheduler.addRepetitiveCallback(std::source_location::current(), m_player.getAccountID(), &Main::Persistence::PersistentDatabase::storeMailbox,
 				mailbox, m_player.getAccountID(), true);
 		}
 
 		bool Session::deleteSentMailbox(std::uint32_t timestamp)
 		{
-			if (m_player.getMailbox().deleteSentMailbox(timestamp))
+			if (m_player.mailbox.deleteSentMailbox(timestamp))
 			{
 				m_scheduler.addRepetitiveCallback(std::source_location::current(), m_player.getAccountID(), &Main::Persistence::PersistentDatabase::deleteMailbox,
 					timestamp, m_player.getAccountID(), true);
@@ -203,7 +203,7 @@ namespace Main
 
 		bool Session::deleteReceivedMailbox(std::uint32_t timestamp)
 		{
-			if (m_player.getMailbox().deleteReceivedMailbox(timestamp))
+			if (m_player.mailbox.deleteReceivedMailbox(timestamp))
 			{
 				m_scheduler.addRepetitiveCallback(std::source_location::current(), m_player.getAccountID(), &Main::Persistence::PersistentDatabase::deleteMailbox,
 					timestamp, m_player.getAccountID(), false);
@@ -223,7 +223,7 @@ namespace Main
 
 		void Session::setReceivedGiftboxes(const std::vector<Main::Structures::Giftbox>& giftboxes)
 		{
-			m_player.getMailbox().setReceivedGiftboxes(giftboxes);
+			m_player.mailbox.setReceivedGiftboxes(giftboxes);
 			if (!giftboxes.empty())
 			{
 				m_packet.setTcpHeader(m_id, Common::Enums::NO_ENCRYPTION);
@@ -235,7 +235,7 @@ namespace Main
 
 		void Session::sendUnreadMailboxes()
 		{
-			const auto& newMailboxes = m_player.getMailbox().getMailboxReceived();
+			const auto& newMailboxes = m_player.mailbox.getMailboxReceived();
 			std::vector<Main::Structures::Mailbox> unreadMailboxes;
 			std::copy_if(newMailboxes.begin(), newMailboxes.end(), std::back_inserter(unreadMailboxes), [](const Main::Structures::Mailbox& mailbox) {
 				return !mailbox.hasBeenRead;
@@ -274,7 +274,7 @@ namespace Main
 
 		const Main::Structures::AccountInfo& Session::getAccountInfo() const
 		{
-			return m_player.getAccountInfo();
+			return m_player.accountInfo;
 		}
 
 
@@ -285,14 +285,14 @@ namespace Main
 			m_packet.setCommand(61, 0, 0, 0);
 			m_packet.setData(nullptr, 0);
 
-			if (m_player.getSocialInfo().getFriendlist().size() >= Common::Constants::maxFriends)
+			if (m_player.socialInfo.getFriendlist().size() >= Common::Constants::maxFriends)
 			{
 				m_packet.setMission(Main::Enums::AddFriendServerMission::SENDER_FRIENDLIST_FULL);
 				m_packet.setExtra(Main::Enums::AddFriendServerExtra::TARGET_OR_SENDER_FRIEND_LIST_FULL);
 				asyncWrite(m_packet);
 				return;
 			}
-			const AccountInfo& accountInfo = m_player.getAccountInfo();
+			const AccountInfo& accountInfo = m_player.accountInfo;
 			if (!targetSession)
 			{
 				handleOfflineFriendRequest(accountInfo, nickname);
@@ -327,14 +327,14 @@ namespace Main
 				sendMessage("You cannot send a friend request to yourself!");
 				return;
 			}
-			if (targetSession->getPlayer().getSocialInfo().getFriendlist().size() >= Common::Constants::maxFriends)
+			if (targetSession->getPlayer().socialInfo.getFriendlist().size() >= Common::Constants::maxFriends)
 			{
 				m_packet.setExtra(Main::Enums::AddFriendServerExtra::TARGET_OR_SENDER_FRIEND_LIST_FULL);
 				m_packet.setMission(Main::Enums::AddFriendServerMission::RECEIVER_FRIENDLIST_FULL);
 				asyncWrite(m_packet);
 				return;
 			}
-			if (targetSession->getPlayer().getSocialInfo().hasBlocked(accountInfo.accountID))
+			if (targetSession->getPlayer().socialInfo.hasBlocked(accountInfo.accountID))
 			{
 				m_packet.setExtra(Main::Enums::AddFriendServerExtra::RECEIVER_BLOCKED_SENDER);
 				asyncWrite(m_packet);
@@ -370,7 +370,7 @@ namespace Main
 
 		bool Session::removeBossBattleTicket()
 		{
-			if (auto foundBossBattleSerialInfo = m_player.getInventory().getBossBattleTicket())
+			if (auto foundBossBattleSerialInfo = m_player.inventory.getBossBattleTicket())
 			{
 				return deleteItem(foundBossBattleSerialInfo.value(), "Boss Battle ticket removed automatically after starting Boss Battle match");
 			}
@@ -379,7 +379,7 @@ namespace Main
 
 		void Session::acceptFriendRequest(std::shared_ptr<Main::Network::Session> senderSession, const Main::Structures::Friend& target, const std::uint8_t* const data)
 		{
-			const auto& accountInfo = m_player.getAccountInfo();
+			const auto& accountInfo = m_player.accountInfo;
 			m_packet.setTcpHeader(m_id, Common::Enums::NO_ENCRYPTION);
 			m_packet.setCommand(61, 0, Main::Enums::AddFriendServerExtra::REQUEST_ACCEPTED, 0);
 			m_packet.setData(data, sizeof(accountInfo.uniqueId) + sizeof(accountInfo.accountID) + sizeof(accountInfo.nickname));
@@ -391,7 +391,7 @@ namespace Main
 			}
 			else
 			{ // sender and receiver are both online
-				m_player.getSocialInfo().addOnlineFriend(senderSession);
+				m_player.socialInfo.addOnlineFriend(senderSession);
 				senderSession->addOnlineFriend(std::static_pointer_cast<Main::Network::Session>(shared_from_this()));
 				m_scheduler.immediatePersist(std::source_location::current(), &Main::Persistence::PersistentDatabase::addFriend, 
 					m_player.getAccountID(), senderSession->getAccountInfo().accountID);
@@ -413,7 +413,7 @@ namespace Main
 					asyncWrite(m_packet);
 				}
 			}
-			const std::vector<Main::Structures::Friend> friendlist = m_player.getSocialInfo().getFriendlist();
+			const std::vector<Main::Structures::Friend> friendlist = m_player.socialInfo.getFriendlist();
 			m_packet.setCommand(63, 0, 37, friendlist.size());
 			m_packet.setData(reinterpret_cast<const std::uint8_t*>(friendlist.data()), friendlist.size() * sizeof(Main::Structures::Friend));
 			asyncWrite(m_packet);
@@ -421,7 +421,7 @@ namespace Main
 
 		void Session::sendAccountInfo(Common::Network::Packet& response)
 		{
-			auto accountInfo = m_player.getAccountInfo();
+			auto accountInfo = m_player.accountInfo;
 			response.setData(reinterpret_cast<std::uint8_t*>(&accountInfo), sizeof(accountInfo));
 			asyncWrite(response);
 		}
@@ -445,13 +445,13 @@ namespace Main
 				targetFriend.targetAccountId = targetAccountInfo.accountID;
 				targetFriend.targetUniqueId = remove ? Main::Structures::UniqueId{} : targetAccountInfo.uniqueId;
 				std::memcpy(targetFriend.targetNickname, targetAccountInfo.nickname, 16);
-				m_player.getSocialInfo().updateFriend(targetFriend, targetSession, remove);
+				m_player.socialInfo.updateFriend(targetFriend, targetSession, remove);
 			}
 		}
 
 		bool Session::blockAccount(std::uint32_t accountId, const char* nickname)
 		{
-			if (m_player.getSocialInfo().blockAccount(accountId, nickname))
+			if (m_player.socialInfo.blockAccount(accountId, nickname))
 			{
 				m_packet.setTcpHeader(m_id, Common::Enums::NO_ENCRYPTION);
 				m_packet.setCommand(52, 0, 1, 0);
@@ -474,7 +474,7 @@ namespace Main
 			if (auto entryOpt = CollectionInfo::getInstance().getEntry(idx))
 			{
 				m_player.addAchievementTier1(idx);
-				setAccountMicroPoints(m_player.getAccountInfo().microPoints + entryOpt->ci_reward_point);
+				setAccountMicroPoints(m_player.accountInfo.microPoints + entryOpt->ci_reward_point);
 				sendCurrency();
 				m_scheduler.addRepetitiveCallback(std::source_location::current(), m_player.getAccountID(), &Main::Persistence::PersistentDatabase::addPlayerAchievement,
 					m_player.getAccountID(), idx);
@@ -491,7 +491,7 @@ namespace Main
 			START_BENCHMARK
 
 			bool unblockSuccess = false;
-			if (m_player.getSocialInfo().unblockAccount(accountId))
+			if (m_player.socialInfo.unblockAccount(accountId))
 			{
 				m_scheduler.addRepetitiveCallback(std::source_location::current(), m_player.getAccountID(), &Main::Persistence::PersistentDatabase::unblockPlayer,
 					m_player.getAccountID(), accountId);
@@ -508,7 +508,7 @@ namespace Main
 		void Session::sendBlockedPlayers()
 		{
 			START_BENCHMARK
-			const std::vector<Main::Structures::BlockedPlayer>& blockedPlayers = m_player.getSocialInfo().getBlockedPlayers();
+			const std::vector<Main::Structures::BlockedPlayer>& blockedPlayers = m_player.socialInfo.getBlockedPlayers();
 			m_packet.setTcpHeader(m_id, Common::Enums::NO_ENCRYPTION);
 			m_packet.setCommand(54, 0, 37, blockedPlayers.size());  // max blocked players is 30, should never exceed 1440 bytes in total
 			m_packet.setData(reinterpret_cast<const std::uint8_t*>(blockedPlayers.data()), blockedPlayers.size() * sizeof(Main::Structures::BlockedPlayer));
@@ -530,7 +530,7 @@ namespace Main
 		// call once with default "persist", since removeFriend removes the friend for both players
 		void Session::deleteFriend(std::uint32_t targetAccountId, bool persist)
 		{
-			const bool deletedFriend = m_player.getSocialInfo().deleteFriend(targetAccountId);
+			const bool deletedFriend = m_player.socialInfo.deleteFriend(targetAccountId);
 			if (persist)
 			{
 				m_scheduler.immediatePersist(std::source_location::current(), &Main::Persistence::PersistentDatabase::removeFriend, m_player.getAccountID(), targetAccountId);
@@ -566,7 +566,7 @@ namespace Main
 			}
 
 			static constexpr std::array<std::uint8_t, 72> unused{};
-			const Main::Structures::AccountInfo& accountInfo = m_player.getAccountInfo();
+			const Main::Structures::AccountInfo& accountInfo = m_player.accountInfo;
 			m_packet.setTcpHeader(m_id, Common::Enums::NO_ENCRYPTION);
 			m_packet.setCommand(101, mission, Enums::UPGRADE_SUCCESS, option);
 			m_packet.setData(unused.data(), unused.size());
@@ -577,7 +577,7 @@ namespace Main
 				asyncWrite(m_packet);
 				return false;
 			}
-			auto itemEnergy = m_player.getInventory().getItemEnergy(serialInfo);
+			auto itemEnergy = m_player.inventory.getItemEnergy(serialInfo);
 			if (!itemEnergy)
 			{
 				m_packet.setExtra(Enums::UPGRADE_FAIL);
@@ -615,7 +615,7 @@ namespace Main
 
 		void Session::resetUpgrade(const Main::ClientData::UpgradeReset& upgradeReset)
 		{
-			if (const auto itemIdOpt = m_player.getInventory().findItemIdBySerialInfo(upgradeReset.weaponToResetSerialInfo); itemIdOpt && deleteItem(upgradeReset.upgradeResetItemSerialInfo,
+			if (const auto itemIdOpt = m_player.inventory.findItemIdBySerialInfo(upgradeReset.weaponToResetSerialInfo); itemIdOpt && deleteItem(upgradeReset.upgradeResetItemSerialInfo,
 				"Item deleted automatically while attempting to use upgrade reset on it"))
 			{
 				if (auto baseItemOpt = CdbUtils::getBaseItemId(*itemIdOpt); baseItemOpt)
@@ -630,7 +630,7 @@ namespace Main
 
 		void Session::refundItem(const Main::ClientData::ItemRefund& itemRefund)
 		{
-			auto originalItemId = m_player.getInventory().findItemIdBySerialInfo(itemRefund.serialInfo);
+			auto originalItemId = m_player.inventory.findItemIdBySerialInfo(itemRefund.serialInfo);
 			const bool removed = deleteItemBasic(itemRefund.serialInfo, "Session::refundItem");
 
 			m_packet.setTcpHeader(m_id, Common::Enums::NO_ENCRYPTION);
@@ -650,7 +650,7 @@ namespace Main
 
 		bool Session::deleteItemBasic(const Main::Structures::ItemSerialInfo& itemSerialInfo, const std::string& caller)
 		{
-			if (m_player.getInventory().deleteItemBasic(itemSerialInfo))
+			if (m_player.inventory.deleteItemBasic(itemSerialInfo))
 			{
 				m_scheduler.addRepetitiveCallback(std::source_location::current(), m_player.getAccountID(), 
 					&Main::Persistence::PersistentDatabase::removePlayerItem,
@@ -663,19 +663,19 @@ namespace Main
 
 		void Session::addItems(const std::vector<Item>& items)
 		{
-			m_player.getInventory().addItems(items);
+			m_player.inventory.addItems(items);
 			m_scheduler.addRepetitiveCallback(std::source_location::current(), m_player.getAccountID(),
 				&Main::Persistence::PersistentDatabase::addPlayerItems, m_player.getAccountID(), items, -1);
 		}
 
 		// Important notes: before using this function:
-		// - make sure to call "m_player.getInventory().setLatestItemNumber(getLatestItemNumber() + 1)"!
+		// - make sure to call "m_player.inventory.setLatestItemNumber(getLatestItemNumber() + 1)"!
 		// - make sure that Item.itemSerialNumber is already set appropriately
 		// ^ These aren't performed inside this function because this function is used for multiple purposes (e.g. replacing an already existing item that has the correct
 		//   Item.itemSerialNumber, in which case setLatestItemNumber must not be called)
 		bool Session::addItem(const Item& item, bool isCouponItem)
 		{
-			if (!isCouponItem && !m_player.getInventory().hasEnoughInventorySpace(1))
+			if (!isCouponItem && !m_player.inventory.hasEnoughInventorySpace(1))
 			{
 				sendMessage("[error] Not enough inventory space!");
 				return false;
@@ -685,13 +685,13 @@ namespace Main
 				m_scheduler.addRepetitiveCallback(std::source_location::current(), m_player.getAccountID(),
 					&Main::Persistence::PersistentDatabase::addPlayerItem, item, m_player.getAccountID(), -1);
 			}
-			m_player.getInventory().addItem(item);
+			m_player.inventory.addItem(item);
 			return true;
 		}
 
 		bool Session::addItem(const Main::Structures::Giftbox& item)
 		{
-			if (!m_player.getInventory().hasEnoughInventorySpace(1))
+			if (!m_player.inventory.hasEnoughInventorySpace(1))
 			{
 				sendMessage("[error] Not enough inventory space!");
 				return false;
@@ -699,9 +699,9 @@ namespace Main
 			
 			Item convertedItem{item.id};
 			convertedItem.serialInfo.itemOrigin = 0;
-			auto latestItemNumber = m_player.getInventory().getLatestItemNumber();
+			auto latestItemNumber = m_player.inventory.getLatestItemNumber();
 			convertedItem.serialInfo.itemNumber = ++latestItemNumber;
-			m_player.getInventory().setLatestItemNumber(latestItemNumber);
+			m_player.inventory.setLatestItemNumber(latestItemNumber);
 			convertedItem.serialInfo.itemCreationDate = static_cast<time32_t>(std::time(0));
 			convertedItem.durability = Main::CdbUtils::getItemDurability(item.id).value_or(0);
 			const std::uint32_t duration = Main::CdbUtils::getItemDuration(item.id);
@@ -709,13 +709,13 @@ namespace Main
 
 			m_scheduler.addRepetitiveCallback(std::source_location::current(), m_player.getAccountID(),
 				&Main::Persistence::PersistentDatabase::addPlayerItem, convertedItem, m_player.getAccountID(), -1);
-			m_player.getInventory().addItem(convertedItem);
+			m_player.inventory.addItem(convertedItem);
 			return true;
 		}
 
 		void Session::addItems(const std::vector<Main::Structures::BoxItem>& boxItems, const Main::ClientData::BoxOpen& boxData, std::uint32_t extra)
 		{
-			if (boxItems.empty() || !m_player.getInventory().hasEnoughInventorySpace(boxItems.size()) || !deleteItem(boxData.serialInfo, "The item was deleted after being used (Example: boxes)"))
+			if (boxItems.empty() || !m_player.inventory.hasEnoughInventorySpace(boxItems.size()) || !deleteItem(boxData.serialInfo, "The item was deleted after being used (Example: boxes)"))
 			{
 				return;
 			}
@@ -728,8 +728,8 @@ namespace Main
 			m_packet.setData(reinterpret_cast<const std::uint8_t*>(boxItems.data()), sizeof(Main::Structures::BoxItem) * boxItems.size());
 			asyncWrite(m_packet);
 
-			m_player.getInventory().setLatestItemNumber(boxItems.back().serialInfo.itemNumber);
-			m_player.getInventory().addItems(boxItems);
+			m_player.inventory.setLatestItemNumber(boxItems.back().serialInfo.itemNumber);
+			m_player.inventory.addItems(boxItems);
 			m_scheduler.addRepetitiveCallback(std::source_location::current(), m_player.getAccountID(),
 				&Main::Persistence::PersistentDatabase::addPlayerBoxItems, m_player.getAccountID(),
 				boxItems, -1);
@@ -743,7 +743,7 @@ namespace Main
 			auto response = request;
 			response.setCommand(102, 1, 1, 0);
 
-			const auto result = m_player.getInventory().useInstantRespawn(serialInfo.itemNumber);
+			const auto result = m_player.inventory.useInstantRespawn(serialInfo.itemNumber);
 			if (result.first == Common::Enums::MATCHITEM_DELETE)
 			{
 				asyncWrite(response);
@@ -770,7 +770,7 @@ namespace Main
 
 		bool Session::tryRemoveCoupons(std::uint32_t totalCouponsNeeded)
 		{
-			const auto result = m_player.getInventory().tryRemoveCoupons(totalCouponsNeeded);
+			const auto result = m_player.inventory.tryRemoveCoupons(totalCouponsNeeded);
 			if (result.action == Common::Enums::COUPON_ITEM_DELETE)
 			{
 				return deleteItem(result.serialInfo, "Coupon item deleted automatically after using the item");
@@ -800,7 +800,7 @@ namespace Main
 			response.setCommand(102, 1, 1, 0);
 			response.setData(reinterpret_cast<const std::uint8_t*>(&serialInfo), sizeof(serialInfo));
 
-			const auto result = m_player.getInventory().useInstantRespawn(serialInfo.itemNumber);
+			const auto result = m_player.inventory.useInstantRespawn(serialInfo.itemNumber);
 			if (result.first == Common::Enums::MATCHITEM_DELETE)
 			{
 				asyncWrite(response);
@@ -831,7 +831,7 @@ namespace Main
 		//  - The latest item in BoughtItems has the greatest item number (which should be the last one that is set)
 		bool Session::addItems(const std::vector<BoughtItem>& boughtItems, bool areCouponItems)
 		{
-			if (boughtItems.empty() || !m_player.getInventory().hasEnoughInventorySpace(boughtItems.size()))
+			if (boughtItems.empty() || !m_player.inventory.hasEnoughInventorySpace(boughtItems.size()))
 			{
 				sendMessage("[Session::addItems] fail: boughtItems.empty() || !hasEnoughInventorySpace(boughtItems.size())");
 				return false;
@@ -840,8 +840,8 @@ namespace Main
 			m_packet.setData(reinterpret_cast<std::uint8_t*>(const_cast<BoughtItem*>(boughtItems.data())), boughtItems.size() * sizeof(Main::Structures::BoughtItem));
 			asyncWrite(m_packet);
 
-			m_player.getInventory().setLatestItemNumber(boughtItems.back().serialInfo.itemNumber);
-			m_player.getInventory().addItems(boughtItems);
+			m_player.inventory.setLatestItemNumber(boughtItems.back().serialInfo.itemNumber);
+			m_player.inventory.addItems(boughtItems);
 
 			m_scheduler.addRepetitiveCallback(std::source_location::current(), m_player.getAccountID(), &Main::Persistence::PersistentDatabase::addPlayerBoughtItems, 
 				m_player.getAccountID(), boughtItems, -1);
@@ -855,7 +855,7 @@ namespace Main
 		bool Session::setAccountRockTotens(std::uint32_t rt)
 		{
 			if (rt > 0x3FFFFFFF) return false;
-			m_player.getAccountInfo().rockTotens = rt;
+			m_player.accountInfo.rockTotens = rt;
 			m_scheduler.addCallback(std::source_location::current(), m_player.getAccountID(), 1, &Main::Persistence::PersistentDatabase::updatePlayerCurrencyByType,
 				m_player.getAccountID(), rt, Main::Enums::ItemCurrencyType::ITEM_RT);
 			return true;
@@ -864,7 +864,7 @@ namespace Main
 		bool Session::setAccountMicroPoints(std::uint32_t mp)
 		{
 			if (mp > 0x7FFFFFFF) return false;
-			m_player.getAccountInfo().microPoints = mp;
+			m_player.accountInfo.microPoints = mp;
 			m_scheduler.addCallback(std::source_location::current(), m_player.getAccountID(), 2, &Main::Persistence::PersistentDatabase::updatePlayerCurrencyByType,
 				m_player.getAccountID(), mp, Main::Enums::ItemCurrencyType::ITEM_MP);
 			return true;
@@ -873,7 +873,7 @@ namespace Main
 		bool Session::setAccountCoins(std::uint16_t coins)
 		{
 			if (coins > 0x7F) return false;
-			m_player.getAccountInfo().coins = coins;
+			m_player.accountInfo.coins = coins;
 			m_scheduler.addCallback(std::source_location::current(), m_player.getAccountID(), 3, &Main::Persistence::PersistentDatabase::updatePlayerCurrencyByType,
 				m_player.getAccountID(), coins, Main::Enums::ItemCurrencyType::ITEM_COIN);
 			return true;
@@ -881,7 +881,7 @@ namespace Main
 
 		void Session::setAccountLatestCharacterSelected(std::uint16_t latestCharacterSelected)
 		{
-			m_player.getAccountInfo().latestSelectedCharacter = latestCharacterSelected;
+			m_player.accountInfo.latestSelectedCharacter = latestCharacterSelected;
 			m_scheduler.addCallback(std::source_location::current(), m_player.getAccountID(), 5, &Main::Persistence::PersistentDatabase::updateLatestSelectedCharacter,
 				m_player.getAccountID(), latestCharacterSelected);
 		}
@@ -892,7 +892,7 @@ namespace Main
 			{
 				return false;
 			}
-			m_player.getAccountInfo().playerLevel = level + 1;
+			m_player.accountInfo.playerLevel = level + 1;
 			m_scheduler.addCallback(std::source_location::current(), 
 				m_player.getAccountID(), 6, &Main::Persistence::PersistentDatabase::updatePlayerLevel, m_player.getAccountID(), level);
 			return true;
@@ -900,7 +900,7 @@ namespace Main
 
 		bool Session::setExperience(std::uint32_t experience)
 		{
-			m_player.getAccountInfo().experience = experience;
+			m_player.accountInfo.experience = experience;
 			m_scheduler.addCallback(std::source_location::current(),
 				m_player.getAccountID(), 7, &Main::Persistence::PersistentDatabase::updatePlayerExperience, m_player.getAccountID(), experience);
 			return true;
@@ -973,7 +973,7 @@ namespace Main
 		// option and mission are probably related to the upgrade type (power, firing rate, etc)
 		void Session::addEnergyToItem(const Main::ClientData::ItemAddEnergy& itemAddEnergy, std::uint16_t weaponType, std::uint16_t mission)
 		{
-			const auto result = m_player.getInventory().addEnergyToItem(itemAddEnergy.serialInfo, itemAddEnergy.usedEnergy);
+			const auto result = m_player.inventory.addEnergyToItem(itemAddEnergy.serialInfo, itemAddEnergy.usedEnergy);
 			if (result)
 			{
 				m_packet.setTcpHeader(m_id, Common::Enums::NO_ENCRYPTION);
@@ -989,7 +989,7 @@ namespace Main
 
 		void Session::addFriend(const Main::Structures::Friend& ffriend)
 		{
-			m_player.getSocialInfo().addOfflineFriend(ffriend);
+			m_player.socialInfo.addOfflineFriend(ffriend);
 			m_scheduler.immediatePersist(std::source_location::current(), 
 				&Main::Persistence::PersistentDatabase::addFriend, m_player.getAccountID(), ffriend.targetAccountId);
 		}
@@ -997,25 +997,25 @@ namespace Main
 		std::optional<Main::Structures::Friend> Session::addOnlineFriend(std::shared_ptr<Main::Network::Session> session)
 		{
 			if (!session) return std::nullopt;
-			return m_player.getSocialInfo().addOnlineFriend(session);
+			return m_player.socialInfo.addOnlineFriend(session);
 		}
 
 		void Session::equipItem(const std::uint16_t itemNumber)
 		{
-			m_player.getInventory().equipItem(itemNumber, m_scheduler);
+			m_player.inventory.equipItem(itemNumber, m_scheduler);
 		}
 
 		bool Session::replaceItem(const Main::Structures::ItemSerialInfo& serialInfo, std::uint32_t newItemId, const std::string& action)
 		{
 			// Logs
-			auto itemIdOpt = m_player.getInventory().findItemIdBySerialInfo(serialInfo);
+			auto itemIdOpt = m_player.inventory.findItemIdBySerialInfo(serialInfo);
 
 			if (!CdbUtils::itemExists(newItemId))
 			{
 				sendMessage("[Session::replaceItem] error: itemID not found");
 				return false;
 			}
-			if (!m_player.getInventory().hasEnoughInventorySpace(1))
+			if (!m_player.inventory.hasEnoughInventorySpace(1))
 			{
 				sendMessage("[Session::replaceItem] not enough inventory space!");
 				return false;
@@ -1028,11 +1028,11 @@ namespace Main
 			Main::Structures::SpawnedItem spawnedItem{ newItemId };
 			spawnedItem.serialInfo = serialInfo;
 			auto item = Item{ spawnedItem };
-			m_player.getInventory().addItem(item);
+			m_player.inventory.addItem(item);
 
 			m_packet.setCommand(66, 0, 51, 2);
 			m_packet.setData(reinterpret_cast<const std::uint8_t*>(&spawnedItem), sizeof(spawnedItem));
-			m_player.getInventory().setLatestItemNumber(spawnedItem.serialInfo.itemNumber);
+			m_player.inventory.setLatestItemNumber(spawnedItem.serialInfo.itemNumber);
 			asyncWrite(m_packet);
 
 			m_scheduler.addRepetitiveCallback(std::source_location::current(), m_player.getAccountID(),
@@ -1061,7 +1061,7 @@ namespace Main
 			}
 
 			Main::Structures::SpawnedItem spawnedItem{itemId};
-			spawnedItem.serialInfo.itemNumber = m_player.getInventory().getLatestItemNumber() + 1;
+			spawnedItem.serialInfo.itemNumber = m_player.inventory.getLatestItemNumber() + 1;
 
 			const auto duration = CdbUtils::getItemDuration(itemId);
 			spawnedItem.expirationDate = duration <= 3 ? static_cast<time32_t>(duration) : static_cast<time_t>(std::time(0)) + duration;
@@ -1069,7 +1069,7 @@ namespace Main
 			{
 				m_packet.setCommand(66, 0, 51, 2);
 				m_packet.setData(reinterpret_cast<const std::uint8_t*>(&spawnedItem), sizeof(spawnedItem));
-				m_player.getInventory().setLatestItemNumber(spawnedItem.serialInfo.itemNumber);
+				m_player.inventory.setLatestItemNumber(spawnedItem.serialInfo.itemNumber);
 				asyncWrite(m_packet);
 
 				logItemInfo(spawnedItem.serialInfo.itemNumber, itemId, spawnedItem.expirationDate, action);
@@ -1086,14 +1086,14 @@ namespace Main
 				return false;
 			}
 
-			if (!m_player.getInventory().hasEnoughInventorySpace(1))
+			if (!m_player.inventory.hasEnoughInventorySpace(1))
 			{
 				sendMessage("[error] Not enough inventory space!");
 				return false;
 			}
 
 			Main::Structures::SpawnedItem spawnedItem{ itemId };
-			spawnedItem.serialInfo.itemNumber = m_player.getInventory().getLatestItemNumber() + 1;
+			spawnedItem.serialInfo.itemNumber = m_player.inventory.getLatestItemNumber() + 1;
 
 			const auto duration = CdbUtils::getItemDuration(itemId);
 			spawnedItem.expirationDate = duration <= 3 ? static_cast<time32_t>(duration) : static_cast<time_t>(std::time(0)) + duration;
@@ -1101,11 +1101,11 @@ namespace Main
 			const Item item{ spawnedItem };
 			m_scheduler.addRepetitiveCallback(std::source_location::current(), m_player.getAccountID(),
 				&Main::Persistence::PersistentDatabase::addUntradeablePlayerItem, item, m_player.getAccountID(), -1);
-			m_player.getInventory().addItem(item);
+			m_player.inventory.addItem(item);
 
 			m_packet.setCommand(66, 0, 51, 2);
 			m_packet.setData(reinterpret_cast<const std::uint8_t*>(&spawnedItem), sizeof(spawnedItem));
-			m_player.getInventory().setLatestItemNumber(spawnedItem.serialInfo.itemNumber);
+			m_player.inventory.setLatestItemNumber(spawnedItem.serialInfo.itemNumber);
 			asyncWrite(m_packet);
 
 			logItemInfo(spawnedItem.serialInfo.itemNumber, itemId, spawnedItem.expirationDate, action);
@@ -1126,11 +1126,11 @@ namespace Main
 
 		bool Session::spawnCouponCommon(const std::uint32_t total, bool immediateToAccount)
 		{
-			const auto res = m_player.getInventory().addCoupon(total);
+			const auto res = m_player.inventory.addCoupon(total);
 
 			Main::Structures::SpawnedItem spawnedItem{ 1000000 };
 			spawnedItem.itemId.stock = total;
-			spawnedItem.serialInfo.itemNumber = m_player.getInventory().getLatestItemNumber() + 1;
+			spawnedItem.serialInfo.itemNumber = m_player.inventory.getLatestItemNumber() + 1;
 			spawnedItem.expirationDate = 0;
 
 			if (res.action == Common::Enums::AddCouponAction::MUST_CREATE_NEW_COUPON)
@@ -1145,7 +1145,7 @@ namespace Main
 				{
 					m_packet.setCommand(66, 0, 51, 2);
 					m_packet.setData(reinterpret_cast<const std::uint8_t*>(&spawnedItem), sizeof(spawnedItem));
-					m_player.getInventory().setLatestItemNumber(spawnedItem.serialInfo.itemNumber);
+					m_player.inventory.setLatestItemNumber(spawnedItem.serialInfo.itemNumber);
 					asyncWrite(m_packet);
 
 					logItemInfo(spawnedItem.serialInfo.itemNumber, spawnedItem.itemId.itemId, spawnedItem.expirationDate,
@@ -1153,7 +1153,7 @@ namespace Main
 				}
 				else
 				{
-					m_player.getInventory().addTotalCouponItems(convertedItem);
+					m_player.inventory.addTotalCouponItems(convertedItem);
 				}
 
 				return true;
@@ -1167,7 +1167,7 @@ namespace Main
 					spawnedItem.serialInfo.itemNumber = 0; // on purpose, this is just for the client anyway
 					m_packet.setCommand(66, 0, 51, 2);
 					m_packet.setData(reinterpret_cast<const std::uint8_t*>(&spawnedItem), sizeof(spawnedItem));
-					m_player.getInventory().setLatestItemNumber(spawnedItem.serialInfo.itemNumber);
+					m_player.inventory.setLatestItemNumber(spawnedItem.serialInfo.itemNumber);
 					asyncWrite(m_packet);
 
 					logItemInfo(spawnedItem.serialInfo.itemNumber, spawnedItem.itemId.itemId, spawnedItem.expirationDate,
@@ -1185,7 +1185,7 @@ namespace Main
 		// Assumptions: giftDescription is < 256 characters; itemId is valid
 		bool Session::receiveGift(std::uint32_t itemId, const std::string& giftDescription)
 		{
-			if (m_player.getMailbox().getMailboxReceived().size() > Common::Constants::maxMailbox)
+			if (m_player.mailbox.getMailboxReceived().size() > Common::Constants::maxMailbox)
 			{
 				return false;
 			}
@@ -1196,7 +1196,7 @@ namespace Main
 				asyncWrite(m_packet);
 
 				
-				Main::Structures::Giftbox giftbox{ m_player.getAccountInfo().accountID, static_cast<time32_t>(std::time(0)), itemId, itemId, itemId };
+				Main::Structures::Giftbox giftbox{ m_player.accountInfo.accountID, static_cast<time32_t>(std::time(0)), itemId, itemId, itemId };
 				std::memcpy(giftbox.nickname, Common::Constants::teamString.c_str(), Common::Constants::teamString.size());
 				std::memcpy(giftbox.message, giftDescription.c_str(), giftDescription.size());
 				addGiftboxReceived(giftbox);
@@ -1206,7 +1206,7 @@ namespace Main
 
 		void Session::deleteGiftbox(std::uint32_t timestamp)
 		{
-			m_player.getMailbox().deleteGiftbox(timestamp);
+			m_player.mailbox.deleteGiftbox(timestamp);
 			m_scheduler.addRepetitiveCallback(std::source_location::current(), 
 				m_player.getAccountID(), &Main::Persistence::PersistentDatabase::deleteReceivedGiftbox, m_player.getAccountID(), timestamp);
 		}
@@ -1220,7 +1220,7 @@ namespace Main
 				return; // currently, sending / sent gifts remains unimplemented
 			}
 
-			const auto& receivedGiftboxes = m_player.getMailbox().getGiftboxReceived();
+			const auto& receivedGiftboxes = m_player.mailbox.getGiftboxReceived();
 			const std::uint32_t totalBytes = receivedGiftboxes.size() * sizeof(Main::Structures::Giftbox);
 			m_packet.setCommand(67, type, 0, receivedGiftboxes.size());
 
@@ -1250,7 +1250,7 @@ namespace Main
 		{
 			START_BENCHMARK
 
-			const auto& actualMailbox = mailboxType == Main::Enums::MISSION_MAILBOX_RECEIVED ? m_player.getMailbox().getMailboxReceived() : m_player.getMailbox().getMailboxSent();
+			const auto& actualMailbox = mailboxType == Main::Enums::MISSION_MAILBOX_RECEIVED ? m_player.mailbox.getMailboxReceived() : m_player.mailbox.getMailboxSent();
 			m_packet.setTcpHeader(m_id, Common::Enums::NO_ENCRYPTION);
 			m_packet.setCommand(106, mailboxType, 0, actualMailbox.size());
 			const std::size_t totalBytes = actualMailbox.size() * sizeof(Main::Structures::Mailbox);
@@ -1282,7 +1282,7 @@ namespace Main
 
 		bool Session::deleteItem(const Main::Structures::ItemSerialInfo& itemSerialInfoToDelete, const std::string& action)
 		{
-			if (auto itemIdOpt = m_player.getInventory().findItemIdBySerialInfo(itemSerialInfoToDelete))
+			if (auto itemIdOpt = m_player.inventory.findItemIdBySerialInfo(itemSerialInfoToDelete))
 			{
 				Main::Structures::ItemLogInfo itemLog{itemSerialInfoToDelete.itemNumber, *itemIdOpt, 0, action};
 				m_scheduler.addRepetitiveCallback(std::source_location::current(),
@@ -1306,7 +1306,7 @@ namespace Main
 
 		bool Session::sendDeletePacket(const Main::Structures::ItemSerialInfo& itemSerialInfoToDelete)
 		{
-			const bool removed = m_player.getInventory().deleteItemBasic(itemSerialInfoToDelete);
+			const bool removed = m_player.inventory.deleteItemBasic(itemSerialInfoToDelete);
 			const std::pair<std::uint32_t, Main::Structures::ItemSerialInfo> itemToDelete{ 1, itemSerialInfoToDelete };
 			m_packet.setTcpHeader(m_id, Common::Enums::NO_ENCRYPTION);
 			m_packet.setCommand(89, 0, removed, 0);
@@ -1317,7 +1317,7 @@ namespace Main
 
 		void Session::sendMp(std::uint32_t mpToAdd)
 		{
-			const auto& accountInfo = m_player.getAccountInfo();
+			const auto& accountInfo = m_player.accountInfo;
 			std::pair<std::uint32_t, std::uint32_t> rtAndMpMessage{ accountInfo.rockTotens, accountInfo.microPoints + mpToAdd };
 			m_packet.setCommand(307, 0, 0, 0);
 			m_packet.setData(reinterpret_cast<std::uint8_t*>(&rtAndMpMessage), sizeof(std::uint32_t) * 2);
@@ -1327,7 +1327,7 @@ namespace Main
 
 		void Session::sendRt(std::uint32_t rtToAdd)
 		{
-			const auto& accountInfo = m_player.getAccountInfo();
+			const auto& accountInfo = m_player.accountInfo;
 			std::pair<std::uint32_t, std::uint32_t> rtAndMpMessage{ accountInfo.rockTotens + rtToAdd , accountInfo.microPoints };
 			m_packet.setCommand(307, 0, 0, 0);
 			m_packet.setData(reinterpret_cast<std::uint8_t*>(&rtAndMpMessage), sizeof(std::uint32_t) * 2);
@@ -1337,8 +1337,8 @@ namespace Main
 
 		void Session::reduceEquippedItemsDurability(std::uint32_t weaponRestriction)
 		{
-			const auto characterID = m_player.getAccountInfo().latestSelectedCharacter;
-			auto cont = m_player.getInventory().reduceEquippedItemsDurabilities(characterID, weaponRestriction);
+			const auto characterID = m_player.accountInfo.latestSelectedCharacter;
+			auto cont = m_player.inventory.reduceEquippedItemsDurabilities(characterID, weaponRestriction);
 			auto weaponDurabilityDamages = cont.first;
 			auto weaponsToDamageIds = cont.second;
 
@@ -1356,14 +1356,14 @@ namespace Main
 		{
 			m_scheduler.addRepetitiveCallback(std::source_location::current(),
 				m_player.getAccountID(), &Main::Persistence::PersistentDatabase::updateItemDurability, m_player.getAccountID(), itemNumber, newDurability);
-			m_player.getInventory().updateItemDurabilityByNumber(itemNumber, newDurability);
+			m_player.inventory.updateItemDurabilityByNumber(itemNumber, newDurability);
 		}
 
 		void Session::sendCurrency()
 		{ // NB: Set the currency before using this function
 
 			m_packet.setCommand(307, 0, 0, 0);
-			const auto& accountInfo = m_player.getAccountInfo();
+			const auto& accountInfo = m_player.accountInfo;
 			struct CurrencyData { std::uint32_t rt; std::uint32_t mp; std::uint32_t coins; };
 			CurrencyData message{ accountInfo.rockTotens, accountInfo.microPoints, accountInfo.coins };
 			m_packet.setData(reinterpret_cast<std::uint8_t*>(&message), sizeof(std::uint32_t) * 3);
@@ -1374,21 +1374,21 @@ namespace Main
 		{
 			if (characterId != -1 && characterId >= Common::Enums::MAX_CHARACTERS) return;
 
-			if (!m_player.getInventory().unequipItemIfEquipped(itemNumber, characterId, m_scheduler))
+			if (!m_player.inventory.unequipItemIfEquipped(itemNumber, characterId, m_scheduler))
 			{
-				m_player.getInventory().equipItemIfNotEquipped(itemNumber, characterId, m_scheduler);
+				m_player.inventory.equipItemIfNotEquipped(itemNumber, characterId, m_scheduler);
 			}
 		}
 
 		void Session::unequipItem(std::uint64_t itemType)
 		{
 			if (itemType >= Common::Constants::maxItemType) return;
-			m_player.getInventory().unequipItemImpl(itemType, m_scheduler);
+			m_player.inventory.unequipItemImpl(itemType, m_scheduler);
 		}
 
 		void Session::updateSingleWaveScore(std::uint32_t score, std::uint32_t stage)
 		{
-			auto ainfo = m_player.getAccountInfo();
+			auto ainfo = m_player.accountInfo;
 			if (ainfo.highestSingleWaveScore < score || ainfo.highestSinglewaveStage < stage)
 			{
 				if (ainfo.highestSingleWaveScore < score)
@@ -1408,7 +1408,7 @@ namespace Main
 
 		void Session::completeTutorial()
 		{
-			auto ainfo = m_player.getAccountInfo();
+			auto ainfo = m_player.accountInfo;
 			if (ainfo.isTutorialDone) return;
 
 			ainfo.isTutorialDone = true;
@@ -1431,7 +1431,7 @@ namespace Main
 			const std::string bannedUntil = std::format("{:%Y-%m-%d %H:%M:%S}", zt.get_sys_time());
 
 			if (m_scheduler.immediatePersist(std::source_location::current(), 
-				&Main::Persistence::PersistentDatabase::updateSuspension, m_player.getAccountInfo().nickname,
+				&Main::Persistence::PersistentDatabase::updateSuspension, m_player.accountInfo.nickname,
 				bannedUntil, reason, playerGrade))
 			{
 				m_packet.setCommand(73, 0, 1, 0);
@@ -1450,10 +1450,10 @@ namespace Main
 			zoned_time zt{ "UTC", local_seconds{duration_cast<seconds>(system_clock::now().time_since_epoch()) + seconds(daysDuration * 24 * 60 * 60)}};
 			const std::string mutedUntil = std::format("{:%Y-%m-%d %H:%M:%S}", zt.get_sys_time());
 			if (m_scheduler.immediatePersist(std::source_location::current(), 
-				&Main::Persistence::PersistentDatabase::updateMute, m_player.getAccountInfo().nickname,
+				&Main::Persistence::PersistentDatabase::updateMute, m_player.accountInfo.nickname,
 				mutedUntil, reason, mutedBy, Main::Enums::GRADE_MOD))
 			{
-				auto& moderationInfo = m_player.getModerationInfo();
+				auto& moderationInfo = m_player.moderationInfo;
 				moderationInfo.isMuted = true;
 				moderationInfo.muteReason = reason;
 				moderationInfo.mutedBy = mutedBy;
@@ -1472,10 +1472,10 @@ namespace Main
 			zoned_time zt{ "UTC", local_seconds{duration_cast<seconds>(system_clock::now().time_since_epoch()) + seconds(daysDuration * 24 * 60 * 60)}};
 			const std::string disabledUntil = std::format("{:%Y-%m-%d %H:%M:%S}", zt.get_sys_time());
 			if (m_scheduler.immediatePersist(std::source_location::current(),
-				&Main::Persistence::PersistentDatabase::updateRoomCreationDisabledUntil, m_player.getAccountInfo().nickname,
+				&Main::Persistence::PersistentDatabase::updateRoomCreationDisabledUntil, m_player.accountInfo.nickname,
 				disabledUntil))
 			{
-				m_player.getModerationInfo().isRoomCreationEnabled = false;
+				m_player.moderationInfo.isRoomCreationEnabled = false;
 				return true;
 			}
 			return false;
@@ -1492,10 +1492,10 @@ namespace Main
 
 			if (m_scheduler.immediatePersist(std::source_location::current(),
 				&Main::Persistence::PersistentDatabase::updateVotekickDisabledUntil,
-				m_player.getAccountInfo().nickname,
+				m_player.accountInfo.nickname,
 				disabledUntil))
 			{
-				m_player.getModerationInfo().isVotekickEnabled = false;
+				m_player.moderationInfo.isVotekickEnabled = false;
 				return true;
 			}
 			return false;
@@ -1552,7 +1552,7 @@ namespace Main
 			}
 			else
 			{
-				const auto& selfAccountInfo = m_player.getAccountInfo();
+				const auto& selfAccountInfo = m_player.accountInfo;
 				std::vector<Main::Structures::SingleLobbyClanList> playerList;
 				for (const auto& currentSession : allSessions)
 				{
@@ -1577,28 +1577,28 @@ namespace Main
 
 		bool Session::unmuteAccount()
 		{
-			m_player.getModerationInfo().isMuted = false;
+			m_player.moderationInfo.isMuted = false;
 			return m_scheduler.immediatePersist(std::source_location::current(),
-				&Main::Persistence::PersistentDatabase::unmuteAccount, m_player.getAccountInfo().nickname);
+				&Main::Persistence::PersistentDatabase::unmuteAccount, m_player.accountInfo.nickname);
 		}
 
 		bool Session::enableRoomCreation()
 		{
-			m_player.getModerationInfo().isRoomCreationEnabled = true;
+			m_player.moderationInfo.isRoomCreationEnabled = true;
 			return m_scheduler.immediatePersist(std::source_location::current(),
-				&Main::Persistence::PersistentDatabase::resetRoomCreationDisabledUntil, m_player.getAccountInfo().nickname);
+				&Main::Persistence::PersistentDatabase::resetRoomCreationDisabledUntil, m_player.accountInfo.nickname);
 		}
 
 		bool Session::enableVotekick()
 		{
-			m_player.getModerationInfo().isVotekickEnabled = true;
+			m_player.moderationInfo.isVotekickEnabled = true;
 			return m_scheduler.immediatePersist(std::source_location::current(), &Main::Persistence::PersistentDatabase::resetVotekickDisabledUntil,
-				m_player.getAccountInfo().nickname);
+				m_player.accountInfo.nickname);
 		}
 
 		void Session::setMute(Main::Structures::MuteInfo val)
 		{
-			auto& moderationInfo = m_player.getModerationInfo();
+			auto& moderationInfo = m_player.moderationInfo;
 			if (val.isMuted)
 			{
 				moderationInfo.isMuted = true;
@@ -1622,26 +1622,26 @@ namespace Main
 			m_player.setPlayerState(playerState);
 			if (playerState == Common::Enums::STATE_NORMAL)
 			{
-				m_player.getMatchContext().isInMatch = true;
+				m_player.matchContext.isInMatch = true;
 			}
 			else if (playerState == Common::Enums::STATE_WAITING)
 			{
-				m_player.getMatchContext().isInMatch = false;
+				m_player.matchContext.isInMatch = false;
 			}
 		}
 
 		void Session::addLuckyPoints(std::uint32_t points)
 		{
-			m_player.getAccountInfo().luckyPoints += points; 
+			m_player.accountInfo.luckyPoints += points; 
 			m_scheduler.immediatePersist(std::source_location::current(), 
-				&Persistence::PersistentDatabase::updatePlayerLuckyPoints, m_player.getAccountID(), static_cast<std::uint32_t>(m_player.getAccountInfo().luckyPoints));
+				&Persistence::PersistentDatabase::updatePlayerLuckyPoints, m_player.getAccountID(), static_cast<std::uint32_t>(m_player.accountInfo.luckyPoints));
 		}
 
 		void Session::setLuckyPoints(std::uint32_t points)
 		{
-			m_player.getAccountInfo().luckyPoints = points;
+			m_player.accountInfo.luckyPoints = points;
 			m_scheduler.immediatePersist(std::source_location::current(), 
-				&Persistence::PersistentDatabase::updatePlayerLuckyPoints, m_player.getAccountID(), static_cast<std::uint32_t>(m_player.getAccountInfo().luckyPoints));
+				&Persistence::PersistentDatabase::updatePlayerLuckyPoints, m_player.getAccountID(), static_cast<std::uint32_t>(m_player.accountInfo.luckyPoints));
 		}
 
 		void Session::leaveRoom()
@@ -1655,7 +1655,7 @@ namespace Main
 			if (battery != 500 && battery != 1000)
 				return;
 
-			auto& accountInfo = m_player.getAccountInfo();
+			auto& accountInfo = m_player.accountInfo;
 			const std::uint32_t oldBatteryQuantity = accountInfo.battery;
 			accountInfo.battery = std::min(static_cast<std::uint32_t>(accountInfo.battery + battery),static_cast<std::uint32_t>(accountInfo.maxBattery));
 			const std::uint32_t totalNewBattery = accountInfo.battery;
@@ -1668,7 +1668,7 @@ namespace Main
 
 		void Session::resetKillDeath()
 		{
-			auto& ainfo = m_player.getAccountInfo();
+			auto& ainfo = m_player.accountInfo;
 			ainfo.totalKills = ainfo.deaths = 0;
 			const std::uint32_t accountId = ainfo.accountID;
 			m_scheduler.addRepetitiveCallback(std::source_location::current(), 
@@ -1677,7 +1677,7 @@ namespace Main
 
 		void Session::resetRecord()
 		{
-			auto& ainfo = m_player.getAccountInfo();
+			auto& ainfo = m_player.accountInfo;
 			ainfo.wins = ainfo.losses = ainfo.draws = 0;
 			const std::uint32_t accountId = ainfo.accountID;
 			m_scheduler.addRepetitiveCallback(std::source_location::current(), 
@@ -1686,7 +1686,7 @@ namespace Main
 
 		void Session::expandBattery()
 		{
-			auto& accountInfo = m_player.getAccountInfo();
+			auto& accountInfo = m_player.accountInfo;
 			if (accountInfo.maxBattery > 4000)
 			{
 				sendMessage("Error: Maximum possible battery is 5000");
@@ -1700,7 +1700,7 @@ namespace Main
 
 		void Session::expandInventory(std::uint32_t spaceToAdd)
 		{
-			auto& accountInfo = m_player.getAccountInfo();
+			auto& accountInfo = m_player.accountInfo;
 
 			if (accountInfo.inventorySpace + spaceToAdd > 1000)
 			{
@@ -1725,7 +1725,7 @@ namespace Main
 			const std::string todayDate = std::format("{:%F}", system_clock::now());
 			if (latestOpenedRewardDate != todayDate)
 			{
-				if (!m_player.getInventory().hasEnoughInventorySpace(1))
+				if (!m_player.inventory.hasEnoughInventorySpace(1))
 				{
 					sendMessage("The weekly reward cannot be received since your inventory is full. Free some space and re-log to receive the reward", 
 						Main::Enums::TIP);
@@ -1745,9 +1745,9 @@ namespace Main
 				{
 					m_packet.setCommand(66, 0, 51, 2);
 					Main::Structures::SpawnedItem spawnedItem{ rewards.items[day] };
-					spawnedItem.serialInfo.itemNumber = m_player.getInventory().getLatestItemNumber() + 1;
+					spawnedItem.serialInfo.itemNumber = m_player.inventory.getLatestItemNumber() + 1;
 					addItem(Item{ spawnedItem });
-					m_player.getInventory().setLatestItemNumber(spawnedItem.serialInfo.itemNumber);
+					m_player.inventory.setLatestItemNumber(spawnedItem.serialInfo.itemNumber);
 
 					m_packet.setData(reinterpret_cast<std::uint8_t*>(&spawnedItem), sizeof(spawnedItem));
 					asyncWrite(m_packet);
@@ -1768,7 +1768,7 @@ namespace Main
 			const std::string todayDate = std::format("{:%F}", system_clock::now());
 			if (latestOpenedRewardDate != todayDate)
 			{
-				if (!m_player.getInventory().hasEnoughInventorySpace(1))
+				if (!m_player.inventory.hasEnoughInventorySpace(1))
 				{
 					sendMessage("The monthly reward cannot be received since your inventory is full. Free some space and re-log to receive the reward",
 						Main::Enums::TIP);
@@ -1786,9 +1786,9 @@ namespace Main
 				{
 					m_packet.setCommand(66, 0, 51, 2);
 					Main::Structures::SpawnedItem spawnedItem{ rewards.items[rewards.day] };
-					spawnedItem.serialInfo.itemNumber = m_player.getInventory().getLatestItemNumber() + 1;
+					spawnedItem.serialInfo.itemNumber = m_player.inventory.getLatestItemNumber() + 1;
 					addItem(Item{ spawnedItem });
-					m_player.getInventory().setLatestItemNumber(spawnedItem.serialInfo.itemNumber);
+					m_player.inventory.setLatestItemNumber(spawnedItem.serialInfo.itemNumber);
 
 					m_packet.setData(reinterpret_cast<std::uint8_t*>(&spawnedItem), sizeof(spawnedItem));
 					asyncWrite(m_packet);
@@ -1842,7 +1842,7 @@ namespace Main
 			{
 				sendSeparatePackets(nonEquippedItems);
 			}
-			m_player.getInventory().setUnequippedItems(nonEquippedItems);
+			m_player.inventory.setUnequippedItems(nonEquippedItems);
 
 			// equipped items
 			m_packet.setOrder(75);
@@ -1853,7 +1853,7 @@ namespace Main
 				m_packet.setData(reinterpret_cast<std::uint8_t*>(items.data()), items.size() * sizeof(Main::Structures::EquippedItem));
 				asyncWrite(m_packet);
 			}
-			m_player.getInventory().setEquippedItems(equippedItems);
+			m_player.inventory.setEquippedItems(equippedItems);
 
 			// Client expects this as confirmation
 			m_packet.setOption(0);
@@ -1990,7 +1990,7 @@ namespace Main
 		void Session::storeEndMatchStats(std::uint64_t totalPlaytimeSeconds, const Main::Structures::ScoreboardResponse& stats, Main::Enums::MatchEnd matchEnd, 
 			bool hasLeveledUp, bool isZombieMode, bool isClanMatch)
 		{
-			auto ainfo = m_player.getAccountInfo();
+			auto ainfo = m_player.accountInfo;
 			if (isZombieMode)
 			{
 				ainfo.zombieKills += (stats.totalKills / 3);
@@ -2037,7 +2037,7 @@ namespace Main
 				ainfo.accountID, &Main::Persistence::PersistentDatabase::updatePlayerStats, ainfo.accountID, ainfo);
 
 			m_player.storeBatteryObtainedInMatch();
-			const std::uint32_t updatedBattery = m_player.getAccountInfo().battery;
+			const std::uint32_t updatedBattery = m_player.accountInfo.battery;
 			m_scheduler.addRepetitiveCallback(std::source_location::current(),
 				m_player.getAccountID(), &Main::Persistence::PersistentDatabase::updateBattery, m_player.getAccountID(),
 				updatedBattery);
@@ -2070,7 +2070,7 @@ PACK_POP()
 			std::uint32_t index = 0; 
 
 			// Currently causing a client crash in some special circumstances??
-			for (const auto& [itemNum, item] : m_player.getInventory().getItems())
+			for (const auto& [itemNum, item] : m_player.inventory.getItems())
 			{ 
 				const bool isTradeable = Main::CdbUtils::isTradeable(item.itemId.itemId).value_or(false); // avoid further issues, don't seal it
 				if (isTradeable && item.itemId.itemId != 1000000 /* coupons dont work */ && item.expirationDate == 0 /* unlimited */)
@@ -2090,7 +2090,7 @@ PACK_POP()
 			response.setExtra(1); // unseal success
 			std::vector<std::uint8_t> message(8);
 
-			for (const auto& [itemNum, item] : m_player.getInventory().getItems())
+			for (const auto& [itemNum, item] : m_player.inventory.getItems())
 			{
 				std::memcpy(message.data(), &item.serialInfo, sizeof(item.serialInfo));
 				response.setData(message.data(), message.size());
@@ -2103,7 +2103,7 @@ PACK_POP()
 		void Session::resetTradeInfo()
 		{
 			unsealAllItems();
-			m_player.getTradeInfo().reset();
+			m_player.tradeInfo.reset();
 			m_player.setPlayerState(Common::Enums::PlayerState::STATE_INVENTORY);
 		}
 
@@ -2137,14 +2137,14 @@ PACK_POP()
 
 		void Session::addItems(const std::vector<Main::Structures::TradeBasicItem>& tradedItems)
 		{
-			auto items = m_player.getInventory().addItems(tradedItems);
+			auto items = m_player.inventory.addItems(tradedItems);
 			m_scheduler.addRepetitiveCallback(std::source_location::current(), m_player.getAccountID(), 
 				&Main::Persistence::PersistentDatabase::addPlayerItems, m_player.getAccountID(), items, -1);
 		}
 
 		void Session::addItemFromTrade(const Main::Structures::TradeBasicItem& tradeItem)
 		{
-			auto item = m_player.getInventory().addItemFromTrade(tradeItem);
+			auto item = m_player.inventory.addItemFromTrade(tradeItem);
 			m_scheduler.addRepetitiveCallback(std::source_location::current(), m_player.getAccountID(),
 				&Main::Persistence::PersistentDatabase::addPlayerItem, item, m_player.getAccountID(), -1);
 		}
@@ -2159,7 +2159,7 @@ PACK_POP()
 			Main::Structures::SpawnedItem spawnedItem{ itemId };
 			spawnedItem.serialInfo = itemSerialInfo;
 			spawnedItem.expirationDate = 0;
-			spawnedItem.serialInfo.itemNumber = m_player.getInventory().getLatestItemNumber() + 1;
+			spawnedItem.serialInfo.itemNumber = m_player.inventory.getLatestItemNumber() + 1;
 			response.setData(reinterpret_cast<std::uint8_t*>(&spawnedItem), sizeof(spawnedItem));
 			asyncWrite(response);
 

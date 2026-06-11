@@ -17,7 +17,7 @@ namespace Main
 			Common::Network::Packet& response)
 		{
 			const auto& selfAccountInfo = session->getAccountInfo();
-			const auto& equippedItems = session->getPlayer().getInventory().getEquippedItemsFor(selfAccountInfo.latestSelectedCharacter);
+			const auto& equippedItems = session->getPlayer().inventory.getEquippedItemsFor(selfAccountInfo.latestSelectedCharacter);
 			std::uint32_t selfEquippedHair = 0;
 			std::uint32_t selfEquippedEyes = 0;
 
@@ -41,7 +41,7 @@ namespace Main
 				selfEquippedHair, selfEquippedEyes };
 			response.setData(reinterpret_cast<std::uint8_t*>(&tradePlayerInfo), sizeof(tradePlayerInfo));
 			targetSession->asyncWrite(response);
-			targetSession->getPlayer().getTradeInfo().setCurrentlyTradingWithAccountId(selfAccountInfo.accountID);
+			targetSession->getPlayer().tradeInfo.setCurrentlyTradingWithAccountId(selfAccountInfo.accountID);
 		}
 
 		inline void handleTradeInitialization(const Common::Network::Packet& request, std::shared_ptr<Main::Network::Session> session, 
@@ -57,7 +57,7 @@ namespace Main
 			if (auto targetSession = sessionsManager.getSessionByAccountId(targetAccountId))
 			{
 				const auto targetPlayerState = targetSession->getPlayer().getPlayerState();
-				if (!session->getPlayer().getSocialInfo().isFriend(targetAccountId))
+				if (!session->getPlayer().socialInfo.isFriend(targetAccountId))
 				{
 					response.setExtra(Enums::TradeSystemExtra::PLAYERS_NOT_FRIENDS);
 					session->asyncWrite(response);

@@ -45,47 +45,21 @@ namespace Main
 			using ModerationInfo = Main::Structures::ModerationInfo;
 			using MatchContext = Main::Structures::MatchContext;
 
-			AccountInfo m_accountInfo{};
-			Inventory m_inventory{ m_accountInfo };
-			SocialInfo m_socialInfo{};
-			TradeInfo m_tradeInfo{};
-			ModerationInfo m_moderationInfo{};
-			MatchContext m_matchContext{};
-			Main::Classes::Mailbox m_mailbox{};
 			Common::Enums::PlayerState m_playerState{};
 			std::uint16_t m_ping{};
 			std::string m_latestWeeklyRewardDay{};
 			std::string m_latestMonthlyRewardDay{};
 
 		public:
-			// Inventory
-			Inventory& getInventory() noexcept { return m_inventory; }
-			const Inventory& getInventory() const noexcept { return m_inventory; }
+						AccountInfo accountInfo{};
+			Inventory inventory{ accountInfo };
+			SocialInfo socialInfo{};
+			TradeInfo tradeInfo{};
+			ModerationInfo moderationInfo{};
+			MatchContext matchContext{};
+			Main::Classes::Mailbox mailbox{};
 
-			// Social (friends + blocked)
-			SocialInfo& getSocialInfo() noexcept { return m_socialInfo; }
-			const SocialInfo& getSocialInfo() const noexcept { return m_socialInfo; }
-
-			// Trade system
-			TradeInfo& getTradeInfo() noexcept { return m_tradeInfo; }
-			const TradeInfo& getTradeInfo() const noexcept { return m_tradeInfo; }
-
-			// Moderation (mute + room creation / votekick restrictions)
-			ModerationInfo& getModerationInfo() noexcept { return m_moderationInfo; }
-			const ModerationInfo& getModerationInfo() const noexcept { return m_moderationInfo; }
-
-			// Match / room context
-			MatchContext& getMatchContext() noexcept { return m_matchContext; }
-			const MatchContext& getMatchContext() const noexcept { return m_matchContext; }
-
-			// Mailbox / giftbox
-			Main::Classes::Mailbox& getMailbox() noexcept { return m_mailbox; }
-			const Main::Classes::Mailbox& getMailbox() const noexcept { return m_mailbox; }
-
-			// Account info
-			void setAccountInfo(const AccountInfo& accountInfo);
-			AccountInfo& getAccountInfo() noexcept { return m_accountInfo; }
-			const AccountInfo& getAccountInfo() const;
+						void setAccountInfo(const AccountInfo& info);
 			std::uint32_t getAccountID() const;
 			const char* const getPlayerName() const;
 			void setPlayerName(const char* playerName);
@@ -95,8 +69,7 @@ namespace Main
 			std::uint16_t getPing() const;
 			bool isInLobby() const;
 
-			// Rewards
-			void setLatestWeeklyRewardDate(const std::string& date) { m_latestWeeklyRewardDay = date; }
+						void setLatestWeeklyRewardDate(const std::string& date) { m_latestWeeklyRewardDay = date; }
 			const std::string getLatestWeeklyRewardDate() const { return m_latestWeeklyRewardDay; }
 			void setLatestMonthlyRewardDate(const std::string& date) { m_latestMonthlyRewardDay = date; }
 			const std::string getLatestMonthlyRewardDate() const { return m_latestMonthlyRewardDay; }
@@ -112,7 +85,7 @@ namespace Main
 
 			std::string getPlayerInfoAsString() const
 			{
-				return "(PlayerName: " + std::string(m_accountInfo.nickname) + ", RoomNumber: " + std::to_string(m_matchContext.roomNumber) + ", IsInMatch : " + std::to_string(m_matchContext.isInMatch) + "\n";
+				return "(PlayerName: " + std::string(accountInfo.nickname) + ", RoomNumber: " + std::to_string(matchContext.roomNumber) + ", IsInMatch : " + std::to_string(matchContext.isInMatch) + "\n";
 			}
 		};
 	}

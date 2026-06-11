@@ -168,7 +168,7 @@ namespace Main
 					session->asyncWrite(response);
 					return;
 				}
-				else if (!session->getPlayer().getInventory().hasEnoughInventorySpace(totalSpins))
+				else if (!session->getPlayer().inventory.hasEnoughInventorySpace(totalSpins))
 				{
 					response.setExtra(Main::Enums::CapsuleSpinExtra::CAPSULE_SPIN_INVENTORY_FULL);
 					session->asyncWrite(response);
@@ -184,7 +184,7 @@ namespace Main
 
 				while (i < request.getOption() && retryCount < maxRetries)
 				{
-					if (static_cast<std::uint32_t>(session->getPlayer().getAccountInfo().luckyPoints) >= Common::Constants::maxLuckySpin)
+					if (static_cast<std::uint32_t>(session->getPlayer().accountInfo.luckyPoints) >= Common::Constants::maxLuckySpin)
 					{
 						session->setLuckyPoints(0);
 						response.setMission(Main::Enums::CapsuleSpinMission::CAPSULE_LUCKY_SPIN);
@@ -223,9 +223,9 @@ namespace Main
 					}
 
 					Main::Structures::ItemSerialInfo serialInfo;
-					serialInfo.itemNumber = session->getPlayer().getInventory().getLatestItemNumber() + 1;
+					serialInfo.itemNumber = session->getPlayer().inventory.getLatestItemNumber() + 1;
 					Main::Structures::CapsuleSpin capsuleSpin{ wonItemIdAndType->first, serialInfo };
-					session->getPlayer().getInventory().setLatestItemNumber(capsuleSpin.itemSerialInfo.itemNumber);
+					session->getPlayer().inventory.setLatestItemNumber(capsuleSpin.itemSerialInfo.itemNumber);
 					Main::Structures::Item capsuleItem{ capsuleSpin };
 					if (session->addItem(capsuleItem))
 					{

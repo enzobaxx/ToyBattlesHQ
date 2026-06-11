@@ -34,7 +34,7 @@ namespace Main
 		{
 			START_BENCHMARK
 			// Check if the sender is muted - if so, don't allow mailbox communication
-			if (session->getPlayer().getModerationInfo().isMuted) return;
+			if (session->getPlayer().moderationInfo.isMuted) return;
 			
 			if (request.getOption() == 2) // option seems to always be 2
 			{

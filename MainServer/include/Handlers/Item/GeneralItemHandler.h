@@ -53,7 +53,7 @@ namespace Main
 		{
 			START_BENCHMARK
 
-			const auto& userItems = session->getPlayer().getInventory().getItems();
+			const auto& userItems = session->getPlayer().inventory.getItems();
 			if (auto it = userItems.find(boxData.serialInfo.itemNumber); it != userItems.end())
 			{
 				const Main::Structures::Item boxItem = it->second;
@@ -74,7 +74,7 @@ namespace Main
 				{ // box item
 					std::vector<Main::Structures::BoxItem> boxWonItems;
 					Main::Structures::ItemSerialInfo wonItemSerialInfo;
-					std::uint64_t latestItemNumber = session->getPlayer().getInventory().getLatestItemNumber();
+					std::uint64_t latestItemNumber = session->getPlayer().inventory.getLatestItemNumber();
 
 					for (std::uint32_t currentWonItemId : *wonItemIdsOpt)
 					{

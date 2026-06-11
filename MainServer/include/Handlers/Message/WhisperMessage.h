@@ -49,11 +49,11 @@ namespace Main
 
 			if (targetSession)
 			{
-				if (session->getPlayer().getSocialInfo().hasBlocked(targetSession->getAccountInfo().accountID))
+				if (session->getPlayer().socialInfo.hasBlocked(targetSession->getAccountInfo().accountID))
 				{
 					response.setExtra(Enums::WhisperExtra::WHISPER_SENDER_BLOCKED_RECEIVER);
 				}
-				else if (targetSession->getPlayer().getSocialInfo().hasBlocked(accountInfo.accountID))
+				else if (targetSession->getPlayer().socialInfo.hasBlocked(accountInfo.accountID))
 				{
 					response.setExtra(Enums::WhisperExtra::WHISPER_RECEIVER_BLOCKED_SENDER);
 				}

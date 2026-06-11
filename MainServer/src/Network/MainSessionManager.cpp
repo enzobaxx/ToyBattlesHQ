@@ -32,7 +32,7 @@ namespace Main
 			auto session = it->second;
 
 			std::vector<std::weak_ptr<Session>> validFriendSessions;
-			for (const auto& [_, friendSession] : session->getPlayer().getSocialInfo().getFriendSessions())
+			for (const auto& [_, friendSession] : session->getPlayer().socialInfo.getFriendSessions())
 			{
 				if (friendSession.lock())
 					validFriendSessions.push_back(friendSession);
@@ -48,7 +48,7 @@ namespace Main
 			}
 
 			// 1. remove the player from a normal room/clan room, remove them from the match too
-			if (session->getPlayer().getMatchContext().roomNumber)
+			if (session->getPlayer().matchContext.roomNumber)
 			{
 				if (session->getPlayer().isInMatch())
 				{
@@ -64,7 +64,7 @@ namespace Main
 			// 2. remove them from the party
 			//m_clansManager->tryRemovePlayerFromParty(session->getAccountInfo().clanId, sessionId);
 
-			if (session->getPlayer().getMatchContext().partyRoomNumber)
+			if (session->getPlayer().matchContext.partyRoomNumber)
 			{
 				Common::Network::Packet leavePartyReq;
 				leavePartyReq.setCommand(111, 0, 0, 0);
@@ -228,7 +228,7 @@ namespace Main
 			auto response = prepareMessage(message);
 			for (auto& currentSession : m_sessionsVector)
 			{
-				if (!currentSession->getPlayer().getMatchContext().roomNumber)
+				if (!currentSession->getPlayer().matchContext.roomNumber)
 				{
 					currentSession->sendMessage(message);
 				}

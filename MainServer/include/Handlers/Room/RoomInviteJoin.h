@@ -43,8 +43,8 @@ namespace Main
 				if (auto targetSession = sessionsManager.getSessionByAccountId(targetAccountId))
 				{
 					const auto& targetPlayer = targetSession->getPlayer();
-					const std::uint32_t targetRoomNum = targetPlayer.getMatchContext().roomNumber;
-					const std::uint32_t selfRoomNum = selfPlayer.getMatchContext().roomNumber;
+					const std::uint32_t targetRoomNum = targetPlayer.matchContext.roomNumber;
+					const std::uint32_t selfRoomNum = selfPlayer.matchContext.roomNumber;
 					if (targetRoomNum)
 					{
 						if (!selfPlayer.isInLobby())
@@ -94,7 +94,7 @@ namespace Main
 				auto targetSession = sessionsManager.findSessionByName(targetNickname);
 				if (targetSession)
 				{
-					if (session->getPlayer().getMatchContext().roomNumber == 0 || session->getPlayer().getMatchContext().roomNumber >= Common::Constants::clanRoomNumberStart)
+					if (session->getPlayer().matchContext.roomNumber == 0 || session->getPlayer().matchContext.roomNumber >= Common::Constants::clanRoomNumberStart)
 					{
 						session->sendMessage("You must be in a normal room to invite someone!");
 						return;
@@ -105,17 +105,17 @@ namespace Main
 						session->sendMessage("This player is currently not in the lobby.");
 						return;
 					}
-					else if (targetPlayer.getMatchContext().roomNumber == selfPlayer.getMatchContext().roomNumber)
+					else if (targetPlayer.matchContext.roomNumber == selfPlayer.matchContext.roomNumber)
 					{
 						session->sendMessage("The player you are trying to invite is already in your room.");
 						return;
 					}
-					else if (targetPlayer.getSocialInfo().hasBlocked(session->getAccountInfo().accountID))
+					else if (targetPlayer.socialInfo.hasBlocked(session->getAccountInfo().accountID))
 					{
 						session->sendMessage("The player you are trying to invite has blocked you.");
 						return;
 					}
-					if (Main::Classes::Room* room = roomsManager.getRoomByNumber(selfPlayer.getMatchContext().roomNumber))
+					if (Main::Classes::Room* room = roomsManager.getRoomByNumber(selfPlayer.matchContext.roomNumber))
 					{
 						response.setCommand(319, 0, 0, 0); 
 						response.setData(nullptr, 0);
@@ -124,7 +124,7 @@ namespace Main
 						roomFollow.channelId = 1; // if 0 then beginner channel?
 						roomFollow.serverId = serverId; // This is correct (checked)
 						roomFollow.unknown = 2; // Apparently can be anything except for 0?
-						roomFollow.roomNumber = selfPlayer.getMatchContext().roomNumber - 1;
+						roomFollow.roomNumber = selfPlayer.matchContext.roomNumber - 1;
 						std::ranges::copy(std::span(room->getRoomTitle().c_str(), sizeof(roomFollow.roomTitle) - 1), roomFollow.roomTitle);
 						roomFollow.roomTitle[sizeof(roomFollow.roomTitle) - 1] = '\0';
 						std::ranges::copy(std::span(session->getAccountInfo().nickname, sizeof(roomFollow.sourceNickname) - 1), roomFollow.sourceNickname);

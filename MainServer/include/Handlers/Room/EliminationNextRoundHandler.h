@@ -17,7 +17,7 @@ namespace Main
 	{
 		inline void unknown(const Common::Network::Packet& request, std::shared_ptr<Main::Network::Session> session, Main::Classes::RoomsManager& roomsManager)
 		{
-			if (auto* room = roomsManager.getRoomByNumber(session->getPlayer().getMatchContext().roomNumber))
+			if (auto* room = roomsManager.getRoomByNumber(session->getPlayer().matchContext.roomNumber))
 			{
 				room->broadcastToRoom(const_cast<Common::Network::Packet&>(request));
 			}
@@ -26,7 +26,7 @@ namespace Main
 		inline void handleEliminationNextRound(const Common::Network::Packet& request, std::shared_ptr<Main::Network::Session> session,
 			Main::Classes::RoomsManager& roomsManager)
 		{
-			if (auto* room = roomsManager.getRoomByNumber(session->getPlayer().getMatchContext().roomNumber))
+			if (auto* room = roomsManager.getRoomByNumber(session->getPlayer().matchContext.roomNumber))
 			{
 				if (!room->isHost(session->getAccountInfo().uniqueId)) return;
 				room->broadcastToRoomExceptSelf(const_cast<Common::Network::Packet&>(request), session->getAccountInfo().uniqueId);
@@ -55,7 +55,7 @@ namespace Main
 		inline void handleEliminationNextRound2(const Common::Network::Packet& request, std::shared_ptr<Main::Network::Session> session,
 			Main::Classes::RoomsManager& roomsManager)
 		{
-			if (auto* room = roomsManager.getRoomByNumber(session->getPlayer().getMatchContext().roomNumber))
+			if (auto* room = roomsManager.getRoomByNumber(session->getPlayer().matchContext.roomNumber))
 			{
 				if (!room->isHost(session->getAccountInfo().uniqueId)) return;
 				Common::Network::Packet response = request;
@@ -169,7 +169,7 @@ namespace Main
 			Common::Network::Packet response = request;
 			response.setCommand(66, 0, 17, 2); // single wave ack
 
-			if (session->getPlayer().getInventory().hasEnoughInventorySpace(1))
+			if (session->getPlayer().inventory.hasEnoughInventorySpace(1))
 			{
 				constexpr std::uint64_t threeMinsMs = 3 * 60 * 1000;
 				constexpr std::uint64_t sevenMinsMs = 7 * 60 * 1000;
@@ -177,8 +177,8 @@ namespace Main
 				if (req.type == 1 && req.stage == 10 && (now - session->m_matchStartTime >= threeMinsMs))
 				{
 					Main::Structures::BoughtItem reward{ Common::Constants::singlewaveEasyBox };
-					reward.serialInfo.itemNumber = session->getPlayer().getInventory().getLatestItemNumber() + 1;
-					session->getPlayer().getInventory().setLatestItemNumber(reward.serialInfo.itemNumber);
+					reward.serialInfo.itemNumber = session->getPlayer().inventory.getLatestItemNumber() + 1;
+					session->getPlayer().inventory.setLatestItemNumber(reward.serialInfo.itemNumber);
 					response.setData(reinterpret_cast<std::uint8_t*>(&reward), sizeof(reward));
 					session->addItem(Main::Structures::Item{ reward });
 					session->m_matchStartTime = now;
@@ -188,8 +188,8 @@ namespace Main
 					if (req.stage == 20 && (now - session->m_matchStartTime >= sevenMinsMs))
 					{
 						Main::Structures::BoughtItem reward{ Common::Constants::singlewaveHardBox };
-						reward.serialInfo.itemNumber = session->getPlayer().getInventory().getLatestItemNumber() + 1;
-						session->getPlayer().getInventory().setLatestItemNumber(reward.serialInfo.itemNumber);
+						reward.serialInfo.itemNumber = session->getPlayer().inventory.getLatestItemNumber() + 1;
+						session->getPlayer().inventory.setLatestItemNumber(reward.serialInfo.itemNumber);
 						response.setData(reinterpret_cast<std::uint8_t*>(&reward), sizeof(reward));
 						session->addItem(Main::Structures::Item{ reward });
 						session->m_matchStartTime = now;
@@ -256,7 +256,7 @@ namespace Main
 
 			std::uint32_t totalExpBonus = 0;
 			std::uint32_t totalMpBonus = 0;
-			const auto& equippedItems = targetSession->getPlayer().getInventory().getEquippedItemsFor(targetSession->getAccountInfo().latestSelectedCharacter);
+			const auto& equippedItems = targetSession->getPlayer().inventory.getEquippedItemsFor(targetSession->getAccountInfo().latestSelectedCharacter);
 			for (const auto& currentItem : equippedItems)
 			{
 				if (currentItem.serialInfo.itemNumber == 0) continue;
@@ -372,7 +372,7 @@ namespace Main
 				return;
 			}
 
-			Main::Classes::Room* room = roomsManager.getRoomByNumber(session->getPlayer().getMatchContext().roomNumber);
+			Main::Classes::Room* room = roomsManager.getRoomByNumber(session->getPlayer().matchContext.roomNumber);
 			if (!room) return;
 			if (!room->isHost(session->getAccountInfo().uniqueId)) return; // only the host should send this packet, prevent lvl up exploits
 

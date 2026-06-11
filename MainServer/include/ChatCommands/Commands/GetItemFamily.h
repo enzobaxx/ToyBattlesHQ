@@ -85,7 +85,7 @@ namespace Main
 					}
 				}
 
-				if (!session->getPlayer().getInventory().hasEnoughInventorySpace(static_cast<std::uint16_t>(validIds.size())))
+				if (!session->getPlayer().inventory.hasEnoughInventorySpace(static_cast<std::uint16_t>(validIds.size())))
 				{
 					session->sendMessage("error: not enough inventory space, this family needs " + std::to_string(validIds.size())
 						+ " free slots. Nothing was spawned, free up space and try again");

@@ -15,7 +15,7 @@ namespace Main
 		inline void handleSimpleRoomSetting(const Common::Network::Packet& request, std::shared_ptr<Main::Network::Session> session,
 			Main::Classes::RoomsManager& roomsManager)
 		{
-			if (Main::Classes::Room* room = roomsManager.getRoomByNumber(session->getPlayer().getMatchContext().roomNumber))
+			if (Main::Classes::Room* room = roomsManager.getRoomByNumber(session->getPlayer().matchContext.roomNumber))
 			{
 				if (room->getRoomSettings().mode == Common::Enums::AiBattle)
 				{

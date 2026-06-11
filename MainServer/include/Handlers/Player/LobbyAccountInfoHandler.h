@@ -24,7 +24,7 @@ namespace Main
             Main::Structures::LobbyAccountInfo lobbyAccountInfo(targetSession->getAccountInfo());
             auto& setItemsInstance = Common::ConstantDatabase::CdbSingleton<Common::ConstantDatabase::SetItemInfo>::getInstance();
             const std::size_t offset = targetSession->getAccountInfo().latestSelectedCharacter * Common::Enums::MAX_ITEMTYPE;
-            const auto& targetEquippedItems = targetSession->getPlayer().getInventory().getEquippedItems();
+            const auto& targetEquippedItems = targetSession->getPlayer().inventory.getEquippedItems();
 
             std::uint32_t equippedScaffoldId = 0;
             std::uint32_t equippedDioramaId = 0;

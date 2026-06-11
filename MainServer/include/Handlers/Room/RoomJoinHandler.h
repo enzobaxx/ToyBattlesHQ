@@ -43,9 +43,9 @@ namespace Main
 		{
 			START_BENCHMARK
 
-			if (session->getPlayer().getMatchContext().roomNumber)
+			if (session->getPlayer().matchContext.roomNumber)
 			{
-				session->sendMessage("Error: you are already inside a room (room number: " + std::to_string(session->getPlayer().getMatchContext().roomNumber) + 
+				session->sendMessage("Error: you are already inside a room (room number: " + std::to_string(session->getPlayer().matchContext.roomNumber) + 
 					", cannot join another room!");
 				return;
 			}
@@ -252,7 +252,7 @@ namespace Main
 				latestEnteredPlayerInfo.ping = session->getPlayer().getPing();
 				latestEnteredPlayerInfo.uniqueId = accountInfo.uniqueId;
 				std::memcpy(latestEnteredPlayerInfo.playerName, accountInfo.nickname, Common::Constants::maxNicknameSize);
-				auto separatedItems = session->getPlayer().getInventory().getEquippedItemsSeparated(); // first=items, second=weapons
+				auto separatedItems = session->getPlayer().inventory.getEquippedItemsSeparated(); // first=items, second=weapons
 				latestEnteredPlayerInfo.equippedItems = separatedItems.first;
 				latestEnteredPlayerInfo.equippedWeapons = separatedItems.second;
 

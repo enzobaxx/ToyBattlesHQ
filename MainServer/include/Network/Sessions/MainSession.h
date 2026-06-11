@@ -108,7 +108,7 @@ namespace Main
 			template <typename Predicate>
 			bool checkEquippedItems(Predicate&& pred, const std::string& failMessage)
 			{
-				const auto equippedItems = m_player.getInventory().getEquippedItemsFor(m_player.getAccountInfo().latestSelectedCharacter);
+				const auto equippedItems = m_player.inventory.getEquippedItemsFor(m_player.accountInfo.latestSelectedCharacter);
 
 				for (const auto& equippedItem : equippedItems)
 				{
@@ -130,17 +130,17 @@ namespace Main
 			{
 				bool cashSet = false;
 				if constexpr (CT == Main::Enums::ITEM_MP)
-					cashSet = setAccountMicroPoints(m_player.getAccountInfo().microPoints + value);
+					cashSet = setAccountMicroPoints(m_player.accountInfo.microPoints + value);
 				else if constexpr (CT == Main::Enums::ITEM_RT)
-					cashSet = setAccountRockTotens(m_player.getAccountInfo().rockTotens + value);
+					cashSet = setAccountRockTotens(m_player.accountInfo.rockTotens + value);
 				else if constexpr (CT == Main::Enums::ITEM_COIN)
-					cashSet = setAccountCoins(m_player.getAccountInfo().coins + value);
+					cashSet = setAccountCoins(m_player.accountInfo.coins + value);
 					
 				if (cashSet || CT == Main::Enums::ITEM_COUPON)
 				{
 					if (CT == Main::Enums::ITEM_COUPON)
 					{
-						if (m_player.getInventory().getTotalCoupons() >= 250)
+						if (m_player.inventory.getTotalCoupons() >= 250)
 						{
 							sendMessage("Max coupon limit (250) has been reached. Open this box when you have less coupons!");
 						}

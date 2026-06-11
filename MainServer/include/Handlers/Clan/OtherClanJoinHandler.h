@@ -146,7 +146,7 @@ namespace Main
 				latestEnteredPlayerInfo.ping = session->getPlayer().getPing();
 				latestEnteredPlayerInfo.uniqueId = accountInfo.uniqueId;
 				std::memcpy(latestEnteredPlayerInfo.playerName, accountInfo.nickname, Common::Constants::maxNicknameSize);
-				auto separatedItems = session->getPlayer().getInventory().getEquippedItemsSeparated(); // first=items, second=weapons
+				auto separatedItems = session->getPlayer().inventory.getEquippedItemsSeparated(); // first=items, second=weapons
 				latestEnteredPlayerInfo.equippedItems = separatedItems.first;
 				latestEnteredPlayerInfo.equippedWeapons = separatedItems.second;
 				latestEnteredPlayerInfo.team = team;
@@ -188,7 +188,7 @@ namespace Main
 
 			const Main::ClientData::ClanRoomInfo requestStructure = Details::parseData<Main::ClientData::ClanRoomInfo>(request); 
 			const auto& ainfo = session->getAccountInfo();
-			const std::uint16_t selfPartyRoomNumber = session->getPlayer().getMatchContext().partyRoomNumber;
+			const std::uint16_t selfPartyRoomNumber = session->getPlayer().matchContext.partyRoomNumber;
 
 			if (auto targetPartyRoom = partiesManager.getExactRoomFor(requestStructure.clanId, requestStructure.roomNumber);
 				auto selfPartyRoom = partiesManager.getExactRoomFor(ainfo.clanId, selfPartyRoomNumber))
@@ -224,8 +224,8 @@ namespace Main
 						return;
 					}
 
-					// Let all the other players join the room with the JoinRoom handler, where roomNumber = otherTargetLeader.getPlayer().getMatchContext().roomNumber
-					const std::uint16_t roomNumber = otherTargetLeader->getPlayer().getMatchContext().roomNumber;
+					// Let all the other players join the room with the JoinRoom handler, where roomNumber = otherTargetLeader.getPlayer().matchContext.roomNumber
+					const std::uint16_t roomNumber = otherTargetLeader->getPlayer().matchContext.roomNumber;
 					Main::ClientData::RoomInfo joinInfo{ roomNumber - 1, 2 };
 					response.setCommand(140, 0, 0, 0);
 					response.setData(reinterpret_cast<std::uint8_t*>(&joinInfo), sizeof(joinInfo));

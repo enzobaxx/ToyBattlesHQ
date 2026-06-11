@@ -21,7 +21,7 @@ namespace Main
 
 			Main::Structures::TradeAck ack{ Main::Structures::UniqueId{}, session->getAccountInfo().accountID };
 			
-			if (auto targetSession = sessionsManager.getSessionByAccountId(session->getPlayer().getTradeInfo().getCurrentlyTradingWithAccountId()))
+			if (auto targetSession = sessionsManager.getSessionByAccountId(session->getPlayer().tradeInfo.getCurrentlyTradingWithAccountId()))
 			{
 				response.setExtra(Enums::TradeSystemExtra::TRADE_CANCELLED); // This player exited the trade
 				targetSession->asyncWrite(response);

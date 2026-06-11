@@ -80,7 +80,7 @@ namespace Main
 			}
 
 			m_players.emplace_back(createRoomPlayerInfo(session, team), std::weak_ptr<Main::Network::Session>{ session });
-			session->getPlayer().getMatchContext().roomNumber = m_number;
+			session->getPlayer().matchContext.roomNumber = m_number;
 		}
 
 		void Room::addObserverPlayer(std::shared_ptr<Main::Network::Session> session)
@@ -102,7 +102,7 @@ namespace Main
 			}
 
 			m_observerPlayers.emplace_back(createRoomPlayerInfo(session, Common::Enums::TEAM_OBSERVER), std::weak_ptr<Main::Network::Session>{ session });
-			session->getPlayer().getMatchContext().roomNumber = m_number;
+			session->getPlayer().matchContext.roomNumber = m_number;
 		}
 
 		// Refactored
@@ -328,7 +328,7 @@ namespace Main
 
 			Main::Structures::UniqueId originalHostUniqueId = hostSession->getAccountInfo().uniqueId;
 			const std::uint64_t originalHostSessionId = hostSession->getId();
-			hostSession->getPlayer().getMatchContext().isInMatch = false; 
+			hostSession->getPlayer().matchContext.isInMatch = false; 
 
 			const std::size_t totalPlayersInMatch = std::count_if(
 				m_players.begin(), m_players.end(), [](const auto& currentPlayer) {
@@ -555,7 +555,7 @@ namespace Main
 				if (!session) continue;
 
 				Main::Structures::RoomPlayerItems roomPlayerItems;
-				const auto separatedItems = session->getPlayer().getInventory().getEquippedItemsSeparated();
+				const auto separatedItems = session->getPlayer().inventory.getEquippedItemsSeparated();
 				roomPlayerItems.equippedItems = separatedItems.first;
 				roomPlayerItems.equippedWeapons = separatedItems.second;
 				roomPlayerItems.uniqueId = roomInfo.uniqueId;

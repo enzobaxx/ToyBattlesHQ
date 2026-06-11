@@ -19,7 +19,7 @@ namespace Main
 
 		inline void handleHostChange(const Common::Network::Packet& request, std::shared_ptr<Main::Network::Session> session, Main::Classes::RoomsManager& roomsManager)
 		{	
-			if (Main::Classes::Room* room = roomsManager.getRoomByNumber(session->getPlayer().getMatchContext().roomNumber))
+			if (Main::Classes::Room* room = roomsManager.getRoomByNumber(session->getPlayer().matchContext.roomNumber))
 			{
 				Common::Network::Packet response;
 				response.setTcpHeader(request.getSession(), Common::Enums::USER_LARGE_ENCRYPTION);

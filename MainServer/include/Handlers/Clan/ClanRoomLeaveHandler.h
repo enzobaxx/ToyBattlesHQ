@@ -66,7 +66,7 @@ namespace Main
             response.setExtra(Main::Enums::PartyLeaveExtra::PARTY_LEAVE_SUCCESS);
 
             const auto& ainfo = session->getAccountInfo();
-            std::uint16_t selfPartyRoomNumber = session->getPlayer().getMatchContext().partyRoomNumber;
+            std::uint16_t selfPartyRoomNumber = session->getPlayer().matchContext.partyRoomNumber;
 
             if (auto selfPartyRoom = partiesManager.getExactRoomFor(ainfo.clanId, selfPartyRoomNumber))
             {
@@ -134,8 +134,8 @@ namespace Main
             response.setExtra(ClanRoomLeaveExtra::CLANROOM_LEAVE_SUCCESS);
             response.setData(nullptr, 0);
 
-            const std::uint16_t selfClanRoomNumber = session->getPlayer().getMatchContext().partyRoomNumber;
-            const std::uint16_t selfRoomNumber = session->getPlayer().getMatchContext().roomNumber;
+            const std::uint16_t selfClanRoomNumber = session->getPlayer().matchContext.partyRoomNumber;
+            const std::uint16_t selfRoomNumber = session->getPlayer().matchContext.roomNumber;
 
             if (auto selfPartyRoom = partiesManager.getExactRoomFor(session->getAccountInfo().clanId, selfClanRoomNumber))
             {

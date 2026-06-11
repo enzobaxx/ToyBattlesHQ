@@ -24,7 +24,7 @@ namespace Main
 			Main::Classes::RoomsManager& roomsManager,
 			std::uint64_t m_latestServerRestart)
 		{
-			if (Main::Classes::Room* room = roomsManager.getRoomByNumber(session->getPlayer().getMatchContext().roomNumber))
+			if (Main::Classes::Room* room = roomsManager.getRoomByNumber(session->getPlayer().matchContext.roomNumber))
 			{
 				if (room->getRoomSettings().mode == Common::Enums::AiBattle)
 				{
@@ -53,7 +53,7 @@ namespace Main
 						{
 							session->sendMessage("Cannot votekick a staff member!");
 						}
-						else if (!session->getPlayer().getModerationInfo().isVotekickEnabled)
+						else if (!session->getPlayer().moderationInfo.isVotekickEnabled)
 						{
 							session->sendMessage("Your votekicking permissions are currently disabled.");
 							return;

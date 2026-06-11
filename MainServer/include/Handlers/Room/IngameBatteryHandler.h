@@ -14,7 +14,7 @@ namespace Main
         inline void handleBattery(const Common::Network::Packet& request, std::shared_ptr<Main::Network::Session> session,
             Main::Classes::RoomsManager& roomsManager, const Main::Structures::UniqueId& targetUniqueId)
         {
-            if (Main::Classes::Room* room = roomsManager.getRoomByNumber(session->getPlayer().getMatchContext().roomNumber))
+            if (Main::Classes::Room* room = roomsManager.getRoomByNumber(session->getPlayer().matchContext.roomNumber))
             {
                 std::array<std::uint32_t, 4> batteryValues = { 0, 30, 50, 100 };
                 std::array<int, 4> weights = { 60, 20, 15, 5 };
@@ -35,7 +35,7 @@ namespace Main
                     response.setCommand(request.getOrder(), 0, 1, selectedBattery);
                     response.setData(reinterpret_cast<std::uint8_t*>(&selectedBattery), sizeof(selectedBattery));
                     targetSession->asyncWrite(response);
-                    targetSession->getPlayer().getMatchContext().batteryObtainedInMatch += selectedBattery;
+                    targetSession->getPlayer().matchContext.batteryObtainedInMatch += selectedBattery;
                 }
             }
         }

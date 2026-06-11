@@ -25,7 +25,7 @@ namespace Main
 		inline void handleRoomCreation(const Common::Network::Packet& request, std::shared_ptr<Main::Network::Session> session, Main::Classes::RoomsManager& roomsManager,
 			bool isRoomCreationEnabled)
 		{
-			if (session->getPlayer().getMatchContext().roomNumber) // cannot create a room while already in one
+			if (session->getPlayer().matchContext.roomNumber) // cannot create a room while already in one
 			{
 				session->sendMessage("You are already in a room - If this is an error, report it");
 				return;
@@ -35,7 +35,7 @@ namespace Main
 				session->sendMessage("Public room creation is currently disabled by the team.");
 				return;
 			}
-			else if (!session->getPlayer().getModerationInfo().isRoomCreationEnabled)
+			else if (!session->getPlayer().moderationInfo.isRoomCreationEnabled)
 			{
 				session->sendMessage("You currently cannot create a new room.");
 				return;
@@ -83,7 +83,7 @@ namespace Main
 			{
 				Main::Ipc::M2C_sendRoomNumber(session->getId(), room.getRoomNumber());
 				room.setStateFor(session->getAccountInfo().uniqueId, Common::Enums::STATE_WAITING);
-				session->getPlayer().getMatchContext().roomNumber = room.getRoomNumber();
+				session->getPlayer().matchContext.roomNumber = room.getRoomNumber();
 				const std::pair<std::uint16_t, std::uint16_t> roomInfo{ room.getRoomNumber() - 1, 2 }; // {roomNum, unk}
 				response.setExtra(RoomCreationExtra::CREATION_SUCCESS);
 				response.setData(reinterpret_cast<const std::uint8_t*>(&roomInfo), sizeof(roomInfo));

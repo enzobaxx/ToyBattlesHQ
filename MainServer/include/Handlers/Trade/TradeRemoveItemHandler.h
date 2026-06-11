@@ -25,16 +25,16 @@ namespace Main
 			response.setOrder(request.getOrder());
 
 			std::uint32_t itemID = 0;
-			const auto& itemId = session->getPlayer().getInventory().findItemIdBySerialInfo(itemSerialInfo);
+			const auto& itemId = session->getPlayer().inventory.findItemIdBySerialInfo(itemSerialInfo);
 			if (itemId.has_value()) itemID = *itemId;
 			else return;
 
 			const auto& accountInfo = session->getAccountInfo();
-			if (auto targetSession = sessionsManager.getSessionByAccountId(session->getPlayer().getTradeInfo().getCurrentlyTradingWithAccountId()))
+			if (auto targetSession = sessionsManager.getSessionByAccountId(session->getPlayer().tradeInfo.getCurrentlyTradingWithAccountId()))
 			{
 				Main::Structures::TradeAddedItemDetailed tradeItem{ session->getAccountInfo().accountID, itemSerialInfo, itemID };			
 				response.setExtra(Enums::TradeSystemExtra::TRADE_SUCCESS);
-				session->getPlayer().getTradeInfo().removeTradedItem(itemSerialInfo);
+				session->getPlayer().tradeInfo.removeTradedItem(itemSerialInfo);
 				response.setData(reinterpret_cast<std::uint8_t*>(&tradeItem), sizeof(tradeItem));
 				session->asyncWrite(response);
 				targetSession->asyncWrite(response);
