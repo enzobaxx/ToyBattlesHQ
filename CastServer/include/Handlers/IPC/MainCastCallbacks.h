@@ -1,17 +1,18 @@
-#ifndef MAIN_TO_CAST_IPC_CALLBACKS_H
-#define MAIN_TO_CAST_IPC_CALLBACKS_H
+#ifndef CAST_MAIN_CAST_CALLBACKS_H
+#define CAST_MAIN_CAST_CALLBACKS_H
 
-#include "Network/Packet.h"
 #include "Network/Session.h"
-#include "../Classes/RoomsManager.h"
-#include "../../../MainServer/include/Structures/ClientData/Structures.h"
-#include <cstring> 
+#include "Network/Packet.h"
+#include "Managers/RoomsManager.h"
+#include "Network/SessionsManager.h"
+#include "Structures/ClientData/Structures.h"
+#include <cstring>
 
 namespace Cast
 {
     namespace Handlers
     {
-        inline void handleMapId(const Common::Network::UnecryptedPacket& request, std::shared_ptr<Common::Network::Session> session, 
+        inline void handleMapId(const Common::Network::UnecryptedPacket& request, std::shared_ptr<Common::Network::Session> session,
             Cast::Classes::RoomsManager& roomsManager)
         {
             roomsManager.setMapFor(request.getSession(), request.getExtra());
@@ -20,6 +21,7 @@ namespace Cast
         }
 
         enum InvisibilityType { SELF_NOT_INVISIBLE = 0, SELF_INVISIBLE, ALL_INVISIBLE, NONE_INVISIBLE };
+
         inline void handleInvisibleCmd(const Common::Network::UnecryptedPacket& request, std::shared_ptr<Common::Network::Session> session,
             Cast::Classes::RoomsManager& roomsManager, Cast::Network::SessionsManager& sm)
         {
@@ -36,7 +38,8 @@ namespace Cast
             else if (request.getExtra() == 3) room->m_isInvisible = false;
         }
 
-        inline void closeSocketAfterMain(const Common::Network::UnecryptedPacket& request, std::shared_ptr<Common::Network::Session> session, Cast::Network::SessionsManager& sm)
+        inline void closeSocketAfterMain(const Common::Network::UnecryptedPacket& request, std::shared_ptr<Common::Network::Session> session,
+            Cast::Network::SessionsManager& sm)
         {
             if (auto s = sm.getSession(request.getSession()))
             {
@@ -44,7 +47,6 @@ namespace Cast
                 s->closeSocket();
             }
         }
-
 
         inline void handleAssassinMode(const Common::Network::UnecryptedPacket& request, std::shared_ptr<Common::Network::Session> session,
             Cast::Classes::RoomsManager& roomsManager)
@@ -62,12 +64,12 @@ namespace Cast
             session->asyncWrite(request);
         }
 
-      inline void handleRoomNumber(const Common::Network::UnecryptedPacket& request, std::shared_ptr<Common::Network::Session> session,
-          Cast::Classes::RoomsManager& roomsManager)
-      {
-          roomsManager.setRoomNumberFor(request.getSession(), request.getExtra());
-          session->asyncWrite(request);
-      }
+        inline void handleRoomNumber(const Common::Network::UnecryptedPacket& request, std::shared_ptr<Common::Network::Session> session,
+            Cast::Classes::RoomsManager& roomsManager)
+        {
+            roomsManager.setRoomNumberFor(request.getSession(), request.getExtra());
+            session->asyncWrite(request);
+        }
 
         inline void handleIpReq(const Common::Network::UnecryptedPacket& request, std::shared_ptr<Common::Network::Session> session)
         {
@@ -89,10 +91,10 @@ namespace Cast
             session->asyncWrite(request);
         }
 
-        inline void handlePlayerTeamInfoBatch(const Common::Network::UnecryptedPacket& request,  std::shared_ptr<Common::Network::Session> session,
+        inline void handlePlayerTeamInfoBatch(const Common::Network::UnecryptedPacket& request, std::shared_ptr<Common::Network::Session> session,
             Cast::Classes::RoomsManager& roomsManager)
         {
-            const std::uint8_t* data = request.getData(); 
+            const std::uint8_t* data = request.getData();
             std::size_t dataSize = request.getDataSize();
 
             if (dataSize % sizeof(Main::ClientData::PlayerTeamInfo) != 0)
@@ -106,11 +108,9 @@ namespace Cast
             std::vector<Main::ClientData::PlayerTeamInfo> players(numPlayers);
             std::memcpy(players.data(), data, dataSize);
 
-          
             roomsManager.setPlayerTeamsFor(request.getSession(), players);
             session->asyncWrite(request);
         }
-
     }
 }
 

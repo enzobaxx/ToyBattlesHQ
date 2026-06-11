@@ -4,7 +4,7 @@
 #include <type_traits>
 #include <Network/Packet.h>
 #include <source_location>
-#include <cstring> 
+#include <cstring>
 
 namespace Cast
 {
@@ -37,7 +37,7 @@ namespace Cast
 				if constexpr (Warn)
 				{
 					std::cerr << "[parseDataFromEnd warning] at " << location.file_name()
-						<< ":" << location.line() << " — offsetFromEnd (" << offsetFromEnd
+						<< ":" << location.line() << " â€” offsetFromEnd (" << offsetFromEnd
 						<< ") + sizeof(T) (" << sizeof(T) << ") exceeds data size (" << dataSize << ")\n";
 				}
 				return T{};
@@ -79,7 +79,6 @@ namespace Cast
 				|| mode == Common::Enums::BombBattle || mode == Common::Enums::Clan_BombBattle
 				|| mode == Common::Enums::Clan_CaptureTheBattery || mode == Common::Enums::Clan_Elimination
 				|| mode == Common::Enums::ZombieMode);
-
 		}
 	}
 }

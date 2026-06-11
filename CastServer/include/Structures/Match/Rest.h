@@ -1,9 +1,8 @@
-
 #ifndef REST_STRUCTS_H
 #define REST_STRUCTS_H
 
 #include <cstdint>
-#include "../../../MainServer/include/Structures/AccountInfo/MainAccountUniqueId.h"
+#include "Structures/AccountInfo/MainAccountUniqueId.h"
 #include "Macros.h"
 
 namespace Cast
@@ -11,7 +10,7 @@ namespace Cast
     namespace Structures
     {
 PACK_PUSH(1)
-        struct SpecialItem // Used to send special items for assassin mode
+        struct SpecialItem
         {
             std::uint32_t number{};
             std::uint32_t itemId{};
@@ -28,7 +27,7 @@ PACK_PUSH(1)
 PACK_POP()
 
 PACK_PUSH(1)
-        struct RespawnCoord 
+        struct RespawnCoord
         {
             std::int32_t x;
             std::int32_t y;

@@ -1,10 +1,10 @@
 
 #include <unordered_map>
 #include <functional>
-#include "../../include/Network/CastSession.h"
-#include "../../include/Network/SessionsManager.h"
+#include "Network/Sessions/CastSession.h"
+#include "Network/SessionsManager.h"
 #include <vector>
-#include "../../../MainServer/include/Structures/AccountInfo/MainAccountInfo.h"
+#include "Structures/AccountInfo/MainAccountInfo.h"
 #include <Utils/Logger.h>
 
 namespace Cast

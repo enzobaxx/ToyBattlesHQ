@@ -5,7 +5,7 @@
 #include <cstdint>
 #include <asio.hpp>
 #include <optional>
-#include "Classes/RoomsManager.h"
+#include "Managers/RoomsManager.h"
 #include "Network/SessionsManager.h"
 #include <AntiCheat/AntiCheat.h>
 #include <Network/Session.h>

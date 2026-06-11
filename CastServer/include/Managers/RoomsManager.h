@@ -2,8 +2,8 @@
 #define ROOMS_MANAGER_H
 
 #include <array>
-#include "Room.h"
-#include "../include/Enums/RoomEnums.h"
+#include "Rooms/Room.h"
+#include "Enums/RoomEnums.h"
 #include <Utils/Constants.h>
 
 namespace Cast
@@ -17,7 +17,7 @@ namespace Cast
 			std::vector<std::shared_ptr<Cast::Classes::Room>> m_rooms{};
 
 		public:
-			const auto& getAllRooms() const 
+			const auto& getAllRooms() const
 			{
 				return m_rooms;
 			}

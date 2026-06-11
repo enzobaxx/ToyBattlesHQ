@@ -1,17 +1,17 @@
 #ifndef PLAYER_POSITION_HANDLER_H
 #define PLAYER_POSITION_HANDLER_H
 
-#include "../Network/CastSession.h"
-#include "../Network/SessionsManager.h"
-#include "../Structures/PlayerPositionFromServer.h"
-#include "../Structures/SuicideStruct.h"
+#include "Network/Sessions/CastSession.h"
+#include "Network/SessionsManager.h"
+#include "Structures/Player/PlayerPositionFromServer.h"
+#include "Structures/Match/SuicideStruct.h"
+#include "Managers/RoomsManager.h"
+#include "Detail/Utilities.h"
 
-#include "Utils/Logger.h"
-#include "AntiCheat/AntiCheat.h"
-#include "AntiCheat/Event.h"
-#include "../Utils/Utilities.h"
-#include <Utils/Utils.h>
-#include <cstring> 
+#include <Utils/Logger.h>
+#include <AntiCheat/AntiCheat.h>
+#include <AntiCheat/Event.h>
+#include <cstring>
 
 namespace Cast
 {
@@ -47,17 +47,12 @@ namespace Cast
                     room->m_redAssassinPos = playerPositionFromClient.position;;
                 }
             }
-            else
-            {
-                //acManager.submitEvent(std::make_unique<Ac::PacketFloodingEvent>(session, 20, 1000, "Speed hack (Cheat Engine)", 281));
-            }
 
             static Common::Network::UnecryptedPacket response{ 1440, 322, 1 };
             response.setCommand(322, 0, 0, 1);
             const auto fullSize = request.getFullSize();
-            
 
-            if (fullSize == 36) 
+            if (fullSize == 36)
             {
                 Cast::Structures::ClientPlayerInfoBullet playerPositionBullet{};
                 std::memcpy(&playerPositionBullet, request.getData(), sizeof(playerPositionBullet));
@@ -79,7 +74,7 @@ namespace Cast
 
                 response.setData(reinterpret_cast<std::uint8_t*>(&playerInfoResponseWithBullets), sizeof(playerInfoResponseWithBullets));
             }
-            else if (fullSize == 40) // bullet+jump+movement+rotation (simplified)
+            else if (fullSize == 40)
             {
                 Cast::Structures::ClientPlayerInfoComplete playerPositionComplete{};
                 std::memcpy(&playerPositionComplete, request.getData(), request.getDataSize());
@@ -92,8 +87,6 @@ namespace Cast
                 PlayerInfoResponseWithBullets playerInfoResponseWithBullets;
                 playerInfoResponseWithBullets.specificInfo.enableBullet = true;
                 playerInfoResponseWithBullets.specificInfo.enableJump = true;
-
-                //  playerInfoResponseWithBullets.tick = playerPositionFromClient.matchTick;
                 playerInfoResponseWithBullets.position = playerPositionFromClient.position;
                 playerInfoResponseWithBullets.direction = playerPositionFromClient.direction;
                 playerInfoResponseWithBullets.specificInfo.animation1 = playerPositionFromClient.animation1;
@@ -112,7 +105,6 @@ namespace Cast
             else
             {
                 PlayerInfoBasicResponse playerInfoBasicResponse;
-                // playerInfoBasicResponse.tick = playerPositionFromClient.matchTick;
                 playerInfoBasicResponse.position = playerPositionFromClient.position;
                 playerInfoBasicResponse.direction = playerPositionFromClient.direction;
                 playerInfoBasicResponse.currentWeapon = playerPositionFromClient.weapon;
@@ -124,7 +116,7 @@ namespace Cast
                 playerInfoBasicResponse.specificInfo.sessionId = static_cast<std::uint32_t>(session->getId());
                 playerInfoBasicResponse.specificInfo.enableJump = false;
                 playerInfoBasicResponse.specificInfo.enableBullet = false;
-                
+
                 if (fullSize == 28)
                 {
                     response.setData(reinterpret_cast<std::uint8_t*>(&playerInfoBasicResponse), sizeof(playerInfoBasicResponse));
@@ -147,7 +139,7 @@ namespace Cast
                     return;
                 }
             }
-            
+
             room->enqueuePosition(std::move(response));
         }
     }

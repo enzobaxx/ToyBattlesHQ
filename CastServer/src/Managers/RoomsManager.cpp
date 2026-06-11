@@ -1,8 +1,8 @@
-#include "../../include/Classes/Room.h"
-#include "../../include/Classes/RoomsManager.h"
+#include "Rooms/Room.h"
+#include "Managers/RoomsManager.h"
 
 #include <Utils/Logger.h>
-#include "../../../MainServer/include/Structures/ClientData/Structures.h"
+#include "Structures/ClientData/Structures.h"
 
 namespace Cast
 {
@@ -135,7 +135,7 @@ namespace Cast
 			playerRoom->playerForwardToHost(hostSessionId, senderSessionId, packet);
 		}
 
-		void RoomsManager::hostForwardToPlayer(std::uint64_t hostSessionId, std::uint64_t receiverSessionId, Common::Network::UnecryptedPacket& packet, 
+		void RoomsManager::hostForwardToPlayer(std::uint64_t hostSessionId, std::uint64_t receiverSessionId, Common::Network::UnecryptedPacket& packet,
 			bool useHostSessionIdInTcpHeader)
 		{
 			if (hostSessionId >= m_playerSessionIdToRoom.size())

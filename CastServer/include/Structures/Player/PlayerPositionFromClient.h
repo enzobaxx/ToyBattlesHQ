@@ -5,6 +5,7 @@
 #include <directxmath/DirectXPackedVector.h>
 #include "AntiCheat/Event.h"
 #include "Macros.h"
+#include "Structures/AccountInfo/MainAccountUniqueId.h"
 
 namespace Cast
 {
@@ -16,12 +17,12 @@ namespace Cast
             if (rawVal == -2147483648 || rawVal == 2139095040)
                 return true;
 
-            uint16_t rawBits = *reinterpret_cast<uint16_t*>(&position);  
-            uint16_t exponentMask = 0x7C00; 
-            uint16_t fractionMask = 0x03FF; 
+            uint16_t rawBits = *reinterpret_cast<uint16_t*>(&position);
+            uint16_t exponentMask = 0x7C00;
+            uint16_t fractionMask = 0x03FF;
 
             return (rawBits & exponentMask) == exponentMask && (rawBits & fractionMask) != 0 ||
-                (rawBits & exponentMask) == exponentMask && (rawBits & fractionMask) == 0;  
+                (rawBits & exponentMask) == exponentMask && (rawBits & fractionMask) == 0;
         }
 
         inline bool isNaNOrInfinity(float value)
@@ -50,9 +51,9 @@ namespace Cast
             if (exponent != 31)
                 return ((exponent + 112) << 23) | ((mantissa | (sign << 18)) << 13);
             if ((half & 0x3FF) != 0)
-                return (mantissa | (sign << 18) | 0x3FC00) << 13; // NaN case
+                return (mantissa | (sign << 18) | 0x3FC00) << 13;
             else
-                return (sign << 31) | 0x7F800000; // Infinity case
+                return (sign << 31) | 0x7F800000;
         }
 
 PACK_PUSH(1)
@@ -116,7 +117,7 @@ PACK_PUSH(1)
             }
         };
 PACK_POP()
-        
+
 PACK_PUSH(1)
         struct ClientPlayerInfoBasic
         {
@@ -185,15 +186,15 @@ PACK_PUSH(1)
             char u0[16]{};
             Main::Structures::UniqueId uid;
             std::uint32_t unknown{};
-        };  
+        };
 PACK_POP()
 
 PACK_PUSH(1)
         struct SinglePlayerJoinInfoResponse
         {
             Main::Structures::UniqueId uid;
-            std::uint32_t u0 : 20 = 0; // This may be zombie mode weapon ID or HP given by client, no idea about it -- could be related to special melee weapon in zombie mode
-            std::uint32_t mode : 5 = 0; // client checks whether the mode is zombie for some reason
+            std::uint32_t u0 : 20 = 0;
+            std::uint32_t mode : 5 = 0;
             std::uint32_t playerState : 4 = 0;
         };
 PACK_POP()

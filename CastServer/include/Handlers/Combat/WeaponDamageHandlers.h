@@ -1,18 +1,13 @@
-#ifndef WEAPON_KILL_HANDLERS
-#define WEAPON_KILL_HANDLERS
+#ifndef CAST_WEAPON_DAMAGE_HANDLERS_H
+#define CAST_WEAPON_DAMAGE_HANDLERS_H
 
-#include <Network/Packet.h>
-#include <memory>
-#include "../Utils/Utilities.h"
-#include "../../../MainServer/include/Structures/AccountInfo/MainAccountUniqueId.h"
-#include "../Structures/PlayerPositionFromClient.h"
-#include <thread>
-#include "../Network/CastSession.h"
-#include "../Network/SessionsManager.h"
-#include "../Structures/PlayerPositionFromServer.h"
-#include "../Structures/SuicideStruct.h"
-#include "SimpleHandlers.h"
-#include <Utils/Utils.h>
+#include "Detail/IpcUtils.h"
+#include "Handlers/Room/ArenaModeHandler.h"
+#include "Managers/RoomsManager.h"
+#include "Network/SessionsManager.h"
+#include "Structures/Match/SuicideStruct.h"
+#include "Structures/Player/PlayerPositionFromServer.h"
+#include "Detail/Utilities.h"
 #include <AntiCheat/AntiCheat.h>
 
 namespace Cast
@@ -61,6 +56,35 @@ namespace Cast
 			}
 		}
 
+		// Returns false if the caller should return early (e.g. assassin position update was sent instead of a kill).
+		inline bool handleTargetDeath(const Common::Network::UnecryptedPacket& request, std::shared_ptr<Cast::Network::Session> session,
+			std::shared_ptr<Cast::Network::Session> targetSession,
+			Cast::Classes::RoomsManager& roomsManager, std::shared_ptr<Cast::Classes::Room>& room,
+			const Main::Structures::UniqueId& attackerUid, const Main::Structures::UniqueId& targetUid,
+			std::shared_ptr<Common::Network::Session> ipcSession)
+		{
+			if (room->m_isAssassinMode)
+			{
+				if (!handleAssassinMode(roomsManager, room, attackerUid, targetUid, session, targetSession)) return false;
+				roomsManager.broadcastToMatch(session->getId(), const_cast<Common::Network::UnecryptedPacket&>(request));
+			}
+			else
+			{
+				if (!targetSession->isDead) roomsManager.broadcastToMatch(session->getId(), const_cast<Common::Network::UnecryptedPacket&>(request));
+				targetSession->isDead = true;
+				if (room->isArenaMode())
+				{
+					handleArenaMode(roomsManager, room);
+					return false;
+				}
+				if (Cast::Details::mustBroadcastDeath(roomsManager.getModeOf(session->getId())))
+				{
+					sendPlayerStateUpdate(targetSession->getAccountId(), true, ipcSession);
+				}
+			}
+			return true;
+		}
+
 		inline void handleNormalWeaponDamage(const Common::Network::UnecryptedPacket& request, std::shared_ptr<Cast::Network::Session> session,
 			Cast::Classes::RoomsManager& roomsManager, Cast::Network::SessionsManager& sessionsManager, Ac::AntiCheatManager& acManager,
 			std::shared_ptr<Common::Network::Session> ipcSession)
@@ -96,32 +120,11 @@ namespace Cast
 				if (targetHp)
 				{
 					if (!targetSession->isDead)
-					{
 						roomsManager.broadcastToMatch(session->getId(), const_cast<Common::Network::UnecryptedPacket&>(request));
-					}
 				}
 				else
 				{
-					if (room->m_isAssassinMode)
-					{
-						if (!handleAssassinMode(roomsManager, room, attackerUid, targetUid, session, targetSession)) return;
-						else roomsManager.broadcastToMatch(session->getId(), const_cast<Common::Network::UnecryptedPacket&>(request));
-					}
-					else
-					{
-						if (!targetSession->isDead) roomsManager.broadcastToMatch(session->getId(), const_cast<Common::Network::UnecryptedPacket&>(request));
-						targetSession->isDead = true;
-
-						if (room->isArenaMode())
-						{
-							handleArenaMode(roomsManager, room);
-							return;
-						}
-						if (Cast::Details::mustBroadcastDeath(roomsManager.getModeOf(session->getId())))
-						{
-							sendPlayerStateUpdate(targetSession->getAccountId(), true, ipcSession);
-						}
-					}
+					if (!handleTargetDeath(request, session, targetSession, roomsManager, room, attackerUid, targetUid, ipcSession)) return;
 				}
 			}
 		}
@@ -140,9 +143,9 @@ namespace Cast
 			}
 			auto& room = *roomOpt;
 
-			std::uint16_t targetHp = Cast::Details::parseDataFromEnd<std::uint16_t>(request, 6);
-			auto targetUid = Cast::Details::parseDataFromEnd<Main::Structures::UniqueId>(request, 8);
-			auto attackerUid = Cast::Details::parseData<Main::Structures::UniqueId>(request, 16);
+			const std::uint16_t targetHp = Cast::Details::parseDataFromEnd<std::uint16_t>(request, 6);
+			const auto targetUid = Cast::Details::parseDataFromEnd<Main::Structures::UniqueId>(request, 8);
+			const auto attackerUid = Cast::Details::parseData<Main::Structures::UniqueId>(request, 16);
 
 			if (room->getMode() == Common::Enums::AiBattle || room->getMode() == Common::Enums::BossBattle)
 			{
@@ -166,25 +169,7 @@ namespace Cast
 				}
 				else
 				{
-					if (room->m_isAssassinMode)
-					{
-						if (!handleAssassinMode(roomsManager, room, attackerUid, targetUid, session, targetSession)) return;
-						else roomsManager.broadcastToMatch(session->getId(), const_cast<Common::Network::UnecryptedPacket&>(request));
-					}
-					else
-					{
-						if (!targetSession->isDead) roomsManager.broadcastToMatch(session->getId(), const_cast<Common::Network::UnecryptedPacket&>(request));
-						targetSession->isDead = true;
-						if (room->isArenaMode())
-						{
-							handleArenaMode(roomsManager, room);
-							return;
-						}
-						if (Cast::Details::mustBroadcastDeath(roomsManager.getModeOf(session->getId())))
-						{
-							sendPlayerStateUpdate(targetSession->getAccountId(), true, ipcSession);
-						}
-					}
+					if (!handleTargetDeath(request, session, targetSession, roomsManager, room, attackerUid, targetUid, ipcSession)) return;
 				}
 			}
 		}
@@ -220,27 +205,7 @@ namespace Cast
 					}
 					else
 					{
-						if (room->m_isAssassinMode)
-						{
-							if (!handleAssassinMode(roomsManager, room, Main::Structures::UniqueId{ 0, 0, 1 }, targetUid, session, targetSession))
-								return;
-							else roomsManager.broadcastToMatch(session->getId(), const_cast<Common::Network::UnecryptedPacket&>(request));
-						}
-						else
-						{
-							if (!targetSession->isDead) roomsManager.broadcastToMatch(session->getId(), const_cast<Common::Network::UnecryptedPacket&>(request));
-							targetSession->isDead = true;
-
-							if (room->isArenaMode())
-							{
-								handleArenaMode(roomsManager, room);
-								return;
-							}
-							if (Cast::Details::mustBroadcastDeath(roomsManager.getModeOf(session->getId())))
-							{
-								sendPlayerStateUpdate(targetSession->getAccountId(), true, ipcSession);
-							}
-						}
+						if (!handleTargetDeath(request, session, targetSession, roomsManager, room, Main::Structures::UniqueId{ 0, 0, 1 }, targetUid, ipcSession)) return;
 					}
 				}
 			}

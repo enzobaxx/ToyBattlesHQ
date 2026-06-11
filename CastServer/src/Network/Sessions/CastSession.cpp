@@ -10,12 +10,11 @@
 #include "asio.hpp"
 #include <Utils/Parser.h>
 
-#include "../../../MainServer/include/Structures/AccountInfo/MainAccountInfo.h"
-#include "../../include/Network/CastSession.h"
+#include "Structures/AccountInfo/MainAccountInfo.h"
+#include "Network/Sessions/CastSession.h"
 #include <Utils/Utils.h>
-#include "../include/Enums/ExtrasEnums.h"
+#include "Enums/ExtrasEnums.h"
 #include <Utils/Logger.h>
-#include <Handlers/SimpleHandlers.h>
 
 
 namespace Cast

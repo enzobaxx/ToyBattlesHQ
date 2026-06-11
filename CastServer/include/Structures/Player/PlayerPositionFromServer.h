@@ -1,9 +1,8 @@
-
 #ifndef PLAYER_POSITION_FROM_SERVER_H
 #define PLAYER_POSITION_FROM_SERVER_H
 
 #include <cstdint>
-#include "PlayerPositionFromClient.h"
+#include "Structures/Player/PlayerPositionFromClient.h"
 #include "Macros.h"
 
 namespace Cast
@@ -28,14 +27,13 @@ PACK_POP()
 PACK_PUSH(1)
         struct PlayerInfoBasicResponse
         {
-           // std::uint32_t tick{};
-            SpecificInfo specificInfo{}; 
-            Cast::Structures::PositionStruct position;   
-            Cast::Structures::DirectionStruct direction; 
-            std::uint32_t rotation1 : 8 = 0; 
-            std::uint32_t rotation2 : 8 = 0; 
+            SpecificInfo specificInfo{};
+            Cast::Structures::PositionStruct position;
+            Cast::Structures::DirectionStruct direction;
+            std::uint32_t rotation1 : 8 = 0;
+            std::uint32_t rotation2 : 8 = 0;
             std::uint32_t rotation3 : 9 = 0;
-            std::uint32_t currentWeapon : 4 = 0; 
+            std::uint32_t currentWeapon : 4 = 0;
         };
 PACK_POP()
 
@@ -50,15 +48,14 @@ PACK_POP()
 PACK_PUSH(1)
         struct PlayerInfoResponseWithBullets
         {
-           // std::uint32_t tick{}; 
-            SpecificInfo specificInfo{}; 
-            Cast::Structures::PositionStruct position; 
-            Cast::Structures::DirectionStruct direction; 
-            Cast::Structures::BulletsStruct bullets{}; 
-            std::uint32_t rotation1 : 8 = 0;  
-            std::uint32_t rotation2 : 8 = 0; 
-            std::uint32_t rotation3 : 9 = 0; 
-            std::uint32_t currentWeapon : 4 = 0; 
+            SpecificInfo specificInfo{};
+            Cast::Structures::PositionStruct position;
+            Cast::Structures::DirectionStruct direction;
+            Cast::Structures::BulletsStruct bullets{};
+            std::uint32_t rotation1 : 8 = 0;
+            std::uint32_t rotation2 : 8 = 0;
+            std::uint32_t rotation3 : 9 = 0;
+            std::uint32_t currentWeapon : 4 = 0;
         };
 PACK_POP()
 

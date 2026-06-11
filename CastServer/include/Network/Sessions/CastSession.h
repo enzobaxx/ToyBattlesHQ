@@ -4,16 +4,15 @@
 #include <functional>
 #include <chrono>
 #include <array>
-
 #include <iostream>
-#include <Utils/Parser.h>
 
+#include <Utils/Parser.h>
 #include "asio.hpp"
 
-#include "../../../MainServer/include/Structures/AccountInfo/MainAccountInfo.h"
+#include "Structures/AccountInfo/MainAccountInfo.h"
 #include "Network/Session.h"
-#include "../Structures/PlayerPositionFromClient.h"
-#include "../include/Enums/PlayerEnums.h"
+#include "Structures/Player/PlayerPositionFromClient.h"
+#include "Enums/PlayerEnums.h"
 
 namespace Cast
 {

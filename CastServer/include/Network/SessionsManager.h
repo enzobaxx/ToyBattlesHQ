@@ -1,12 +1,12 @@
-#ifndef	CAST_SESSIONS_MANAGER_H
+#ifndef CAST_SESSIONS_MANAGER_H
 #define CAST_SESSIONS_MANAGER_H
 
 #include <unordered_map>
 #include <functional>
-#include "../Network/CastSession.h"
+#include "Network/Sessions/CastSession.h"
 #include <vector>
-#include "../../../MainServer/include/Structures/AccountInfo/MainAccountInfo.h"
-#include "../Classes/RoomsManager.h"
+#include "Structures/AccountInfo/MainAccountInfo.h"
+#include "Managers/RoomsManager.h"
 
 namespace Cast
 {

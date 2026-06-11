@@ -1,15 +1,15 @@
-﻿
+
 #include <cstdint>
 #include <unordered_map>
 #include <utility>
-#include "../../include/Network/CastSession.h"
-#include "../../include/Classes/Room.h"
+#include "Network/Sessions/CastSession.h"
+#include "Rooms/Room.h"
 #include <Utils/Logger.h>
 #include <Enums/RoomEnums.h>
 #include <Utils/Utils.h>
 #include <Utils/SetupParser.h>
-#include <Structures/PlayerPositionFromServer.h>
-#include <Utils/Utilities.h>
+#include "Structures/Player/PlayerPositionFromServer.h"
+#include "Detail/Utilities.h"
 
 namespace Cast
 {
@@ -25,9 +25,9 @@ namespace Cast
 		{
 			for (auto& weakSession : m_playersVec)
 			{
-				if (auto session = weakSession.lock()) 
+				if (auto session = weakSession.lock())
 				{
-					session->setRoomNumber(roomNumber);  
+					session->setRoomNumber(roomNumber);
 				}
 			}
 			m_roomNumber = roomNumber;
@@ -45,9 +45,9 @@ namespace Cast
 
 			for (auto& weakSession : m_playersVec)
 			{
-				if (auto session = weakSession.lock()) 
+				if (auto session = weakSession.lock())
 				{
-					session->setIsInMatch(false);  
+					session->setIsInMatch(false);
 				}
 			}
 		}
@@ -61,7 +61,7 @@ namespace Cast
 		{
 			for (auto& weakSession : m_playersVec)
 			{
-				if (auto session = weakSession.lock())  
+				if (auto session = weakSession.lock())
 				{
 					session->setIsInMatch(false);
 					session->setRoomNumber(-1);
@@ -70,12 +70,11 @@ namespace Cast
 			m_playersVec.clear();
 		}
 
-		// Returns true if the room must be closed because there are no players left, false otherwise
 		bool Room::removePlayer(std::uint64_t playerSessionId)
 		{
 			auto it = std::find_if(m_playersVec.begin(), m_playersVec.end(),
 				[=](const auto& weakSession) {
-					if (auto session = weakSession.lock())  
+					if (auto session = weakSession.lock())
 					{
 						return session->getId() == playerSessionId;
 					}
@@ -84,17 +83,17 @@ namespace Cast
 
 			if (it == m_playersVec.end())
 			{
-				return m_playersVec.empty(); 
+				return m_playersVec.empty();
 			}
 
-			if (auto session = it->lock()) 
+			if (auto session = it->lock())
 			{
 				session->setIsInMatch(false);
 				session->setRoomNumber(-1);
 			}
 
 			m_playersVec.erase(it);
-			return m_playersVec.empty(); 
+			return m_playersVec.empty();
 		}
 
 		void Room::addPlayer(std::shared_ptr<Cast::Network::Session> playerSession)
@@ -113,8 +112,8 @@ namespace Cast
 				m_playersVec.erase(it, m_playersVec.end());
 			}
 
-			m_playersVec.push_back(playerSession); 
-			playerSession->setRoomNumber(m_roomNumber); 
+			m_playersVec.push_back(playerSession);
+			playerSession->setRoomNumber(m_roomNumber);
 		}
 
 		void Room::broadcastToRoomExceptSelf(std::uint64_t selfSessionId, Common::Network::UnecryptedPacket& packet)
@@ -202,7 +201,7 @@ namespace Cast
 		{
 			auto it = std::find_if(m_playersVec.begin(), m_playersVec.end(),
 				[playerSessionId](const auto& player) {
-					auto lockedPlayer = player.lock();  
+					auto lockedPlayer = player.lock();
 					return lockedPlayer && lockedPlayer->getId() == playerSessionId;
 				});
 
@@ -219,13 +218,13 @@ namespace Cast
 		{
 			auto it = std::find_if(m_playersVec.begin(), m_playersVec.end(),
 				[hostSessionId](const auto& player) {
-					auto lockedPlayer = player.lock(); 
+					auto lockedPlayer = player.lock();
 					return lockedPlayer && lockedPlayer->getId() == hostSessionId;
 				});
 
 			if (it != m_playersVec.end())
 			{
-				if (auto lockedHost = it->lock())  
+				if (auto lockedHost = it->lock())
 				{
 					packet.setTcpHeader(senderSessionId);
 					lockedHost->asyncWrite(packet);
@@ -237,7 +236,7 @@ namespace Cast
 		{
 			auto it = std::find_if(m_playersVec.begin(), m_playersVec.end(),
 				[playerId](const auto& player) {
-					auto lockedPlayer = player.lock();  
+					auto lockedPlayer = player.lock();
 					return lockedPlayer && lockedPlayer->getId() == playerId;
 				});
 
@@ -338,7 +337,7 @@ namespace Cast
 						break;
 					}
 				}
-				};
+			};
 
 			if (m_assassinBlueUid.session == leavingPlayerSid)
 				assignNewAssassin(Team::TEAM_BLUE, m_assassinBlueUid, m_assassinBlueName);
@@ -400,7 +399,7 @@ namespace Cast
 			}
 		}
 
-		void Room::enqueuePosition(Common::Network::UnecryptedPacket&& pkt) 
+		void Room::enqueuePosition(Common::Network::UnecryptedPacket&& pkt)
 		{
 			m_pendingPositions.push_back(std::move(pkt));
 		}
@@ -422,7 +421,7 @@ namespace Cast
 					auto& pkt = m_pendingPositions[index];
 					const auto size = pkt.getDataSize();
 
-					if (totalSize + size > (Common::Constants::maxPacketBytes - 8 - 4)) // 8 bytes header + 4 bytes roomtick
+					if (totalSize + size > (Common::Constants::maxPacketBytes - 8 - 4))
 						break;
 
 					std::memcpy(batchBuffer.data() + totalSize, pkt.getData(), size);

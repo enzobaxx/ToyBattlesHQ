@@ -4,13 +4,13 @@
 #include <cstdint>
 #include <unordered_map>
 #include <utility>
-#include "../Network/CastSession.h"
+#include "Network/Sessions/CastSession.h"
 #include <mutex>
-#include "../../../MainServer/include/Structures/ClientData/Structures.h"
-#include "../Structures/SuicideStruct.h"
+#include "Structures/ClientData/Structures.h"
+#include "Structures/Match/SuicideStruct.h"
 #include "Enums/GameEnums.h"
 #include "Enums/RoomEnums.h"
-#include "../Structures/Rest.h"
+#include "Structures/Match/Rest.h"
 #include <random>
 
 namespace Cast
@@ -34,8 +34,6 @@ namespace Cast
 			bool m_isInvisible{};
 			std::uint32_t m_roomTick{};
 
-
-			// Arena Mode
 			bool m_isArenaMode{};
 			bool m_arenaRoundFinished{};
 			std::vector<Cast::Structures::RespawnCoord> respawnPoints =
@@ -58,7 +56,6 @@ namespace Cast
 				{21758, 25560, 56296}
 			};
 
-			// Assassin Mode
 			std::uint32_t m_isAssassinMode{};
 			Main::Structures::UniqueId m_assassinBlueUid{};
 			Main::Structures::UniqueId m_assassinRedUid{};
@@ -102,7 +99,7 @@ namespace Cast
 			void playerForwardToHost(std::uint64_t hostSessionId, std::uint64_t senderSessionId, Common::Network::UnecryptedPacket& packet);
 
 			void hostForwardToPlayer(std::uint64_t, std::uint64_t playerId, Common::Network::UnecryptedPacket& packet, bool useHostIdInTcpHeader = true);
-			
+
 			void setMap(std::uint32_t mapId);
 
 			std::uint32_t getMap() const;
@@ -119,9 +116,9 @@ namespace Cast
 
 			void tryFindNewAssassin(std::uint32_t leavingPlayerSid);
 
-			bool isArenaMode() const 
+			bool isArenaMode() const
 			{
-				 return m_map == Common::Enums::AcademyTrainingGround && m_mode == Common::Enums::FreeForAll;
+				return m_map == Common::Enums::AcademyTrainingGround && m_mode == Common::Enums::FreeForAll;
 			}
 
 			std::uint32_t getTotalAlivePlayers() const;

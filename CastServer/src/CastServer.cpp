@@ -1,9 +1,17 @@
 #include "../include/CastServer.h"
 #include "Network/Session.h"
-#include "../include/Handlers/SimpleHandlers.h"
-#include "../include/Handlers/PlayerPositionHandler.h"
-#include "../include/Handlers/IpcMainHandlers.h"
-#include "../include/Handlers/WeaponKillHandlers.h"
+#include "Detail/IpcUtils.h"
+#include "Handlers/IPC/MainCastCallbacks.h"
+#include "Handlers/Player/ConnectionHandler.h"
+#include "Handlers/Player/CrashHandler.h"
+#include "Handlers/Player/PlayerPositionHandler.h"
+#include "Handlers/Player/PlayerRespawnHandler.h"
+#include "Handlers/Match/MatchFlowHandler.h"
+#include "Handlers/Match/VoiceMessageHandler.h"
+#include "Handlers/Room/ArenaModeHandler.h"
+#include "Handlers/Combat/WeaponDamageHandlers.h"
+#include "Handlers/Combat/ItemHandlers.h"
+#include "Handlers/Combat/BossBattleHandler.h"
 #include <chrono>
 
 namespace Cast
