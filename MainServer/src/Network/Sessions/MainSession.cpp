@@ -1450,7 +1450,11 @@ namespace Main
 				&Main::Persistence::PersistentDatabase::updateMute, m_player.getAccountInfo().nickname,
 				mutedUntil, reason, mutedBy, Main::Enums::GRADE_MOD))
 			{
-				m_player.getModerationInfo().mute(reason, mutedBy, mutedUntil);
+				auto& moderationInfo = m_player.getModerationInfo();
+				moderationInfo.isMuted = true;
+				moderationInfo.muteReason = reason;
+				moderationInfo.mutedBy = mutedBy;
+				moderationInfo.mutedUntil = mutedUntil;
 				return true;
 			}
 			return false;
@@ -1468,7 +1472,7 @@ namespace Main
 				&Main::Persistence::PersistentDatabase::updateRoomCreationDisabledUntil, m_player.getAccountInfo().nickname,
 				disabledUntil))
 			{
-				m_player.getModerationInfo().disableRoomCreation();
+				m_player.getModerationInfo().isRoomCreationEnabled = false;
 				return true;
 			}
 			return false;
@@ -1488,7 +1492,7 @@ namespace Main
 				m_player.getAccountInfo().nickname,
 				disabledUntil))
 			{
-				m_player.getModerationInfo().disableVotekick();
+				m_player.getModerationInfo().isVotekickEnabled = false;
 				return true;
 			}
 			return false;
@@ -1570,28 +1574,39 @@ namespace Main
 
 		bool Session::unmuteAccount()
 		{
-			m_player.getModerationInfo().unmute();
+			m_player.getModerationInfo().isMuted = false;
 			return m_scheduler.immediatePersist(std::source_location::current(),
 				&Main::Persistence::PersistentDatabase::unmuteAccount, m_player.getAccountInfo().nickname);
 		}
 
 		bool Session::enableRoomCreation()
 		{
-			m_player.getModerationInfo().enableRoomCreation();
+			m_player.getModerationInfo().isRoomCreationEnabled = true;
 			return m_scheduler.immediatePersist(std::source_location::current(),
 				&Main::Persistence::PersistentDatabase::resetRoomCreationDisabledUntil, m_player.getAccountInfo().nickname);
 		}
 
 		bool Session::enableVotekick()
 		{
-			m_player.getModerationInfo().enableVotekick();
+			m_player.getModerationInfo().isVotekickEnabled = true;
 			return m_scheduler.immediatePersist(std::source_location::current(), &Main::Persistence::PersistentDatabase::resetVotekickDisabledUntil,
 				m_player.getAccountInfo().nickname);
 		}
 
 		void Session::setMute(Main::Structures::MuteInfo val)
 		{
-			val.isMuted ? m_player.getModerationInfo().mute(val.reason, val.mutedBy, val.mutedUntil) : m_player.getModerationInfo().unmute();
+			auto& moderationInfo = m_player.getModerationInfo();
+			if (val.isMuted)
+			{
+				moderationInfo.isMuted = true;
+				moderationInfo.muteReason = val.reason;
+				moderationInfo.mutedBy = val.mutedBy;
+				moderationInfo.mutedUntil = val.mutedUntil;
+			}
+			else
+			{
+				moderationInfo.isMuted = false;
+			}
 		}
 
 		void Session::clear()

@@ -35,7 +35,7 @@ namespace Main
 				session->sendMessage("Public room creation is currently disabled by the team.");
 				return;
 			}
-			else if (!session->getPlayer().getModerationInfo().isRoomCreationEnabled())
+			else if (!session->getPlayer().getModerationInfo().isRoomCreationEnabled)
 			{
 				session->sendMessage("You currently cannot create a new room.");
 				return;
