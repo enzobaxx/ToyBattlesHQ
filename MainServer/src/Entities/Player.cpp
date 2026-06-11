@@ -161,60 +161,6 @@ namespace Main
 			return m_roomNumber == 0;
 		}
 
-		Main::Structures::MuteInfo Player::getMuteInfo() const
-		{
-			return Main::Structures::MuteInfo{ m_isMuted, m_muteReason, m_mutedBy, m_mutedUntil };
-		}
-
-		void Player::mute(const std::string& reason, const std::string& mutedBy, const std::string& mutedUntil)
-		{
-			m_isMuted = true;
-			m_muteReason = reason;
-			m_mutedBy = mutedBy;
-			m_mutedUntil = mutedUntil;
-		}
-
-		void Player::disableRoomCreation()
-		{
-			m_isRoomCreationEnabled = false;
-		}
-
-		void Player::enableRoomCreation()
-		{
-			m_isRoomCreationEnabled = true;
-		}
-
-		bool Player::isRoomCreationEnabled() const noexcept
-		{
-			return m_isRoomCreationEnabled;
-		}
-
-		void Player::disableVotekick()
-		{
-			m_isVotekickEnabled = false;
-		}
-
-		void Player::enableVotekick()
-		{
-			m_isVotekickEnabled = true;
-		}
-
-		bool Player::isVotekickEnabled() const noexcept
-		{
-			return m_isVotekickEnabled;
-		}
-
-
-		void Player::unmute()
-		{
-			m_isMuted = false;
-		}
-
-		bool Player::isMuted() const
-		{
-			return m_isMuted;
-		}
-
 		void Player::addLuckyPoints(std::uint32_t points)
 		{
 			m_accountInfo.luckyPoints += points;

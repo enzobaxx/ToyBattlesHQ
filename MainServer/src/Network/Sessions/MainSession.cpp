@@ -1450,7 +1450,7 @@ namespace Main
 				&Main::Persistence::PersistentDatabase::updateMute, m_player.getAccountInfo().nickname,
 				mutedUntil, reason, mutedBy, Main::Enums::GRADE_MOD))
 			{
-				m_player.mute(reason, mutedBy, mutedUntil);
+				m_player.getModerationInfo().mute(reason, mutedBy, mutedUntil);
 				return true;
 			}
 			return false;
@@ -1468,7 +1468,7 @@ namespace Main
 				&Main::Persistence::PersistentDatabase::updateRoomCreationDisabledUntil, m_player.getAccountInfo().nickname,
 				disabledUntil))
 			{
-				m_player.disableRoomCreation();
+				m_player.getModerationInfo().disableRoomCreation();
 				return true;
 			}
 			return false;
@@ -1488,7 +1488,7 @@ namespace Main
 				m_player.getAccountInfo().nickname,
 				disabledUntil))
 			{
-				m_player.disableVotekick();
+				m_player.getModerationInfo().disableVotekick();
 				return true;
 			}
 			return false;
@@ -1570,28 +1570,28 @@ namespace Main
 
 		bool Session::unmuteAccount()
 		{
-			m_player.unmute();
-			return m_scheduler.immediatePersist(std::source_location::current(), 
+			m_player.getModerationInfo().unmute();
+			return m_scheduler.immediatePersist(std::source_location::current(),
 				&Main::Persistence::PersistentDatabase::unmuteAccount, m_player.getAccountInfo().nickname);
 		}
 
 		bool Session::enableRoomCreation()
 		{
-			m_player.enableRoomCreation();
+			m_player.getModerationInfo().enableRoomCreation();
 			return m_scheduler.immediatePersist(std::source_location::current(),
 				&Main::Persistence::PersistentDatabase::resetRoomCreationDisabledUntil, m_player.getAccountInfo().nickname);
 		}
 
 		bool Session::enableVotekick()
 		{
-			m_player.enableVotekick();
+			m_player.getModerationInfo().enableVotekick();
 			return m_scheduler.immediatePersist(std::source_location::current(), &Main::Persistence::PersistentDatabase::resetVotekickDisabledUntil,
 				m_player.getAccountInfo().nickname);
 		}
 
 		void Session::setMute(Main::Structures::MuteInfo val)
 		{
-			val.isMuted ? m_player.mute(val.reason, val.mutedBy, val.mutedUntil) : m_player.unmute();
+			val.isMuted ? m_player.getModerationInfo().mute(val.reason, val.mutedBy, val.mutedUntil) : m_player.getModerationInfo().unmute();
 		}
 
 		void Session::clear()

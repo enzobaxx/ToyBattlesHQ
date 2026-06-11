@@ -56,11 +56,11 @@ namespace Main
 			session->setMute(scheduler.immediatePersist(std::source_location::current(), &Main::Persistence::PersistentDatabase::isMuted, accountInfo.accountID));
 			if (scheduler.immediatePersist(std::source_location::current(), &Main::Persistence::PersistentDatabase::isRoomCreationDisabled, accountInfo.accountID))
 			{
-				session->getPlayer().disableRoomCreation();
+				session->getPlayer().getModerationInfo().disableRoomCreation();
 			}
 			if (scheduler.immediatePersist(std::source_location::current(), &Main::Persistence::PersistentDatabase::isVotekickDisabled, accountInfo.accountID))
 			{
-				session->getPlayer().disableVotekick();
+				session->getPlayer().getModerationInfo().disableVotekick();
 			}
 			auto [sentMailboxes, receivedMailboxes] = scheduler.immediatePersist(std::source_location::current(), 
 				&Main::Persistence::PersistentDatabase::loadMailboxes, accountInfo.accountID);

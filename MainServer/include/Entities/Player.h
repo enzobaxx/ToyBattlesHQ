@@ -14,6 +14,7 @@
 #include "Entities/Inventory.h"
 #include "Entities/SocialInfo.h"
 #include "Entities/TradeInfo.h"
+#include "Entities/ModerationInfo.h"
 #include "Entities/Mailbox.h"
 
 #include <unordered_map>
@@ -45,15 +46,10 @@ namespace Main
 			Inventory m_inventory{ m_accountInfo };
 			SocialInfo m_socialInfo{};
 			TradeInfo m_tradeInfo{};
+			ModerationInfo m_moderationInfo{};
 			Main::Classes::Mailbox m_mailbox{};
 			Common::Enums::PlayerState m_playerState{};
 			std::uint16_t m_ping{};
-			bool m_isMuted{ false };
-			bool m_isRoomCreationEnabled{ true };
-			bool m_isVotekickEnabled{true};
-			std::string m_mutedBy{};
-			std::string m_muteReason{};
-			std::string m_mutedUntil{};
 			std::string m_latestWeeklyRewardDay{};
 			std::string m_latestMonthlyRewardDay{};
 
@@ -75,6 +71,10 @@ namespace Main
 			// Trade system
 			TradeInfo& getTradeInfo() noexcept { return m_tradeInfo; }
 			const TradeInfo& getTradeInfo() const noexcept { return m_tradeInfo; }
+
+			// Moderation (mute + room creation / votekick restrictions)
+			ModerationInfo& getModerationInfo() noexcept { return m_moderationInfo; }
+			const ModerationInfo& getModerationInfo() const noexcept { return m_moderationInfo; }
 
 			// Mailbox / giftbox
 			Main::Classes::Mailbox& getMailbox() noexcept { return m_mailbox; }
@@ -102,16 +102,6 @@ namespace Main
 			void setPing(std::uint16_t ping);
 			std::uint16_t getPing() const;
 			bool isInLobby() const;
-			void mute(const std::string& reason, const std::string& mutedBy, const std::string& mutedUntil);
-			void unmute();
-			void disableRoomCreation();
-			void enableRoomCreation();
-			bool isRoomCreationEnabled() const noexcept;
-			void disableVotekick();
-			void enableVotekick();
-			bool isVotekickEnabled() const noexcept;
-			Main::Structures::MuteInfo getMuteInfo() const;
-			bool isMuted() const;
 			void resetKillDeath();
 			void resetRecord();
 			bool expandBattery();

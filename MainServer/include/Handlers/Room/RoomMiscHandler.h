@@ -53,7 +53,7 @@ namespace Main
 						{
 							session->sendMessage("Cannot votekick a staff member!");
 						}
-						else if (!session->getPlayer().isVotekickEnabled())
+						else if (!session->getPlayer().getModerationInfo().isVotekickEnabled())
 						{
 							session->sendMessage("Your votekicking permissions are currently disabled.");
 							return;
