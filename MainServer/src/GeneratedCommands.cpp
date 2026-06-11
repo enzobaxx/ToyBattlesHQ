@@ -4,6 +4,7 @@
 #include "../include/ChatCommands/Commands/AssassinMode.h"
 #include "../include/ChatCommands/Commands/Ban.h"
 #include "../include/ChatCommands/Commands/Breakroom.h"
+#include "../include/ChatCommands/Commands/CapsuleWinrateTest.h"
 #include "../include/ChatCommands/Commands/ChangeHost.h"
 #include "../include/ChatCommands/Commands/ChangePw.h"
 #include "../include/ChatCommands/Commands/ChangeRoomTitle.h"
