@@ -14,7 +14,7 @@ namespace Main
 {
 	namespace Command
 	{
-		class CapsuleWinrateTest final : public ICommand
+		class CapsuleWinrate final : public ICommand
 		{
 		private:
 			std::uint32_t m_iterations{};
@@ -32,7 +32,7 @@ namespace Main
 			}
 
 		public:
-			explicit CapsuleWinrateTest(const Common::Enums::PlayerGrade requiredGrade)
+			explicit CapsuleWinrate(const Common::Enums::PlayerGrade requiredGrade)
 				: ICommand{ requiredGrade, "/capsulewinrate <iterations>", R"(^\S+\s(\d+))" }
 			{
 			}
@@ -80,7 +80,7 @@ namespace Main
 			}
 		};
 
-		REGISTER_CMD(CapsuleWinrateTest, Common::Enums::PlayerGrade::GRADE_TESTER)
+		REGISTER_CMD(CapsuleWinrate, Common::Enums::PlayerGrade::GRADE_TESTER)
 	}
 }
 

@@ -1,5 +1,5 @@
-#ifndef DISCONNECT_COMMAND_HEADER
-#define DISCONNECT_COMMAND_HEADER
+#ifndef ACS_CMD_HEADER
+#define ACS_CMD_HEADER
 
 #include "ChatCommands/ICommand.h"
 #include "ChatCommands/ChatCommands.h"
