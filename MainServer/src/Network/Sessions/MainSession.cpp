@@ -516,17 +516,7 @@ namespace Main
 			END_BENCHMARK(Session::sendBlockedPlayers, (*this))
 		}
 
-		void Session::setIsInvisible(bool value)
-		{
-			m_isInvisible = value;
-		}
-
-		bool Session::isInvisible() const noexcept
-		{
-			return m_isInvisible;
-		}
-
-
+		
 		// call once with default "persist", since removeFriend removes the friend for both players
 		void Session::deleteFriend(std::uint32_t targetAccountId, bool persist)
 		{
@@ -1646,7 +1636,7 @@ namespace Main
 
 		void Session::leaveRoom()
 		{
-			m_isInvisible = false;
+			m_player.matchContext.isInvisible = false;
 			m_player.leaveRoom();
 		}
 
@@ -1862,11 +1852,6 @@ namespace Main
 			asyncWrite(m_packet);	
 
 			END_BENCHMARK(Main::Persistence::PersistentDatabase::getPlayerItems, (*this))
-		}
-
-		void Session::setMatchStartTime()
-		{
-			m_matchStartTime = Main::Details::getUtcTimeMs();
 		}
 
 		void Session::setEventMissions(const std::unordered_map<std::uint32_t, std::uint32_t>& activeEventIds)
@@ -2189,12 +2174,13 @@ PACK_POP()
 
 		void Session::respawnBossBattle()
 		{
-			if (m_totalBossBattleRespawnsLeft) 
+			if (m_player.matchContext.totalBossBattleRespawnsLeft) 
 			{
 				m_packet.setCommand(329, 0, 1, 0);
-				m_packet.setData(reinterpret_cast<const std::uint8_t*>(&m_totalBossBattleRespawnsLeft), sizeof(m_totalBossBattleRespawnsLeft));
+				m_packet.setData(reinterpret_cast<const std::uint8_t*>(&m_player.matchContext.totalBossBattleRespawnsLeft), 
+					sizeof(m_player.matchContext.totalBossBattleRespawnsLeft));
 				asyncWrite(m_packet);
-				--m_totalBossBattleRespawnsLeft;
+				--m_player.matchContext.totalBossBattleRespawnsLeft;
 			}
 		}
 	};

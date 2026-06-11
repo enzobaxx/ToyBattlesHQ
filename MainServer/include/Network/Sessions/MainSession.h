@@ -44,22 +44,7 @@ namespace Main
 
 			bool spawnCouponCommon(const std::uint32_t total, bool useAddItem);
 
-		public:
-			std::uint16_t m_totalBossBattleRespawnsLeft = 3;
-			std::uint64_t m_matchStartTime{};
-			bool m_hasCheckedMatchBan = false;
-			bool m_isInvisible{};
-
-			std::uint32_t m_totalWrongPasswordReset{};
-			std::uint32_t m_totalWrong2FaUsernameChange{};
-			std::uint32_t m_totalWrongUsernameChange{};
-			std::uint32_t m_totalWrong2FaReset{};
-
-			std::string m_hwid{ "" };
-			std::uint64_t m_hwidLastUpdatedTimestamp{};
-			std::string m_gradedHwid{ "" };
-			std::string m_gradedHwidSalt{ "" };
-			
+		public:			
 			using Item = Main::Structures::Item;
 			using EquippedItem = Main::Structures::EquippedItem;
 			using DetailedEquippedItem = Main::Structures::DetailedEquippedItem;
@@ -204,9 +189,6 @@ namespace Main
 
 			const AccountInfo& getAccountInfo() const;
 
-
-			void setMatchStartTime();
-
 			void storeEvent();
 
 			void sendEventMission(const ClientData::EventMissionPoint& eventMission);
@@ -215,10 +197,7 @@ namespace Main
 
 			void setEventMissions(const std::unordered_map<std::uint32_t, std::uint32_t>& activeEventIds);
 
-			std::uint64_t getMatchStartTime() const noexcept { return m_matchStartTime; }
-
 			void sendFriendList(std::vector<Main::Structures::Friend>& pendingFriends, std::uint32_t serverId);
-
 
 			void sendFriendRequest(std::shared_ptr<Main::Network::Session> targetSession, const char* nickname);
 
@@ -236,8 +215,6 @@ namespace Main
 		public:
 			void sendAccountInfo(Common::Network::Packet& response);
 
-
-
 			void logFriend(Main::Enums::FriendLogType logType, std::uint32_t targetAccountId);
 
 			void updateFriendSession(std::shared_ptr<Main::Network::Session> targetSession, bool remove = false);
@@ -249,11 +226,6 @@ namespace Main
 			void addAchievement(std::uint32_t idx);
 
 			void sendBlockedPlayers();
-
-
-			void setIsInvisible(bool value);
-
-			bool isInvisible() const noexcept;
 
 			// call once with default "persist", since removeFriend removes the friend for both players
 			void deleteFriend(std::uint32_t targetAccountId, bool persist = true);

@@ -76,7 +76,7 @@ namespace Main
 					}
 					session->sendMessage("success");
 					Main::Handlers::handleRoomJoin(response, session, roomsManager, false, joinInfo, true);
-					session->setIsInvisible(true);
+					session->getPlayer().matchContext.isInvisible = true; 
 				}
 				else
 				{

@@ -162,9 +162,9 @@ namespace Main
 
                 if (!validatePassword(m_currentPassword, hashedPassword.value()))
                 {
-                    session->m_totalWrongPasswordReset++;
+                    session->getPlayer().totalWrongPasswordReset++;
 
-                    if (session->m_totalWrongPasswordReset >= maxAttempts)
+                    if (session->getPlayer().totalWrongPasswordReset >= maxAttempts)
                     {
                         sessionsManager.removeSession(ainfo.uniqueId.session);
                         if (!session->banAccount(9999, "[Automatic] Too many wrong passwords while changing password", Common::Enums::GRADE_SYSTEM))
@@ -228,9 +228,9 @@ namespace Main
 
                 if (!verifyToken(encryptedSecret.value(), m_2faToken))
                 {
-                    session->m_totalWrong2FaReset++;
+                    session->getPlayer().totalWrong2FaReset++;
 
-                    if (session->m_totalWrong2FaReset >= maxAttempts)
+                    if (session->getPlayer().totalWrong2FaReset >= maxAttempts)
                     {
                         sessionsManager.removeSession(ainfo.uniqueId.session);
                         if (!session->banAccount(9999, "[Automatic] Too many wrong 2FAs while changing password", Common::Enums::GRADE_SYSTEM))
@@ -292,8 +292,8 @@ namespace Main
                     return;
                 }
 
-                session->m_totalWrongPasswordReset = 0;
-                session->m_totalWrong2FaReset = 0;
+                session->getPlayer().totalWrongPasswordReset = 0;
+                session->getPlayer().totalWrong2FaReset = 0;
 
                 session->sendMessage("success: your password has been updated successfully (relog)");
             }

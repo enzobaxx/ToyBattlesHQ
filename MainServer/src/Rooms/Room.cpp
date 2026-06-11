@@ -1184,7 +1184,7 @@ namespace Main
 				{
 					if (auto session = pair.second.lock())
 					{
-						session->m_totalBossBattleRespawnsLeft = 3;
+						session->getPlayer().matchContext.totalBossBattleRespawnsLeft = 3;
 						setStateFor(pair, Common::Enums::PlayerState::STATE_NORMAL);
 
 						Main::ClientData::PlayerTeamInfo info;
@@ -1389,7 +1389,7 @@ namespace Main
 						matchEnd = Main::Enums::MATCH_DO_NOTHING;
 					}
 
-					const auto matchStartTime = session->getMatchStartTime();
+					const auto matchStartTime = session->getPlayer().matchContext.matchStartTime;
 					const auto currentTime = Main::Details::getUtcTimeMs();
 					std::uint32_t matchDurationSeconds = 0;
 					if (matchStartTime != 0) 
@@ -1408,7 +1408,7 @@ namespace Main
 					const std::uint64_t now = static_cast<std::uint64_t>(std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count());
 					if (now >= eventMissionInfo.startDate && now <= eventMissionInfo.endDate)
 					{
-						auto sessionMatchTime = (now * 1000) - session->getMatchStartTime();
+						auto sessionMatchTime = (now * 1000) - session->getPlayer().matchContext.matchStartTime;
 
 						if (sessionMatchTime >= 300000) 
 						{

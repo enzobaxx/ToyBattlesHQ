@@ -46,6 +46,14 @@ namespace Main
 			std::uint16_t ping{};
 			std::string latestWeeklyRewardDay{};
 			std::string latestMonthlyRewardDay{};
+			std::uint32_t totalWrongPasswordReset{};
+			std::uint32_t totalWrong2FaUsernameChange{};
+			std::uint32_t totalWrongUsernameChange{};
+			std::uint32_t totalWrong2FaReset{};
+			std::string hwid{ "" };
+			std::uint64_t hwidLastUpdatedTimestamp{};
+			std::string gradedHwid{ "" };
+			std::string gradedHwidSalt{ "" };
 
 			void setPlayerName(const char* playerName);
 			bool isInLobby() const;

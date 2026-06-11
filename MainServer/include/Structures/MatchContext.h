@@ -13,6 +13,9 @@ namespace Main
 			std::uint16_t partyRoomNumber{};
 			bool isInMatch{};
 			std::uint32_t batteryObtainedInMatch{};
+			std::uint16_t totalBossBattleRespawnsLeft = 3;
+			std::uint64_t matchStartTime{};
+			bool isInvisible;
 		};
 	}
 }

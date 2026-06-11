@@ -19,7 +19,7 @@ namespace Main
 		{
 			if (request.getExtra() == 6)
 			{ // Single wave
-				session->setMatchStartTime();
+				session->getPlayer().matchContext.matchStartTime = Main::Details::getUtcTimeMs();
 				return;
 			}
 			else if (Main::Classes::Room* room = roomsManager.getRoomByNumber(session->getPlayer().matchContext.roomNumber))
@@ -101,7 +101,7 @@ namespace Main
 					}
 					else if (room->hasMatchStarted())
 					{
-						session->m_totalBossBattleRespawnsLeft = 3;
+						session->getPlayer().matchContext.totalBossBattleRespawnsLeft = 3;
 						room->setStateFor(selfUniqueId, Common::Enums::PlayerState::STATE_NORMAL);
 
 						Main::ClientData::PlayerTeamInfo info;
@@ -122,7 +122,7 @@ namespace Main
 						}
 					}
 
-					session->setMatchStartTime();
+					session->getPlayer().matchContext.matchStartTime = Main::Details::getUtcTimeMs();
 					response.setCommand(request.getOrder(), 0, 38, room->getActualMap());
 					response.setData(reinterpret_cast<const std::uint8_t*>(&selfUniqueId), sizeof(selfUniqueId));
 					room->broadcastToRoom(response);
@@ -140,7 +140,7 @@ namespace Main
 					{ // Tell the other players in the match that we joined
 						response.setCommand(415, 0, 1, 0);
 						response.setData(reinterpret_cast<const std::uint8_t*>(&selfUniqueId), sizeof(selfUniqueId));
-						if (!session->isInvisible())
+						if (!session->getPlayer().matchContext.isInvisible)
 						{
 							room->broadcastToRoom(response);
 						}
@@ -180,7 +180,7 @@ namespace Main
 						room->setStateFor(selfUniqueId, Common::Enums::PlayerState::STATE_NORMAL);
 					}
 
-					session->setMatchStartTime();
+					session->getPlayer().matchContext.matchStartTime = Main::Details::getUtcTimeMs();
 					response.setCommand(request.getOrder(), 0, 38, room->getActualMap());
 					response.setData(reinterpret_cast<const std::uint8_t*>(&selfUniqueId), sizeof(selfUniqueId));
 					room->broadcastToRoom(response);

@@ -95,7 +95,7 @@ namespace Main
 			{
 				if (roomInfo.team == Common::Enums::TEAM_OBSERVER || !session->getPlayer().isInMatch()) continue;
 
-				playerInfos.push_back({ session->getAccountInfo().uniqueId, pveRewardBoxFor(session->m_totalBossBattleRespawnsLeft) });
+				playerInfos.push_back({ session->getAccountInfo().uniqueId, pveRewardBoxFor(session->getPlayer().matchContext.totalBossBattleRespawnsLeft) });
 			}
 
 			struct PveResponseSelf
@@ -174,25 +174,25 @@ namespace Main
 				constexpr std::uint64_t threeMinsMs = 3 * 60 * 1000;
 				constexpr std::uint64_t sevenMinsMs = 7 * 60 * 1000;
 
-				if (req.type == 1 && req.stage == 10 && (now - session->m_matchStartTime >= threeMinsMs))
+				if (req.type == 1 && req.stage == 10 && (now - session->getPlayer().matchContext.matchStartTime >= threeMinsMs))
 				{
 					Main::Structures::BoughtItem reward{ Common::Constants::singlewaveEasyBox };
 					reward.serialInfo.itemNumber = session->getPlayer().inventory.getLatestItemNumber() + 1;
 					session->getPlayer().inventory.setLatestItemNumber(reward.serialInfo.itemNumber);
 					response.setData(reinterpret_cast<std::uint8_t*>(&reward), sizeof(reward));
 					session->addItem(Main::Structures::Item{ reward });
-					session->m_matchStartTime = now;
+					session->getPlayer().matchContext.matchStartTime = now;
 				}
 				else if (req.type == 2)
 				{
-					if (req.stage == 20 && (now - session->m_matchStartTime >= sevenMinsMs))
+					if (req.stage == 20 && (now - session->getPlayer().matchContext.matchStartTime >= sevenMinsMs))
 					{
 						Main::Structures::BoughtItem reward{ Common::Constants::singlewaveHardBox };
 						reward.serialInfo.itemNumber = session->getPlayer().inventory.getLatestItemNumber() + 1;
 						session->getPlayer().inventory.setLatestItemNumber(reward.serialInfo.itemNumber);
 						response.setData(reinterpret_cast<std::uint8_t*>(&reward), sizeof(reward));
 						session->addItem(Main::Structures::Item{ reward });
-						session->m_matchStartTime = now;
+						session->getPlayer().matchContext.matchStartTime = now;
 					}
 					session->updateSingleWaveScore(req.score, req.stage);
 				}
@@ -268,7 +268,7 @@ namespace Main
 			auto baseMp = (scoreboardResponse.totalKills * 15 + scoreboardResponse.deaths * 5 + Common::Constants::matchBaseMp) * 2;
 			auto baseExp = (scoreboardResponse.totalKills * 15 + scoreboardResponse.deaths * 5 + Common::Constants::matchBaseExp) * 2;
 
-			const auto elapsedMs = timeNow - targetSession->m_matchStartTime;
+			const auto elapsedMs = timeNow - targetSession->getPlayer().matchContext.matchStartTime;
 			auto elapsedMinutes = static_cast<std::uint64_t>(elapsedMs / 1000 / 60);
 			elapsedMinutes = std::min<std::uint64_t>(elapsedMinutes, 15);
 			constexpr std::uint64_t mpPerMinute = 80;

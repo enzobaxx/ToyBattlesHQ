@@ -194,9 +194,9 @@ namespace Main
 
                 if (!validatePassword(m_password, hashedPassword.value()))
                 {
-                    session->m_totalWrongUsernameChange++;
+                    session->getPlayer().totalWrongUsernameChange++;
 
-                    if (session->m_totalWrongUsernameChange >= maxAttempts)
+                    if (session->getPlayer().totalWrongUsernameChange >= maxAttempts)
                     {
                         sessionsManager.removeSession(ainfo.uniqueId.session);
                         if (!session->banAccount(9999, "[Automatic] Too many wrong passwords while changing username",
@@ -242,9 +242,9 @@ namespace Main
 
                 if (!verifyToken(encryptedSecret.value(), m_2faToken))
                 {
-                    session->m_totalWrong2FaUsernameChange++;
+                    session->getPlayer().totalWrong2FaUsernameChange++;
 
-                    if (session->m_totalWrong2FaUsernameChange >= maxAttempts)
+                    if (session->getPlayer().totalWrong2FaUsernameChange >= maxAttempts)
                     {
                         sessionsManager.removeSession(ainfo.uniqueId.session);
                         if (!session->banAccount(9999, "[Automatic] Too many wrong 2FAs while changing username",
@@ -288,8 +288,8 @@ namespace Main
                     return;
                 }
 
-                session->m_totalWrongUsernameChange = 0;
-                session->m_totalWrong2FaUsernameChange = 0;
+                session->getPlayer().totalWrongUsernameChange = 0;
+                session->getPlayer().totalWrong2FaUsernameChange = 0;
 
                 if (enhancedSecurity)
                 {

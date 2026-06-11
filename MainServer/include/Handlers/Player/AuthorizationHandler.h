@@ -115,7 +115,8 @@ namespace Main
                         session->asyncWrite(response);
                         return std::nullopt;
                     }
-                    std::tie(session->m_gradedHwid, session->m_gradedHwidSalt) = *gradedHwidOpt;
+                    auto& player = session->getPlayer();
+                    std::tie(player.gradedHwid, player.gradedHwidSalt) = *gradedHwidOpt;
                 }
 
                 session->asyncWrite(response);
@@ -152,9 +153,8 @@ namespace Main
 
             char hwid[64]{};
             std::memcpy(hwid, request.getData(), std::min(request.getDataSize(), 64u));
-            session->m_hwid = hwid;
-
-            session->m_hwidLastUpdatedTimestamp = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+            session->getPlayer().hwid = hwid;
+            session->getPlayer().hwidLastUpdatedTimestamp = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();
         }
     }
 }

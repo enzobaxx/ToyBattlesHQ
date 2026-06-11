@@ -29,8 +29,9 @@ namespace Main
                     auto nowSeconds = std::chrono::duration_cast<std::chrono::seconds>(now.time_since_epoch()).count();
 					std::error_code ec;
 
-                    const bool hwidCorrect = (Common::Utils::hashSha256(session->m_hwid, session->m_gradedHwidSalt) == session->m_gradedHwid);
-                    const bool updatedRecently = (nowSeconds - session->m_hwidLastUpdatedTimestamp <= 20);
+					const auto& player = session->getPlayer();
+                    const bool hwidCorrect = (Common::Utils::hashSha256(player.hwid, player.gradedHwidSalt) == player.gradedHwid);
+                    const bool updatedRecently = (nowSeconds - session->getPlayer().hwidLastUpdatedTimestamp <= 20);
 					
                     if (!hwidCorrect || !updatedRecently)
                     {
