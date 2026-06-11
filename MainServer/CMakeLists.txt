@@ -70,7 +70,7 @@ find_package(Python3 REQUIRED COMPONENTS Interpreter)
 
 add_custom_command(
     TARGET MainServer
-    PRE_LINK
+    PRE_BUILD
     COMMAND ${CMAKE_COMMAND} -E echo "Running generate_command_includes.py..."
     COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_LIST_DIR}/generate_command_includes.py
     WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}

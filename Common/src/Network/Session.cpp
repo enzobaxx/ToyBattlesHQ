@@ -54,6 +54,28 @@ namespace Common
 		{
 			return asyncWriteImpl<PacketType::UNECRYPTED>(message);
 		}
+
+		void Session::flushWriteQueue()
+		{
+			if (m_writeQueue.empty() || !m_socket.is_open())
+			{
+				m_writing = false;
+				return;
+			}
+			m_writing = true;
+			auto& front = m_writeQueue.front();
+			asio::async_write(m_socket, asio::buffer(front.data(), front.size()),
+				[this, self = this->shared_from_this()](const asio::error_code& errorCode, std::size_t)
+				{
+					m_writeQueue.pop_front();
+					if (errorCode)
+					{
+						closeSocket();
+						return;
+					}
+					flushWriteQueue();
+				});
+		}
 	
 		void Session::asyncRead()
 		{

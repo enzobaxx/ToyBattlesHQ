@@ -14,111 +14,62 @@
 #include <asio/post.hpp>
 #include "AntiCheat/AntiCheat.h"
 #include "AntiCheat/Event.h"
-#include <cstring> 
+#include <cstring>
 #include <thread>
 
 namespace Cast
 {
+    namespace Structures
+    {
+        struct PlayerRespawnPacket
+        {
+            std::uint16_t x = 0;
+            std::uint16_t y = 0;
+            std::uint16_t z = 0;
+            std::uint16_t w = 0;
+            Main::Structures::UniqueId targetUniqueId{};
+
+            bool isNaNOrInfinity(std::uint16_t half) const
+            {
+                std::uint16_t exponent = (half >> 10) & 0x1F;
+                return (exponent == 0x1F);
+            }
+
+            bool isBad() const
+            {
+                return isNaNOrInfinity(x) || isNaNOrInfinity(y) || isNaNOrInfinity(z) || isNaNOrInfinity(w);
+            }
+        };
+    }
+
     namespace Handlers
     {
-        inline bool sendPlayerStateUpdate(std::uint32_t accountID, bool isDead)
+        inline void sendPlayerStateUpdate(std::uint32_t accountID, bool isDead, std::shared_ptr<Common::Network::Session> ipcSession)
         {
-            if (!Common::Utils::SetupParser::getInstance().getSelfCastServerInfo().IPC_enableDeadBroadcast) return false;
+            if (!Common::Utils::SetupParser::getInstance().getSelfCastServerInfo().IPC_enableDeadBroadcast || !ipcSession) return;
 
             Common::Network::UnecryptedPacket packet;
-
-            try
-            {
-                asio::io_context ioContext;
-                asio::ip::tcp::socket socket(ioContext);
-                asio::ip::tcp::resolver resolver(ioContext);
-
-                auto selfMainServerInfo = Common::Utils::SetupParser::getInstance().getSelfMainServerInfo();
-
-                asio::error_code ec;
-                auto endpoints = resolver.resolve(selfMainServerInfo.ip, std::to_string(selfMainServerInfo.ipcPort), ec);
-                if (ec)
-                {
-                    ::Utils::Logger::log("Failed to resolve " + selfMainServerInfo.ip, ::Utils::LogType::Warning, "sendPlayerStateUpdate");
-                    return false;
-                }
-
-                asio::connect(socket, endpoints, ec);
-                if (ec)
-                {
-                    ::Utils::Logger::log("Failed to connect to " + selfMainServerInfo.ip, ::Utils::LogType::Warning, "sendPlayerStateUpdate");
-                    return false;
-                }
-
-                socket.set_option(asio::ip::tcp::no_delay(true));
-                packet.setTcpHeader(0);
-                packet.setCommand(Common::Constants::C2M_updatePlayerState, 0, 0, isDead ? Common::Enums::STATE_DYING : Common::Enums::STATE_NORMAL);
-                packet.setData(reinterpret_cast<const std::uint8_t*>(&accountID), sizeof(accountID));
-                asio::write(socket, asio::buffer(packet.generateOutgoingPacket()), ec);
-                if (ec)
-                {
-                    ::Utils::Logger::log("Failed to send player state update to " + selfMainServerInfo.ip, ::Utils::LogType::Warning, "sendPlayerStateUpdate");
-                    return false;
-                }
-                return true;
-            }
-            catch (const std::exception& e)
-            {
-                ::Utils::Logger::log("Exception: " + std::string(e.what()), ::Utils::LogType::Error, "sendPlayerStateUpdate");
-            }
-
-            return false;
+            packet.setTcpHeader(0);
+            packet.setCommand(Common::Constants::C2M_updatePlayerState, 0, 0, isDead ? Common::Enums::STATE_DYING : Common::Enums::STATE_NORMAL);
+            packet.setData(reinterpret_cast<const std::uint8_t*>(&accountID), sizeof(accountID));
+            ipcSession->asyncWrite(packet);
         }
 
-        inline void sendCloseSocketReq(std::shared_ptr<Cast::Network::Session> session)
+        inline void sendCloseSocketReq(std::shared_ptr<Cast::Network::Session> session, std::shared_ptr<Common::Network::Session> ipcSession)
         {
-            Common::Network::UnecryptedPacket packet;
-
-            try
-            {
-                asio::io_context ioContext;
-                asio::ip::tcp::socket socket(ioContext);
-                asio::ip::tcp::resolver resolver(ioContext);
-
-                auto selfMainServerInfo = Common::Utils::SetupParser::getInstance().getSelfMainServerInfo();
-
-                asio::error_code ec;
-                auto endpoints = resolver.resolve(selfMainServerInfo.ip, std::to_string(selfMainServerInfo.ipcPort), ec);
-                if (ec)
-                {
-                    ::Utils::Logger::log("Failed to resolve " + selfMainServerInfo.ip, ::Utils::LogType::Warning, "sendCloseSocketReq");
-                    session->closeSocket();
-                    return;
-                }
-
-                asio::connect(socket, endpoints, ec);
-                if (ec)
-                {
-                    ::Utils::Logger::log("Failed to connect to " + selfMainServerInfo.ip, ::Utils::LogType::Warning, "sendCloseSocketReq");
-                    session->closeSocket();
-                    return;
-                }
-
-                socket.set_option(asio::ip::tcp::no_delay(true));
-                packet.setTcpHeader(0);
-                packet.setCommand(Common::Constants::C2M_CloseSocketReq, 0, 0, 0);
-                auto seid = session->getId();
-                packet.setData(reinterpret_cast<const std::uint8_t*>(&seid), sizeof(seid));
-                asio::write(socket, asio::buffer(packet.generateOutgoingPacket()), ec);
-                if (ec)
-                {
-                    ::Utils::Logger::log("Failed to send player state update to " + selfMainServerInfo.ip, ::Utils::LogType::Warning, "sendCloseSocketReq");
-                    session->closeSocket();
-                    return;
-                }
-            }
-            catch (const std::exception& e)
+            if (!ipcSession || !ipcSession->is_open())
             {
                 session->closeSocket();
-                ::Utils::Logger::log("Exception: " + std::string(e.what()), ::Utils::LogType::Error, "sendCloseSocketReq");
+                return;
             }
-        }
 
+            Common::Network::UnecryptedPacket packet;
+            packet.setTcpHeader(0);
+            packet.setCommand(Common::Constants::C2M_CloseSocketReq, 0, 0, 0);
+            auto seid = session->getId();
+            packet.setData(reinterpret_cast<const std::uint8_t*>(&seid), sizeof(seid));
+            ipcSession->asyncWrite(packet);
+        }
 
         inline std::optional<std::uint32_t> getSessionId(std::uint32_t aid)
         {
@@ -172,13 +123,12 @@ namespace Cast
                         timeoutOccurred = true;
                         socket.cancel();
                     }
-                    });
+                });
 
                 socket.async_read_some(asio::buffer(responseBuffer), [&](const asio::error_code& error, std::size_t length) {
-                    if (!error)
-                        bytesRead = length;
+                    if (!error) bytesRead = length;
                     timer.cancel();
-                    });
+                });
 
                 ioContext.run();
 
@@ -230,21 +180,21 @@ namespace Cast
 
             return std::nullopt;
         }
-        
 
         inline void connectionHandler(const Common::Network::UnecryptedPacket& request,
             std::shared_ptr<Cast::Network::Session> session,
             Cast::Network::SessionsManager& sessionsManager,
-            asio::io_context& ioContext)
+            asio::io_context& ioContext,
+            std::shared_ptr<Common::Network::Session> ipcSession)
         {
             const std::uint32_t aid = Cast::Details::parseData<std::uint32_t>(request, 4);
-            std::jthread([aid, session, &sessionsManager, &ioContext]() {
+            std::jthread([aid, session, &sessionsManager, &ioContext, ipcSession]() {
                 std::optional<std::uint32_t> retrievedSessionId = getSessionId(aid);
 
-                asio::post(ioContext.get_executor(), [retrievedSessionId, session, &sessionsManager, aid]() {
+                asio::post(ioContext.get_executor(), [retrievedSessionId, session, &sessionsManager, aid, ipcSession]() {
                     if (!retrievedSessionId)
                     {
-                        sendCloseSocketReq(session);
+                        sendCloseSocketReq(session, ipcSession);
                         return;
                     }
 
@@ -256,12 +206,11 @@ namespace Cast
                     response.setTcpHeader(session->getId());
                     response.setCommand(501, 0, 32, 0);
                     session->asyncWrite(response);
-                    });
                 });
+            });
         }
-            
 
-        inline void pongHandler(const Common::Network::UnecryptedPacket& request, std::shared_ptr<Cast::Network::Session> session, 
+        inline void pongHandler(const Common::Network::UnecryptedPacket& request, std::shared_ptr<Cast::Network::Session> session,
             Cast::Classes::RoomsManager& roomsManager,
             Cast::Network::SessionsManager& sessionsManager, std::uint32_t m_serverId)
         {
@@ -289,23 +238,23 @@ namespace Cast
                     speedItem.uid.server = powerItem.uid.server = speedItemUse.uid.server = powerItemUse.uid.server = m_serverId;
 
                     response.setCommand(262, 0, 0, 0);
-                    response.setData(reinterpret_cast<std::uint8_t*>(&speedItem), sizeof(speedItem)); // get speed item
+                    response.setData(reinterpret_cast<std::uint8_t*>(&speedItem), sizeof(speedItem));
                     room->broadcastToMatch(response);
                     response.setCommand(263, 0, 1, 0);
                     response.setData(reinterpret_cast<std::uint8_t*>(&speedItemUse), sizeof(speedItemUse));
-                    room->broadcastToMatch(response); // use speed item
+                    room->broadcastToMatch(response);
 
                     response.setCommand(262, 0, 0, 0);
-                    response.setData(reinterpret_cast<std::uint8_t*>(&powerItem), sizeof(powerItem)); // get power item
+                    response.setData(reinterpret_cast<std::uint8_t*>(&powerItem), sizeof(powerItem));
                     room->broadcastToMatch(response);
                     response.setCommand(263, 0, 1, 0);
-                    response.setData(reinterpret_cast<std::uint8_t*>(&powerItemUse), sizeof(powerItemUse)); // use power item
+                    response.setData(reinterpret_cast<std::uint8_t*>(&powerItemUse), sizeof(powerItemUse));
                     room->broadcastToMatch(response);
                 }
             }
         }
 
-        inline void handleCrash(const Common::Network::UnecryptedPacket& request, std::shared_ptr<Cast::Network::Session> session, 
+        inline void handleCrash(const Common::Network::UnecryptedPacket& request, std::shared_ptr<Cast::Network::Session> session,
             Cast::Classes::RoomsManager& roomsManager,
             std::uint32_t serverId)
         {
@@ -314,21 +263,13 @@ namespace Cast
             Common::Network::UnecryptedPacket response = request;
             response.setData(reinterpret_cast<std::uint8_t*>(&uniqueId), sizeof(uniqueId));
             roomsManager.playerForwardToHost(request.getSession(), session->getId(), response);
-
-            // This sets is in match to false, roomNum to -1, removes player from room, removes player from roomsManager's unordered_map, and closes room if necessary
             roomsManager.removePlayerFromRoom(session->getId());
         }
 
-        inline void handleEliminationNextRound(const Common::Network::UnecryptedPacket& request, std::shared_ptr<Cast::Network::Session> session, 
-            Cast::Classes::RoomsManager& roomsManager)
-        {
-            // Just ignore this on the cast server, otherwise it all stops working for some reason...
-            //roomsManager.printRoomInfo(session.getRoomId(), "After EliminationNextRoundHandler");
-        }
-
-        inline void handleMatchInitialLoading(const Common::Network::UnecryptedPacket& request, std::shared_ptr<Cast::Network::Session> session, 
+        inline void handleMatchInitialLoading(const Common::Network::UnecryptedPacket& request, std::shared_ptr<Cast::Network::Session> session,
             Cast::Classes::RoomsManager& roomsManager,
-            std::uint32_t serverId)
+            std::uint32_t serverId,
+            std::shared_ptr<Common::Network::Session> ipcSession)
         {
             auto roomOpt = roomsManager.getRoom(session->getId());
             if (!roomOpt) return;
@@ -345,7 +286,7 @@ namespace Cast
             {
                 if (Cast::Details::mustBroadcastDeath(room->getMode()))
                 {
-                    sendPlayerStateUpdate(session->getAccountId(), true);
+                    sendPlayerStateUpdate(session->getAccountId(), true, ipcSession);
                 }
                 session->isDead = true;
                 session->m_isInMatch = true;
@@ -358,10 +299,11 @@ namespace Cast
             }
         }
 
-        inline void handlePlayerRespawn(const Common::Network::UnecryptedPacket& request, std::shared_ptr<Cast::Network::Session> session, 
+        inline void handlePlayerRespawn(const Common::Network::UnecryptedPacket& request, std::shared_ptr<Cast::Network::Session> session,
             Cast::Classes::RoomsManager& roomsManager,
             Cast::Network::SessionsManager& sessionsManager,
-            Ac::AntiCheatManager& acManager)
+            Ac::AntiCheatManager& acManager,
+            std::shared_ptr<Common::Network::Session> ipcSession)
         {
             auto roomOpt = roomsManager.getRoom(session->getId());
             if (!roomOpt) return;
@@ -371,31 +313,9 @@ namespace Cast
             response.setTcpHeader(session->getId());
             response.setCommand(request.getOrder(), 0, 0, 0);
 
-            struct PlayerRespawnPosition
-            {
-                std::uint16_t x = 0;
-                std::uint16_t y = 0;
-                std::uint16_t z = 0;
-                std::uint16_t w = 0;
-                Main::Structures::UniqueId targetUniqueId{};
-
-                bool isNaNOrInfinity(std::uint16_t half) const
-                {
-                    std::uint16_t exponent = (half >> 10) & 0x1F;
-                    return (exponent == 0x1F); 
-                }
-
-                bool isBad() const
-                {
-                    if (isNaNOrInfinity(x) || isNaNOrInfinity(y) || isNaNOrInfinity(z) || isNaNOrInfinity(w))
-                        return true;
-                    return false;
-                }
-            };
-
-            PlayerRespawnPosition playerRespawnPosition = Cast::Details::parseData<PlayerRespawnPosition>(request);
+            Cast::Structures::PlayerRespawnPacket playerRespawnPosition = Cast::Details::parseData<Cast::Structures::PlayerRespawnPacket>(request);
             if (room->isArenaMode() && room->m_hasMatchStarted)
-            { // academy ground has special respawns, in other maps => dead players are just invisible
+            {
                 playerRespawnPosition.x = 60590;
                 playerRespawnPosition.y = 58810;
                 playerRespawnPosition.z = 26000;
@@ -410,9 +330,9 @@ namespace Cast
                 response.setData(reinterpret_cast<std::uint8_t*>(&playerRespawnPosition), sizeof(playerRespawnPosition));
                 room->broadcastToMatch(response);
             }
-            
+
             if (auto targetSession = sessionsManager.getSession(playerRespawnPosition.targetUniqueId.session); targetSession)
-            {                
+            {
                 if (targetSession->m_team == Common::Enums::TEAM_OBSERVER) return;
 
                 targetSession->isDead = (room->isArenaMode() && room->m_hasMatchStarted) ? true : false;
@@ -420,7 +340,7 @@ namespace Cast
                 session->m_isInMatch = true;
                 if (Cast::Details::mustBroadcastDeath(room->getMode()))
                 {
-                    sendPlayerStateUpdate(targetSession->getAccountId(), false);
+                    sendPlayerStateUpdate(targetSession->getAccountId(), false, ipcSession);
                 }
             }
             else
@@ -429,48 +349,29 @@ namespace Cast
             }
         }
 
-        // This is a request from the client to get the Room Info (e.g. how many wins in which team, etc)
-        inline void roomInfoHandler(const Common::Network::UnecryptedPacket& request, std::shared_ptr<Cast::Network::Session> session,
-            Cast::Classes::RoomsManager& roomsManager)
-        {
-            const auto roomHostSessionId = request.getSession();
-            const auto selfSessionId = session->getId();
-            // roomsManager.playerForwardToHost(session.getRoomId(), selfSessionId, const_cast<Common::Network::Packet&>(request));
-            // This command does NOT exist in the client! [order = 255]
-        }
-
-        inline void handleMatchStart(const Common::Network::UnecryptedPacket& request, std::shared_ptr<Cast::Network::Session> session, 
+        inline void handleMatchStart(const Common::Network::UnecryptedPacket& request, std::shared_ptr<Cast::Network::Session> session,
             Cast::Classes::RoomsManager& roomsManager)
         {
             const auto receiverSessionId = request.getSession();
             const auto hostSessionId = session->getId();
 
-            // For some reason, whenever a new round starts in elimination, the client resends this packet to the host
-            // And if we resend this packet to the host client, it resets the score to 0... so we just avoid doing that.
             if (hostSessionId != receiverSessionId)
             {
                 roomsManager.hostForwardToPlayer(hostSessionId, receiverSessionId, const_cast<Common::Network::UnecryptedPacket&>(request));
             }
         }
 
-        inline void unknownHandler3(const Common::Network::UnecryptedPacket& request, std::shared_ptr<Cast::Network::Session> session, 
-            Cast::Classes::RoomsManager& roomsManager)
-        {
-            roomsManager.broadcastToMatch(session->getId(), const_cast<Common::Network::UnecryptedPacket&>(request));
-        }
-
-        inline void roomInfoJoinHandler(const Common::Network::UnecryptedPacket& request, std::shared_ptr<Cast::Network::Session> session, 
+        inline void roomInfoJoinHandler(const Common::Network::UnecryptedPacket& request, std::shared_ptr<Cast::Network::Session> session,
             Cast::Classes::RoomsManager& roomsManager,
             Cast::Network::SessionsManager& sessionsManager)
         {
             const std::uint32_t mode = roomsManager.getModeOf(session->getId());
             std::vector<Cast::Structures::SinglePlayerJoinInfoResponse> singleInfoResp(request.getOption());
-            const std::uint8_t* dataPtr = request.getData();
             for (std::size_t i = 0; i < request.getOption(); ++i)
             {
-                Cast::Structures::SinglePlayerJoinInfo sp = Cast::Details::parseData<Cast::Structures::SinglePlayerJoinInfo>(request, 
+                Cast::Structures::SinglePlayerJoinInfo sp = Cast::Details::parseData<Cast::Structures::SinglePlayerJoinInfo>(request,
                     sizeof(Cast::Structures::SinglePlayerJoinInfo) * i);
-                
+
                 if (auto targetSession = sessionsManager.getSession(sp.uid.session); targetSession)
                 {
                     singleInfoResp[i].uid = sp.uid;
@@ -486,8 +387,80 @@ namespace Cast
             roomsManager.hostForwardToPlayer(session->getId(), request.getSession(), response, false);
         }
 
+        inline void handleVoiceMessage(const Common::Network::UnecryptedPacket& request, std::shared_ptr<Cast::Network::Session> session,
+            Cast::Classes::RoomsManager& roomsManager, std::uint32_t serverId)
+        {
+            auto response = request;
+            response.setOrder(273);
+
+            struct VoiceMessageData
+            {
+                Main::Structures::UniqueId uid;
+                std::uint32_t voiceId;
+            } voiceMessageData;
+
+            voiceMessageData.uid = Main::Structures::UniqueId{ static_cast<std::uint32_t>(session->getId()), serverId, 0 };
+            voiceMessageData.voiceId = Cast::Details::parseData<std::uint32_t>(request);
+            response.setData(reinterpret_cast<std::uint8_t*>(&voiceMessageData), sizeof(voiceMessageData));
+
+            roomsManager.broadcastToMatchTeamExceptSelf(session->getId(), response, session->m_team);
+        }
+
+        inline void handleArenaMode(Cast::Classes::RoomsManager& roomsManager, std::shared_ptr<Cast::Classes::Room> room)
+        {
+            room->m_hasMatchStarted = true;
+
+            auto totalAlive = room->getTotalAlivePlayers();
+            if (totalAlive <= 1 && !room->m_arenaRoundFinished)
+            {
+                room->m_arenaRoundFinished = true;
+                room->broadcastMessage("[ROOM: " + std::to_string(room->getRoomNumber()) + "] Arena end. Wait 10 seconds...");
+                std::thread([room]() {
+                    room->shuffleCoordinates();
+                    std::this_thread::sleep_for(std::chrono::seconds(10));
+                    room->respawnEveryoneArena();
+                }).detach();
+            }
+        }
+
+        inline void handleMatchLeave(const Common::Network::UnecryptedPacket& request, std::shared_ptr<Cast::Network::Session> session,
+            Cast::Classes::RoomsManager& roomsManager)
+        {
+            session->setIsInMatch(false);
+
+            auto roomOpt = roomsManager.getRoom(session->getId());
+            if (!roomOpt) return;
+            auto& room = *roomOpt;
+
+            if (room->isArenaMode()) handleArenaMode(roomsManager, room);
+            room->tryFindNewAssassin(session->getId());
+        }
+
+        inline void handleBossBattleForwardPacket(const Common::Network::UnecryptedPacket& request, std::shared_ptr<Cast::Network::Session> session,
+            Cast::Classes::RoomsManager& roomsManager)
+        {
+            if (roomsManager.getModeOf(session->getId()) == Common::Enums::BossBattle)
+            {
+                roomsManager.broadcastToMatch(session->getId(), const_cast<Common::Network::UnecryptedPacket&>(request));
+            }
+            else
+            {
+                roomsManager.hostForwardToPlayer(request.getSession(), session->getId(), const_cast<Common::Network::UnecryptedPacket&>(request));
+            }
+        }
+
+        inline void roomInfoHandler(const Common::Network::UnecryptedPacket& request, std::shared_ptr<Cast::Network::Session> session,
+            Cast::Classes::RoomsManager& roomsManager)
+        {
+        }
+
+        inline void handleEliminationNextRound(const Common::Network::UnecryptedPacket& request, std::shared_ptr<Cast::Network::Session> session,
+            Cast::Classes::RoomsManager& roomsManager)
+        {
+        }
+
         template<Common::Enums::PlayerType PlayerType>
-        inline void handleItemPickup(const Common::Network::UnecryptedPacket& request, std::shared_ptr<Cast::Network::Session> session, 
+        inline void handleItemPickup(const Common::Network::UnecryptedPacket& request, std::shared_ptr<Cast::Network::Session> session,
             Cast::Classes::RoomsManager& roomsManager)
         {
             if (session->m_team == Common::Enums::TEAM_OBSERVER || !session->m_isInMatch) return;
@@ -498,9 +471,7 @@ namespace Cast
             }
             else if constexpr (PlayerType == Common::Enums::NON_HOST)
             {
-                const auto hostSessionId = request.getSession();
-                const auto senderId = session->getId();
-                roomsManager.playerForwardToHost(hostSessionId, senderId, const_cast<Common::Network::UnecryptedPacket&>(request));
+                roomsManager.playerForwardToHost(request.getSession(), session->getId(), const_cast<Common::Network::UnecryptedPacket&>(request));
             }
         }
 
@@ -516,9 +487,7 @@ namespace Cast
             }
             else if constexpr (PlayerType == Common::Enums::NON_HOST)
             {
-                const auto hostSessionId = request.getSession();
-                const auto senderId = session->getId();
-                roomsManager.playerForwardToHost(hostSessionId, senderId, const_cast<Common::Network::UnecryptedPacket&>(request));
+                roomsManager.playerForwardToHost(request.getSession(), session->getId(), const_cast<Common::Network::UnecryptedPacket&>(request));
             }
         }
     }

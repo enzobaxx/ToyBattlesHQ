@@ -53,6 +53,8 @@ namespace Common
 			std::string m_ip;
 			std::string m_gradedIp{ "" };
 			std::uint_least16_t m_port;
+			std::deque<std::vector<std::uint8_t>> m_writeQueue{};
+			bool m_writing{ false };
 
 		public:
 			std::string m_hwid = "";
@@ -141,6 +143,7 @@ namespace Common
 				return m_socket.is_open();
 			}
 			void sendConnectionACK(Common::Enums::ServerType serverType);
+			void flushWriteQueue();
 
 			template<PacketType packetType, typename Packet>
 			bool asyncWriteImpl(const Packet& message)
@@ -151,7 +154,7 @@ namespace Common
 					return false;
 				}
 
-				auto packetData = std::make_shared<std::vector<std::uint8_t>>();
+				std::vector<std::uint8_t> packetData;
 
 				if constexpr (packetType == PacketType::ENCRYPTED)
 				{
@@ -159,7 +162,7 @@ namespace Common
 					{
 						return false;
 					}
-					*packetData = message.generateOutgoingPacket(m_crypt.UserKey, m_crypt.isUsed);
+					packetData = message.generateOutgoingPacket(m_crypt.UserKey, m_crypt.isUsed);
 				}
 				else if constexpr (packetType == PacketType::UNECRYPTED)
 				{
@@ -167,25 +170,14 @@ namespace Common
 					{
 						return false;
 					}
-					*packetData = message.generateOutgoingPacket();
+					packetData = message.generateOutgoingPacket();
 				}
 
-				auto packetSize = message.getFullSize();
-
-				//if (m_crypt.isUsed) Common::Parser::parse(m_reader.data(), m_reader.size(), 13000, "client", "server", m_crypt.UserKey);
-				asio::async_write(m_socket, asio::buffer(packetData->data(), packetSize),
-					[this, self = this->shared_from_this(), packetData](const asio::error_code& errorCode, std::size_t)
-					{
-						if (!m_socket.is_open())
-						{
-							return;
-						}
-						if (errorCode)
-						{
-							closeSocket();
-						}
-
-					});
+				m_writeQueue.push_back(std::move(packetData));
+				if (!m_writing)
+				{
+					flushWriteQueue();
+				}
 
 				return true;
 			}
