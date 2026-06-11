@@ -43,7 +43,7 @@ namespace Main
 			matchContext.batteryObtainedInMatch = 0;
 		}
 
-void Player::setPing(std::uint16_t ping)
+		void Player::setPing(std::uint16_t ping)
 		{
 			m_ping = ping;
 		}

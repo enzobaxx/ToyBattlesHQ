@@ -34,7 +34,7 @@ namespace Main
 					return;
 				}
 				
-				if (session->getPlayer().getPlayerState() != Common::Enums::STATE_LOBBY && !session->getPlayer().isInLobby())
+				if (session->getPlayer().getPlayerState() != Common::Enums::STATE_LOBBY && session->getPlayer().getMatchContext().roomNumber != 0)
 				{
 					session->sendMessage("You must be inside the lobby to trade!", Main::Enums::TIP);
 					return;
@@ -53,7 +53,7 @@ namespace Main
 						response.setOrder(192);
 						response.setExtra(Enums::TradeSystemExtra::LEVEL_TOO_LOW);
 					}
-					else if (targetPlayerState == Common::Enums::PlayerState::STATE_LOBBY && targetSession->getPlayer().isInLobby())
+					else if (targetPlayerState == Common::Enums::PlayerState::STATE_LOBBY && targetSession->getPlayer().getMatchContext().roomNumber == 0)
 					{
 						// Todo: check whether this branch is entered in case the player is in a room in a non-ready state
 						targetSession->asyncWrite(response);
