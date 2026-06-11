@@ -117,7 +117,10 @@ namespace Main
 				if constexpr (CT == Main::Enums::ITEM_MP)
 					cashSet = setAccountMicroPoints(m_player.accountInfo.microPoints + value);
 				else if constexpr (CT == Main::Enums::ITEM_RT)
-					cashSet = setAccountRockTotens(m_player.accountInfo.rockTotens + value);
+				{
+					sendRt(value); //setAccountRockTotens(m_player.accountInfo.rockTotens + value);
+					cashSet = true;
+				}
 				else if constexpr (CT == Main::Enums::ITEM_COIN)
 					cashSet = setAccountCoins(m_player.accountInfo.coins + value);
 					

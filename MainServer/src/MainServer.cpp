@@ -521,6 +521,18 @@ namespace Main
 				};
 		}
 
+		// RT
+		std::unordered_map<std::uint32_t, std::uint32_t> rtBoxValues =
+		{
+			{Main::Enums::RT_20000_1, 20000}, {Main::Enums::RT_20000_2, 20000}
+		};
+		for (const auto& [rtId, value] : mpBoxValues)
+		{
+			m_cashItemsCallbacks[rtId] = [value, rtId](std::shared_ptr<Main::Network::Session> session) {
+				session->openCashBox<Main::Enums::ITEM_RT>(rtId, value);
+				};
+		}
+
 		// Coin boxes
 		std::unordered_map<std::uint32_t, std::uint32_t> coinValues =
 		{
