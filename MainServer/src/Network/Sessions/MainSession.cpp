@@ -854,7 +854,8 @@ namespace Main
 
 		bool Session::setAccountRockTotens(std::uint32_t rt)
 		{
-			if (!m_player.getAccountInfo().setRockTotens(rt)) return false;
+			if (rt > 0x3FFFFFFF) return false;
+			m_player.getAccountInfo().rockTotens = rt;
 			m_scheduler.addCallback(std::source_location::current(), m_player.getAccountID(), 1, &Main::Persistence::PersistentDatabase::updatePlayerCurrencyByType,
 				m_player.getAccountID(), rt, Main::Enums::ItemCurrencyType::ITEM_RT);
 			return true;
@@ -862,7 +863,8 @@ namespace Main
 
 		bool Session::setAccountMicroPoints(std::uint32_t mp)
 		{
-			if (!m_player.getAccountInfo().setMicroPoints(mp)) return false;
+			if (mp > 0x7FFFFFFF) return false;
+			m_player.getAccountInfo().microPoints = mp;
 			m_scheduler.addCallback(std::source_location::current(), m_player.getAccountID(), 2, &Main::Persistence::PersistentDatabase::updatePlayerCurrencyByType,
 				m_player.getAccountID(), mp, Main::Enums::ItemCurrencyType::ITEM_MP);
 			return true;
@@ -870,7 +872,8 @@ namespace Main
 
 		bool Session::setAccountCoins(std::uint16_t coins)
 		{
-			if (!m_player.getAccountInfo().setCoins(coins)) return false;
+			if (coins > 0x7F) return false;
+			m_player.getAccountInfo().coins = coins;
 			m_scheduler.addCallback(std::source_location::current(), m_player.getAccountID(), 3, &Main::Persistence::PersistentDatabase::updatePlayerCurrencyByType,
 				m_player.getAccountID(), coins, Main::Enums::ItemCurrencyType::ITEM_COIN);
 			return true;
@@ -878,7 +881,7 @@ namespace Main
 
 		void Session::setAccountLatestCharacterSelected(std::uint16_t latestCharacterSelected)
 		{
-			m_player.getAccountInfo().setLatestSelectedCharacter(latestCharacterSelected);
+			m_player.getAccountInfo().latestSelectedCharacter = latestCharacterSelected;
 			m_scheduler.addCallback(std::source_location::current(), m_player.getAccountID(), 5, &Main::Persistence::PersistentDatabase::updateLatestSelectedCharacter,
 				m_player.getAccountID(), latestCharacterSelected);
 		}
@@ -889,7 +892,7 @@ namespace Main
 			{
 				return false;
 			}
-			m_player.getAccountInfo().setLevel(level);
+			m_player.getAccountInfo().playerLevel = level + 1;
 			m_scheduler.addCallback(std::source_location::current(), 
 				m_player.getAccountID(), 6, &Main::Persistence::PersistentDatabase::updatePlayerLevel, m_player.getAccountID(), level);
 			return true;
@@ -897,7 +900,7 @@ namespace Main
 
 		bool Session::setExperience(std::uint32_t experience)
 		{
-			m_player.getAccountInfo().setExperience(experience);
+			m_player.getAccountInfo().experience = experience;
 			m_scheduler.addCallback(std::source_location::current(),
 				m_player.getAccountID(), 7, &Main::Persistence::PersistentDatabase::updatePlayerExperience, m_player.getAccountID(), experience);
 			return true;
@@ -1629,19 +1632,17 @@ namespace Main
 
 		void Session::addLuckyPoints(std::uint32_t points)
 		{
-			m_player.getAccountInfo().addLuckyPoints(points);
+			m_player.getAccountInfo().luckyPoints += points; 
 			m_scheduler.immediatePersist(std::source_location::current(), 
-				&Persistence::PersistentDatabase::updatePlayerLuckyPoints, m_player.getAccountID(), m_player.getAccountInfo().getLuckyPoints());
+				&Persistence::PersistentDatabase::updatePlayerLuckyPoints, m_player.getAccountID(), static_cast<std::uint32_t>(m_player.getAccountInfo().luckyPoints));
 		}
 
 		void Session::setLuckyPoints(std::uint32_t points)
 		{
-			m_player.getAccountInfo().setLuckyPoints(points);
+			m_player.getAccountInfo().luckyPoints = points;
 			m_scheduler.immediatePersist(std::source_location::current(), 
-				&Persistence::PersistentDatabase::updatePlayerLuckyPoints, m_player.getAccountID(), m_player.getAccountInfo().getLuckyPoints());
+				&Persistence::PersistentDatabase::updatePlayerLuckyPoints, m_player.getAccountID(), static_cast<std::uint32_t>(m_player.getAccountInfo().luckyPoints));
 		}
-
-
 
 		void Session::leaveRoom()
 		{
@@ -1649,66 +1650,69 @@ namespace Main
 			m_player.leaveRoom();
 		}
 
-
-
 		void Session::sendBattery(std::uint32_t battery)
 		{
-			if (battery != 500 && battery != 1000) return;
+			if (battery != 500 && battery != 1000)
+				return;
 
-			const std::uint32_t oldBatteryQuantity = m_player.getAccountInfo().battery;
-			const std::uint32_t totalNewBattery = m_player.getAccountInfo().addBattery(battery);
-
+			auto& accountInfo = m_player.getAccountInfo();
+			const std::uint32_t oldBatteryQuantity = accountInfo.battery;
+			accountInfo.battery = std::min(static_cast<std::uint32_t>(accountInfo.battery + battery),static_cast<std::uint32_t>(accountInfo.maxBattery));
+			const std::uint32_t totalNewBattery = accountInfo.battery;
 			if (totalNewBattery > oldBatteryQuantity)
 			{
-				m_scheduler.addRepetitiveCallback(std::source_location::current(),
-					m_player.getAccountID(), &Main::Persistence::PersistentDatabase::updateBattery, m_player.getAccountID(),
-					totalNewBattery);
+				m_scheduler.addRepetitiveCallback(std::source_location::current(),m_player.getAccountID(),
+					&Main::Persistence::PersistentDatabase::updateBattery,m_player.getAccountID(),totalNewBattery);
 			}
 		}
 
 		void Session::resetKillDeath()
 		{
-			m_player.getAccountInfo().resetKillDeath();
-			const std::uint32_t accountId = m_player.getAccountInfo().accountID;
+			auto& ainfo = m_player.getAccountInfo();
+			ainfo.totalKills = ainfo.deaths = 0;
+			const std::uint32_t accountId = ainfo.accountID;
 			m_scheduler.addRepetitiveCallback(std::source_location::current(), 
 				accountId, &Main::Persistence::PersistentDatabase::resetKillDeath, accountId);
 		}
 
 		void Session::resetRecord()
 		{
-			m_player.getAccountInfo().resetRecord();
-			const std::uint32_t accountId = m_player.getAccountInfo().accountID;
+			auto& ainfo = m_player.getAccountInfo();
+			ainfo.wins = ainfo.losses = ainfo.draws = 0;
+			const std::uint32_t accountId = ainfo.accountID;
 			m_scheduler.addRepetitiveCallback(std::source_location::current(), 
 				accountId, &Main::Persistence::PersistentDatabase::resetRecord, accountId);
 		}
 
 		void Session::expandBattery()
 		{
-			if (m_player.getAccountInfo().expandBattery())
-			{
-				const std::uint32_t accountId = m_player.getAccountInfo().accountID;
-				m_scheduler.addRepetitiveCallback(std::source_location::current(),
-					accountId, &Main::Persistence::PersistentDatabase::batteryExpansion, accountId);
-			}
-			else
+			auto& accountInfo = m_player.getAccountInfo();
+			if (accountInfo.maxBattery > 4000)
 			{
 				sendMessage("Error: Maximum possible battery is 5000");
+				return;
 			}
+
+			accountInfo.maxBattery += 1000;
+			const std::uint32_t accountId = accountInfo.accountID;
+			m_scheduler.addRepetitiveCallback(std::source_location::current(),accountId,&Main::Persistence::PersistentDatabase::batteryExpansion,accountId);
 		}
 
 		void Session::expandInventory(std::uint32_t spaceToAdd)
 		{
-			if (m_player.getAccountInfo().expandInventory(spaceToAdd))
-			{
-				const std::uint32_t accountId = m_player.getAccountInfo().accountID;
-				m_scheduler.addRepetitiveCallback(std::source_location::current(), 
-					accountId, &Main::Persistence::PersistentDatabase::inventoryExpansion, accountId, spaceToAdd);
-				sendMessage("Successfully expanded inventory space, relog", Main::Enums::TIP);
-			}
-			else
+			auto& accountInfo = m_player.getAccountInfo();
+
+			if (accountInfo.inventorySpace + spaceToAdd > 1000)
 			{
 				sendMessage("Error: Maximum possible inventory space is 1000!");
+				return;
 			}
+
+			accountInfo.inventorySpace += spaceToAdd;
+			const std::uint32_t accountId = accountInfo.accountID;
+			m_scheduler.addRepetitiveCallback(std::source_location::current(),accountId,
+				&Main::Persistence::PersistentDatabase::inventoryExpansion,accountId,spaceToAdd);
+			sendMessage("Successfully expanded inventory space, relog", Main::Enums::TIP);
 		}
 
 		void Session::sendWeeklyReward()

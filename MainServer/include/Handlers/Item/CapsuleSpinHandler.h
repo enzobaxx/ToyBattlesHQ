@@ -184,7 +184,7 @@ namespace Main
 
 				while (i < request.getOption() && retryCount < maxRetries)
 				{
-					if (session->getPlayer().getAccountInfo().getLuckyPoints() >= Common::Constants::maxLuckySpin)
+					if (static_cast<std::uint32_t>(session->getPlayer().getAccountInfo().luckyPoints) >= Common::Constants::maxLuckySpin)
 					{
 						session->setLuckyPoints(0);
 						response.setMission(Main::Enums::CapsuleSpinMission::CAPSULE_LUCKY_SPIN);
