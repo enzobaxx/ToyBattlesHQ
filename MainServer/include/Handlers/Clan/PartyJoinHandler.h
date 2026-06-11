@@ -96,9 +96,9 @@ namespace Main
                 response.setData(reinterpret_cast<std::uint8_t*>(&joinInfo), sizeof(joinInfo));
                 selfClanRoom->broadcastExceptSelf(response, session->getAccountInfo().uniqueId.session);
 
-                if (leaderSession->getPlayer().getRoomNumber() >= Common::Constants::clanRoomNumberStart)
+                if (leaderSession->getPlayer().getMatchContext().roomNumber >= Common::Constants::clanRoomNumberStart)
                 { // the clan is in a room vs another clan
-                    const Main::ClientData::RoomInfo joinInfo{ leaderSession->getPlayer().getRoomNumber() - 1, 2 };
+                    const Main::ClientData::RoomInfo joinInfo{ leaderSession->getPlayer().getMatchContext().roomNumber - 1, 2 };
                     response.setCommand(140, 0, 0, 0);
                     response.setData(reinterpret_cast<const std::uint8_t*>(&joinInfo), sizeof(joinInfo));
                     Main::Handlers::handleClanRoomJoin(response, session, roomsManager, selfClanRoom->getTeam());

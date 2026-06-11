@@ -81,7 +81,7 @@ namespace Main
 					return;
 				}
 
-				std::uint32_t currentRoomNumber = session->getPlayer().getRoomNumber();
+				std::uint32_t currentRoomNumber = session->getPlayer().getMatchContext().roomNumber;
 				std::string roomInfo = currentRoomNumber > 0 ? "Room ID: " + std::to_string(currentRoomNumber) : "Lobby";
 
 				Main::Structures::ReportInfo reportInfo(

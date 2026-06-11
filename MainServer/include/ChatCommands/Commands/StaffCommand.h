@@ -22,7 +22,7 @@ namespace Main
 				std::uint32_t roomNumber,
 				Main::MainServer& mainServer) override
 			{
-				if (session->getPlayer().getRoomNumber() != 0)
+				if (session->getPlayer().getMatchContext().roomNumber != 0)
 				{
 					session->sendMessage("You cannot use this command while in a room.");
 					return;

@@ -24,7 +24,7 @@ namespace Main
 			Main::Classes::RoomsManager& roomsManager,
 			std::uint64_t m_latestServerRestart)
 		{
-			if (Main::Classes::Room* room = roomsManager.getRoomByNumber(session->getPlayer().getRoomNumber()))
+			if (Main::Classes::Room* room = roomsManager.getRoomByNumber(session->getPlayer().getMatchContext().roomNumber))
 			{
 				if (room->getRoomSettings().mode == Common::Enums::AiBattle)
 				{

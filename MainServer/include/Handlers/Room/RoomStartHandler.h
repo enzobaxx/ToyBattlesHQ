@@ -22,7 +22,7 @@ namespace Main
 				session->setMatchStartTime();
 				return;
 			}
-			else if (Main::Classes::Room* room = roomsManager.getRoomByNumber(session->getPlayer().getRoomNumber()))
+			else if (Main::Classes::Room* room = roomsManager.getRoomByNumber(session->getPlayer().getMatchContext().roomNumber))
 			{
 				Common::Network::Packet response;
 				response.setTcpHeader(request.getSession(), Common::Enums::NO_ENCRYPTION);
@@ -157,7 +157,7 @@ namespace Main
 		inline bool handleRoomStartInvisible(const Common::Network::Packet& request, std::shared_ptr<Main::Network::Session> session,
 			Main::Classes::RoomsManager& roomsManager)
 		{
-			if (Main::Classes::Room* room = roomsManager.getRoomByNumber(session->getPlayer().getRoomNumber()))
+			if (Main::Classes::Room* room = roomsManager.getRoomByNumber(session->getPlayer().getMatchContext().roomNumber))
 			{
 				Common::Network::Packet response;
 				response.setTcpHeader(request.getSession(), Common::Enums::NO_ENCRYPTION);
@@ -170,7 +170,7 @@ namespace Main
 						session->sendMessage("Error: use this command when you are not the host");
 						return false;
 					}
-					if (session->getPlayer().getRoomNumber() >= Common::Constants::clanRoomNumberStart && !room->hasMatchStarted())
+					if (session->getPlayer().getMatchContext().roomNumber >= Common::Constants::clanRoomNumberStart && !room->hasMatchStarted())
 					{
 						session->sendMessage("Error: You can only enter clan matches if they have started!");
 						return false;

@@ -188,7 +188,7 @@ namespace Main
 
 			const Main::ClientData::ClanRoomInfo requestStructure = Details::parseData<Main::ClientData::ClanRoomInfo>(request); 
 			const auto& ainfo = session->getAccountInfo();
-			const std::uint16_t selfPartyRoomNumber = session->getPlayer().getPartyRoomNumber();
+			const std::uint16_t selfPartyRoomNumber = session->getPlayer().getMatchContext().partyRoomNumber;
 
 			if (auto targetPartyRoom = partiesManager.getExactRoomFor(requestStructure.clanId, requestStructure.roomNumber);
 				auto selfPartyRoom = partiesManager.getExactRoomFor(ainfo.clanId, selfPartyRoomNumber))
@@ -224,8 +224,8 @@ namespace Main
 						return;
 					}
 
-					// Let all the other players join the room with the JoinRoom handler, where roomNumber = otherTargetLeader.getPlayer().getRoomNumber()
-					const std::uint16_t roomNumber = otherTargetLeader->getPlayer().getRoomNumber();
+					// Let all the other players join the room with the JoinRoom handler, where roomNumber = otherTargetLeader.getPlayer().getMatchContext().roomNumber
+					const std::uint16_t roomNumber = otherTargetLeader->getPlayer().getMatchContext().roomNumber;
 					Main::ClientData::RoomInfo joinInfo{ roomNumber - 1, 2 };
 					response.setCommand(140, 0, 0, 0);
 					response.setData(reinterpret_cast<std::uint8_t*>(&joinInfo), sizeof(joinInfo));

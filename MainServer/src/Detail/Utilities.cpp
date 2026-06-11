@@ -11,7 +11,7 @@ namespace Main
 		void broadcastPlayerItems(Main::Classes::RoomsManager& roomsManager, std::shared_ptr<Main::Network::Session> session, const Common::Network::Packet& request)
 		{
 			const auto& player = session->getPlayer();
-			if (Main::Classes::Room* room = roomsManager.getRoomByNumber(player.getRoomNumber()))
+			if (Main::Classes::Room* room = roomsManager.getRoomByNumber(player.getMatchContext().roomNumber))
 			{
 				auto& setItemsInstance = Common::ConstantDatabase::CdbSingleton<Common::ConstantDatabase::SetItemInfo>::getInstance();
 				room->updatePlayerInfo(session);

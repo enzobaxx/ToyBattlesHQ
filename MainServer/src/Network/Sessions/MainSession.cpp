@@ -854,7 +854,7 @@ namespace Main
 
 		bool Session::setAccountRockTotens(std::uint32_t rt)
 		{
-			if (!m_player.setAccountRockTotens(rt)) return false;
+			if (!m_player.getAccountInfo().setRockTotens(rt)) return false;
 			m_scheduler.addCallback(std::source_location::current(), m_player.getAccountID(), 1, &Main::Persistence::PersistentDatabase::updatePlayerCurrencyByType,
 				m_player.getAccountID(), rt, Main::Enums::ItemCurrencyType::ITEM_RT);
 			return true;
@@ -862,7 +862,7 @@ namespace Main
 
 		bool Session::setAccountMicroPoints(std::uint32_t mp)
 		{
-			if (!m_player.setAccountMicroPoints(mp)) return false;
+			if (!m_player.getAccountInfo().setMicroPoints(mp)) return false;
 			m_scheduler.addCallback(std::source_location::current(), m_player.getAccountID(), 2, &Main::Persistence::PersistentDatabase::updatePlayerCurrencyByType,
 				m_player.getAccountID(), mp, Main::Enums::ItemCurrencyType::ITEM_MP);
 			return true;
@@ -870,7 +870,7 @@ namespace Main
 
 		bool Session::setAccountCoins(std::uint16_t coins)
 		{
-			if (!m_player.setAccountCoins(coins)) return false;
+			if (!m_player.getAccountInfo().setCoins(coins)) return false;
 			m_scheduler.addCallback(std::source_location::current(), m_player.getAccountID(), 3, &Main::Persistence::PersistentDatabase::updatePlayerCurrencyByType,
 				m_player.getAccountID(), coins, Main::Enums::ItemCurrencyType::ITEM_COIN);
 			return true;
@@ -878,7 +878,7 @@ namespace Main
 
 		void Session::setAccountLatestCharacterSelected(std::uint16_t latestCharacterSelected)
 		{
-			m_player.setAccountLatestCharacterSelected(latestCharacterSelected);
+			m_player.getAccountInfo().setLatestSelectedCharacter(latestCharacterSelected);
 			m_scheduler.addCallback(std::source_location::current(), m_player.getAccountID(), 5, &Main::Persistence::PersistentDatabase::updateLatestSelectedCharacter,
 				m_player.getAccountID(), latestCharacterSelected);
 		}
@@ -889,7 +889,7 @@ namespace Main
 			{
 				return false;
 			}
-			m_player.setLevel(level);
+			m_player.getAccountInfo().setLevel(level);
 			m_scheduler.addCallback(std::source_location::current(), 
 				m_player.getAccountID(), 6, &Main::Persistence::PersistentDatabase::updatePlayerLevel, m_player.getAccountID(), level);
 			return true;
@@ -897,7 +897,7 @@ namespace Main
 
 		bool Session::setExperience(std::uint32_t experience)
 		{
-			m_player.setExperience(experience);
+			m_player.getAccountInfo().setExperience(experience);
 			m_scheduler.addCallback(std::source_location::current(),
 				m_player.getAccountID(), 7, &Main::Persistence::PersistentDatabase::updatePlayerExperience, m_player.getAccountID(), experience);
 			return true;
@@ -1619,26 +1619,26 @@ namespace Main
 			m_player.setPlayerState(playerState);
 			if (playerState == Common::Enums::STATE_NORMAL)
 			{
-				m_player.setIsInMatch(true);
+				m_player.getMatchContext().isInMatch = true;
 			}
 			else if (playerState == Common::Enums::STATE_WAITING)
 			{
-				m_player.setIsInMatch(false);
+				m_player.getMatchContext().isInMatch = false;
 			}
 		}
 
 		void Session::addLuckyPoints(std::uint32_t points)
 		{
-			m_player.addLuckyPoints(points);
+			m_player.getAccountInfo().addLuckyPoints(points);
 			m_scheduler.immediatePersist(std::source_location::current(), 
-				&Persistence::PersistentDatabase::updatePlayerLuckyPoints, m_player.getAccountID(), m_player.getLuckyPoints());
+				&Persistence::PersistentDatabase::updatePlayerLuckyPoints, m_player.getAccountID(), m_player.getAccountInfo().getLuckyPoints());
 		}
 
 		void Session::setLuckyPoints(std::uint32_t points)
 		{
-			m_player.setLuckyPoints(points);
+			m_player.getAccountInfo().setLuckyPoints(points);
 			m_scheduler.immediatePersist(std::source_location::current(), 
-				&Persistence::PersistentDatabase::updatePlayerLuckyPoints, m_player.getAccountID(), m_player.getLuckyPoints());
+				&Persistence::PersistentDatabase::updatePlayerLuckyPoints, m_player.getAccountID(), m_player.getAccountInfo().getLuckyPoints());
 		}
 
 
@@ -1656,7 +1656,7 @@ namespace Main
 			if (battery != 500 && battery != 1000) return;
 
 			const std::uint32_t oldBatteryQuantity = m_player.getAccountInfo().battery;
-			const std::uint32_t totalNewBattery = m_player.addBattery(battery);
+			const std::uint32_t totalNewBattery = m_player.getAccountInfo().addBattery(battery);
 
 			if (totalNewBattery > oldBatteryQuantity)
 			{
@@ -1668,7 +1668,7 @@ namespace Main
 
 		void Session::resetKillDeath()
 		{
-			m_player.resetKillDeath();
+			m_player.getAccountInfo().resetKillDeath();
 			const std::uint32_t accountId = m_player.getAccountInfo().accountID;
 			m_scheduler.addRepetitiveCallback(std::source_location::current(), 
 				accountId, &Main::Persistence::PersistentDatabase::resetKillDeath, accountId);
@@ -1676,7 +1676,7 @@ namespace Main
 
 		void Session::resetRecord()
 		{
-			m_player.resetRecord();
+			m_player.getAccountInfo().resetRecord();
 			const std::uint32_t accountId = m_player.getAccountInfo().accountID;
 			m_scheduler.addRepetitiveCallback(std::source_location::current(), 
 				accountId, &Main::Persistence::PersistentDatabase::resetRecord, accountId);
@@ -1684,7 +1684,7 @@ namespace Main
 
 		void Session::expandBattery()
 		{
-			if (m_player.expandBattery())
+			if (m_player.getAccountInfo().expandBattery())
 			{
 				const std::uint32_t accountId = m_player.getAccountInfo().accountID;
 				m_scheduler.addRepetitiveCallback(std::source_location::current(),
@@ -1698,7 +1698,7 @@ namespace Main
 
 		void Session::expandInventory(std::uint32_t spaceToAdd)
 		{
-			if (m_player.expandInventory(spaceToAdd))
+			if (m_player.getAccountInfo().expandInventory(spaceToAdd))
 			{
 				const std::uint32_t accountId = m_player.getAccountInfo().accountID;
 				m_scheduler.addRepetitiveCallback(std::source_location::current(), 
@@ -2033,9 +2033,10 @@ namespace Main
 				ainfo.accountID, &Main::Persistence::PersistentDatabase::updatePlayerStats, ainfo.accountID, ainfo);
 
 			m_player.storeBatteryObtainedInMatch();
-			m_scheduler.addRepetitiveCallback(std::source_location::current(), 
+			const std::uint32_t updatedBattery = m_player.getAccountInfo().battery;
+			m_scheduler.addRepetitiveCallback(std::source_location::current(),
 				m_player.getAccountID(), &Main::Persistence::PersistentDatabase::updateBattery, m_player.getAccountID(),
-				m_player.getAccountInfo().battery);
+				updatedBattery);
 		}
 
 		void Session::storeEvent()

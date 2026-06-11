@@ -859,7 +859,7 @@ namespace Main
                 auto targetNickname = obj["TargetNickname"].as_string().c_str();
                 if (auto targetSession = m_sessionsManager.findSessionByName(targetNickname))
                 {
-                    auto roomNum = targetSession->getPlayer().getRoomNumber();
+                    auto roomNum = targetSession->getPlayer().getMatchContext().roomNumber;
                     if (auto* room = m_roomsManager.getRoomByNumber(roomNum))
                     {
                         if (!room->kickPlayer(targetNickname))
@@ -915,7 +915,7 @@ namespace Main
                 auto targetNickname = obj["TargetNickname"].as_string().c_str();
                 if (auto targetSession = m_sessionsManager.findSessionByName(targetNickname))
                 {
-                    if (auto* room = m_roomsManager.getRoomByNumber(targetSession->getPlayer().getRoomNumber()))
+                    if (auto* room = m_roomsManager.getRoomByNumber(targetSession->getPlayer().getMatchContext().roomNumber))
                     {
                         const bool changed = room->changeHostByNickname(targetNickname);
                         if (!changed)
@@ -931,7 +931,7 @@ namespace Main
                     }
                     else
                     {
-                        responseBody = std::format("Room number '{}' not found", targetSession->getPlayer().getRoomNumber());
+                        responseBody = std::format("Room number '{}' not found", targetSession->getPlayer().getMatchContext().roomNumber);
                         statusCode = http::status::not_found;
                     }
                 }
@@ -1166,7 +1166,7 @@ namespace Main
                     playerObj["AccountID"] = ainfo.accountID;
                     playerObj["SessionID"] = targetSession->getId();
                     playerObj["Grade"] = ainfo.playerGrade;
-                    playerObj["CurrentRoom"] = targetSession->getPlayer().getRoomNumber();
+                    playerObj["CurrentRoom"] = targetSession->getPlayer().getMatchContext().roomNumber;
                     playerObj["Level"] = ainfo.playerLevel;
                     playerObj["MicroPoints"] = ainfo.microPoints;
                     playerObj["RockTotens"] = ainfo.rockTotens;

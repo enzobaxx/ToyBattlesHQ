@@ -43,9 +43,9 @@ namespace Main
 		{
 			START_BENCHMARK
 
-			if (session->getPlayer().getRoomNumber())
+			if (session->getPlayer().getMatchContext().roomNumber)
 			{
-				session->sendMessage("Error: you are already inside a room (room number: " + std::to_string(session->getPlayer().getRoomNumber()) + 
+				session->sendMessage("Error: you are already inside a room (room number: " + std::to_string(session->getPlayer().getMatchContext().roomNumber) + 
 					", cannot join another room!");
 				return;
 			}

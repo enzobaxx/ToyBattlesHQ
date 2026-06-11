@@ -17,7 +17,7 @@ namespace Main
 	{
 		inline void unknown(const Common::Network::Packet& request, std::shared_ptr<Main::Network::Session> session, Main::Classes::RoomsManager& roomsManager)
 		{
-			if (auto* room = roomsManager.getRoomByNumber(session->getPlayer().getRoomNumber()))
+			if (auto* room = roomsManager.getRoomByNumber(session->getPlayer().getMatchContext().roomNumber))
 			{
 				room->broadcastToRoom(const_cast<Common::Network::Packet&>(request));
 			}
@@ -26,7 +26,7 @@ namespace Main
 		inline void handleEliminationNextRound(const Common::Network::Packet& request, std::shared_ptr<Main::Network::Session> session,
 			Main::Classes::RoomsManager& roomsManager)
 		{
-			if (auto* room = roomsManager.getRoomByNumber(session->getPlayer().getRoomNumber()))
+			if (auto* room = roomsManager.getRoomByNumber(session->getPlayer().getMatchContext().roomNumber))
 			{
 				if (!room->isHost(session->getAccountInfo().uniqueId)) return;
 				room->broadcastToRoomExceptSelf(const_cast<Common::Network::Packet&>(request), session->getAccountInfo().uniqueId);
@@ -55,7 +55,7 @@ namespace Main
 		inline void handleEliminationNextRound2(const Common::Network::Packet& request, std::shared_ptr<Main::Network::Session> session,
 			Main::Classes::RoomsManager& roomsManager)
 		{
-			if (auto* room = roomsManager.getRoomByNumber(session->getPlayer().getRoomNumber()))
+			if (auto* room = roomsManager.getRoomByNumber(session->getPlayer().getMatchContext().roomNumber))
 			{
 				if (!room->isHost(session->getAccountInfo().uniqueId)) return;
 				Common::Network::Packet response = request;
@@ -372,7 +372,7 @@ namespace Main
 				return;
 			}
 
-			Main::Classes::Room* room = roomsManager.getRoomByNumber(session->getPlayer().getRoomNumber());
+			Main::Classes::Room* room = roomsManager.getRoomByNumber(session->getPlayer().getMatchContext().roomNumber);
 			if (!room) return;
 			if (!room->isHost(session->getAccountInfo().uniqueId)) return; // only the host should send this packet, prevent lvl up exploits
 

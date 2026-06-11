@@ -76,7 +76,7 @@ namespace Main
 			{
 				const auto& ainfo = session->getAccountInfo();
 				auto partiesManager = srv.getPartiesManager();
-				if (auto partyRoom = partiesManager.getExactRoomFor(ainfo.clanId, session->getPlayer().getPartyRoomNumber()))
+				if (auto partyRoom = partiesManager.getExactRoomFor(ainfo.clanId, session->getPlayer().getMatchContext().partyRoomNumber))
 				{
 					session->sendMessage(partyRoom->getPlayersNicknames());
 					session->sendMessage(partyRoom->getFormattedPartyInfo());
@@ -145,7 +145,7 @@ namespace Main
 					session->sendMessage(" - AccountID: " + std::to_string(ainfo.accountID));
 					session->sendMessage(" - SessionID: " + std::to_string(targetSession->getId()));
 					session->sendMessage(" - Grade: " + std::to_string(ainfo.playerGrade));
-					session->sendMessage(" - Current room: " + std::to_string(targetSession->getPlayer().getRoomNumber()));
+					session->sendMessage(" - Current room: " + std::to_string(targetSession->getPlayer().getMatchContext().roomNumber));
 					session->sendMessage(" - Level: " + std::to_string(ainfo.playerLevel));
 					session->sendMessage(" - MicroPoints: " + std::to_string(ainfo.microPoints));
 					session->sendMessage(" - RockTotens: " + std::to_string(ainfo.rockTotens));

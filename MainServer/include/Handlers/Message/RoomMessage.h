@@ -50,7 +50,7 @@ namespace Main
 				sessionsManager.broadcastToClan(session->getId(), response);
 				return;
 			}
-			else if (auto* room = roomsManager.getRoomByNumber(session->getPlayer().getRoomNumber()))
+			else if (auto* room = roomsManager.getRoomByNumber(session->getPlayer().getMatchContext().roomNumber))
 			{
 				if (room->isMuted() && session->getAccountInfo().playerGrade < Common::Enums::GRADE_ES)
 				{

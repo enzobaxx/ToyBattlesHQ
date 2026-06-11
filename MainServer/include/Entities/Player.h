@@ -15,6 +15,7 @@
 #include "Entities/SocialInfo.h"
 #include "Entities/TradeInfo.h"
 #include "Structures/ModerationInfo.h"
+#include "Structures/MatchContext.h"
 #include "Entities/Mailbox.h"
 
 #include <unordered_map>
@@ -42,23 +43,19 @@ namespace Main
 			using Mailbox = Main::Structures::Mailbox;
 			using Giftbox = Main::Structures::Giftbox;
 			using ModerationInfo = Main::Structures::ModerationInfo;
+			using MatchContext = Main::Structures::MatchContext;
 
 			AccountInfo m_accountInfo{};
 			Inventory m_inventory{ m_accountInfo };
 			SocialInfo m_socialInfo{};
 			TradeInfo m_tradeInfo{};
 			ModerationInfo m_moderationInfo{};
+			MatchContext m_matchContext{};
 			Main::Classes::Mailbox m_mailbox{};
 			Common::Enums::PlayerState m_playerState{};
 			std::uint16_t m_ping{};
 			std::string m_latestWeeklyRewardDay{};
 			std::string m_latestMonthlyRewardDay{};
-
-			// Other
-			std::uint16_t m_roomNumber{};
-			std::uint16_t m_partyRoomNumber{};
-			bool m_isInMatch{};
-			std::uint32_t m_batteryObtainedInMatch{};
 
 		public:
 			// Inventory
@@ -77,41 +74,26 @@ namespace Main
 			ModerationInfo& getModerationInfo() noexcept { return m_moderationInfo; }
 			const ModerationInfo& getModerationInfo() const noexcept { return m_moderationInfo; }
 
+			// Match / room context
+			MatchContext& getMatchContext() noexcept { return m_matchContext; }
+			const MatchContext& getMatchContext() const noexcept { return m_matchContext; }
+
 			// Mailbox / giftbox
 			Main::Classes::Mailbox& getMailbox() noexcept { return m_mailbox; }
 			const Main::Classes::Mailbox& getMailbox() const noexcept { return m_mailbox; }
 
 			// Account info
 			void setAccountInfo(const AccountInfo& accountInfo);
-			void addBatteryObtainedInMatch(std::uint32_t newBattery);
-			void storeBatteryObtainedInMatch();
+			AccountInfo& getAccountInfo() noexcept { return m_accountInfo; }
 			const AccountInfo& getAccountInfo() const;
 			std::uint32_t getAccountID() const;
 			const char* const getPlayerName() const;
-			bool setAccountRockTotens(std::uint32_t rt);
-			bool setAccountMicroPoints(std::uint32_t mp);
-			bool setAccountCoins(std::uint16_t coins);
-			void setAccountLatestCharacterSelected(std::uint16_t latestCharacterSelected);
-			void setLevel(std::uint16_t level);
-			void setExperience(std::uint32_t exp);
 			void setPlayerName(const char* playerName);
 			void setPlayerState(Common::Enums::PlayerState playerState);
 			Common::Enums::PlayerState getPlayerState() const;
-			void addLuckyPoints(std::uint32_t points);
-			void setLuckyPoints(std::uint32_t points);
-			std::uint32_t getLuckyPoints() const;
 			void setPing(std::uint16_t ping);
 			std::uint16_t getPing() const;
 			bool isInLobby() const;
-			void resetKillDeath();
-			void resetRecord();
-			bool expandBattery();
-			bool expandInventory(std::uint32_t spaceToAdd);
-
-
-			std::uint32_t addBattery(std::uint32_t battery);
-
-
 
 			// Rewards
 			void setLatestWeeklyRewardDate(const std::string& date) { m_latestWeeklyRewardDay = date; }
@@ -120,21 +102,17 @@ namespace Main
 			const std::string getLatestMonthlyRewardDate() const { return m_latestMonthlyRewardDay; }
 
 			// Room info
-			void setRoomNumber(std::uint16_t roomNumber);
-			void setPartyRoomNumber(std::uint16_t clanRoomNumber);
-			std::uint16_t getRoomNumber() const;
-			std::uint16_t getPartyRoomNumber() const noexcept;
 			void decreaseRoomNumber();
-			void setIsInMatch(bool val);
 			bool isInMatch() const;
 			void leaveRoom();
+			void storeBatteryObtainedInMatch();
 
 			// Achievements
 			void addAchievementTier1(std::uint32_t achievementId);
 
 			std::string getPlayerInfoAsString() const
 			{
-				return "(PlayerName: " + std::string(m_accountInfo.nickname) + ", RoomNumber: " + std::to_string(m_roomNumber) + ", IsInMatch : " + std::to_string(m_isInMatch) + "\n";
+				return "(PlayerName: " + std::string(m_accountInfo.nickname) + ", RoomNumber: " + std::to_string(m_matchContext.roomNumber) + ", IsInMatch : " + std::to_string(m_matchContext.isInMatch) + "\n";
 			}
 		};
 	}

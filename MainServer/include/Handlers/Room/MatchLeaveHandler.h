@@ -15,9 +15,9 @@ namespace Main
             Main::Network::SessionsManager& sessionsManager,
             Main::Classes::RoomsManager& roomsManager, Main::Classes::PartiesManager& partiesManager)
         {
-            if (Main::Classes::Room* room = roomsManager.getRoomByNumber(session->getPlayer().getRoomNumber()))
+            if (Main::Classes::Room* room = roomsManager.getRoomByNumber(session->getPlayer().getMatchContext().roomNumber))
             {
-                const std::uint16_t partyNumber = session->getPlayer().getPartyRoomNumber();
+                const std::uint16_t partyNumber = session->getPlayer().getMatchContext().partyRoomNumber;
 
                 const std::uint32_t selfRoomNumber = room->getRoomNumber();
                 const auto ainfo = session->getAccountInfo();
@@ -55,7 +55,7 @@ namespace Main
         inline void handleMatchLeaveNormal(const Common::Network::Packet& request, std::shared_ptr<Main::Network::Session> session,
             Main::Network::SessionsManager& sessionsManager, Main::Classes::RoomsManager& roomsManager)
         {
-            if (Main::Classes::Room* room = roomsManager.getRoomByNumber(session->getPlayer().getRoomNumber()))
+            if (Main::Classes::Room* room = roomsManager.getRoomByNumber(session->getPlayer().getMatchContext().roomNumber))
             {
                 const std::uint32_t selfRoomNumber = room->getRoomNumber();
                 const auto ainfo = session->getAccountInfo();
@@ -107,7 +107,7 @@ namespace Main
             Main::Network::SessionsManager& sessionsManager,
             Main::Classes::RoomsManager& roomsManager, Main::Classes::PartiesManager& partiesManager)
         {
-            if (session->getPlayer().getRoomNumber() >= Common::Constants::clanRoomNumberStart)
+            if (session->getPlayer().getMatchContext().roomNumber >= Common::Constants::clanRoomNumberStart)
             {
                 handleMatchLeaveClan(request, session, sessionsManager, roomsManager, partiesManager);
             }

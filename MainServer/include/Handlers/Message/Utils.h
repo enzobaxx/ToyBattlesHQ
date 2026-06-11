@@ -48,7 +48,7 @@ namespace Main
 			}
 			const std::string commandName = command.substr(0, command.find(' '));
 			Main::Command::ChatCommands::executeCommand(commandName, command, session, sessionsManager, roomsManager, scheduler,
-				session->getPlayer().getRoomNumber(), mainSv);
+				session->getPlayer().getMatchContext().roomNumber, mainSv);
 		}
 
 		inline bool executeCommon(const Common::Network::Packet& request, std::shared_ptr<Main::Network::Session> session,

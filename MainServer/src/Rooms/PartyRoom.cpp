@@ -27,7 +27,7 @@ namespace Main
 			waitingPlayerInfo.clanContribution = selfInfo.clanContribution;
 
 			m_players.emplace_back(waitingPlayerInfo, session);
-			session->getPlayer().setPartyRoomNumber(m_partyInfo.clanRoomNumber);
+			session->getPlayer().getMatchContext().partyRoomNumber = m_partyInfo.clanRoomNumber;
 
 			session->sendMessage("Created party room number: " + std::to_string(clanRoomNumber), Main::Enums::TIP);
 		}
@@ -47,7 +47,7 @@ namespace Main
 
 			m_players.emplace_back(waitingPlayerInfo, session);
 			++m_partyInfo.numPlayers;
-			session->getPlayer().setPartyRoomNumber(m_partyInfo.clanRoomNumber);
+			session->getPlayer().getMatchContext().partyRoomNumber = m_partyInfo.clanRoomNumber;
 
 			session->sendMessage("Joined party room number: " + std::to_string(m_partyInfo.clanRoomNumber), Main::Enums::TIP);
 		}
@@ -64,7 +64,7 @@ namespace Main
 						s->leaveRoom();
 						m_isRegistered = false;
 					}
-					s->getPlayer().setRoomNumber(num);
+					s->getPlayer().getMatchContext().roomNumber = num;
 				}
 			}
 		}
@@ -108,7 +108,7 @@ namespace Main
 				if (auto session = weakSession.lock())
 				{
 					session->asyncWrite(removePlayerPacket);
-					session->getPlayer().setPartyRoomNumber(0);
+					session->getPlayer().getMatchContext().partyRoomNumber = 0;
 					session->leaveRoom();
 				}
 			}
@@ -193,7 +193,7 @@ namespace Main
 
 			if (auto session = it->second.lock())
 			{
-				session->getPlayer().setPartyRoomNumber(0);
+				session->getPlayer().getMatchContext().partyRoomNumber = 0;
 				session->leaveRoom();
 				session->sendMessage("You left the party (party number: " + std::to_string(m_partyInfo.clanRoomNumber) + ")");
 			}
@@ -465,8 +465,8 @@ namespace Main
 
 				if (auto session = weakSession.lock())
 				{
-					result += " (Room: " + std::to_string(session->getPlayer().getRoomNumber()) +
-						", PartyRoom: " + std::to_string(session->getPlayer().getPartyRoomNumber()) + ")";
+					result += " (Room: " + std::to_string(session->getPlayer().getMatchContext().roomNumber) +
+						", PartyRoom: " + std::to_string(session->getPlayer().getMatchContext().partyRoomNumber) + ")";
 				}
 				else
 				{

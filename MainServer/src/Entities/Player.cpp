@@ -30,29 +30,17 @@ namespace Main
 			m_accountInfo = accountInfo;
 		}
 
-		std::uint32_t Player::addBattery(std::uint32_t battery)
-		{
-			m_accountInfo.battery = std::min(static_cast<std::uint32_t>(m_accountInfo.battery + battery), m_accountInfo.maxBattery);
-			return m_accountInfo.battery;
-		}
-
-
-		void Player::addBatteryObtainedInMatch(std::uint32_t newBattery)
-		{
-			m_batteryObtainedInMatch += newBattery;
-		}
-
 		void Player::storeBatteryObtainedInMatch()
 		{
-			if (m_accountInfo.battery + m_batteryObtainedInMatch >= m_accountInfo.maxBattery)
+			if (m_accountInfo.battery + m_matchContext.batteryObtainedInMatch >= m_accountInfo.maxBattery)
 			{
 				m_accountInfo.battery = m_accountInfo.maxBattery;
 			}
 			else
 			{
-				m_accountInfo.battery += m_batteryObtainedInMatch;
+				m_accountInfo.battery += m_matchContext.batteryObtainedInMatch;
 			}
-			m_batteryObtainedInMatch = 0;
+			m_matchContext.batteryObtainedInMatch = 0;
 		}
 
 		const AccountInfo& Player::getAccountInfo() const
@@ -80,66 +68,6 @@ namespace Main
 			return m_accountInfo.nickname;
 		}
 
-		bool Player::setAccountRockTotens(std::uint32_t rt)
-		{
-			if (rt > 0x3FFFFFFF) return false;
-			m_accountInfo.rockTotens = rt;
-			return true;
-		}
-
-		bool Player::setAccountMicroPoints(std::uint32_t mp)
-		{
-			if (mp > 0x7FFFFFFF) return false;
-			m_accountInfo.microPoints = mp;
-			return true;
-		}
-
-		bool Player::setAccountCoins(std::uint16_t coins)
-		{
-			if (coins > 0x7F) return false;
-			m_accountInfo.coins = coins;
-			return true;
-		}
-
-		void Player::setAccountLatestCharacterSelected(std::uint16_t latestCharacterSelected)
-		{
-			m_accountInfo.latestSelectedCharacter = latestCharacterSelected;
-		}
-
-		void Player::setLevel(std::uint16_t level)
-		{
-			m_accountInfo.playerLevel = level + 1;
-		}
-
-		void Player::setExperience(std::uint32_t exp)
-		{
-			m_accountInfo.experience = exp;
-		}
-
-		void Player::resetKillDeath()
-		{
-			m_accountInfo.totalKills = m_accountInfo.deaths = 0;
-		}
-
-		void Player::resetRecord()
-		{
-			m_accountInfo.wins = m_accountInfo.losses = m_accountInfo.draws = 0;
-		}
-
-		bool Player::expandBattery()
-		{
-			if (m_accountInfo.maxBattery > 4000) return false;
-			m_accountInfo.maxBattery += 1000;
-			return true;
-		}
-
-		bool Player::expandInventory(std::uint32_t spaceToAdd)
-		{
-			if (m_accountInfo.inventorySpace + spaceToAdd > 1000) return false;
-			m_accountInfo.inventorySpace += spaceToAdd;
-			return true;
-		}
-
 		void Player::setPlayerName(const char* playerName)
 		{
 			strncpy(m_accountInfo.nickname, playerName, sizeof(m_accountInfo.nickname) - 1);
@@ -158,25 +86,8 @@ namespace Main
 
 		bool Player::isInLobby() const
 		{
-			return m_roomNumber == 0;
+			return m_matchContext.roomNumber == 0;
 		}
-
-		void Player::addLuckyPoints(std::uint32_t points)
-		{
-			m_accountInfo.luckyPoints += points;
-		}
-
-		void Player::setLuckyPoints(std::uint32_t points)
-		{
-			m_accountInfo.luckyPoints = points;
-		}
-
-		std::uint32_t Player::getLuckyPoints() const
-		{
-			return static_cast<std::uint32_t>(m_accountInfo.luckyPoints);
-		}
-
-
 
 		void Player::addAchievementTier1(std::uint32_t achievementId)
 		{
@@ -186,31 +97,6 @@ namespace Main
 
 
 		// Room info
-		void Player::setRoomNumber(std::uint16_t roomNumber)
-		{
-			m_roomNumber = roomNumber;
-		}
-
-		void Player::setPartyRoomNumber(std::uint16_t partyRoomNumber)
-		{
-			m_partyRoomNumber = partyRoomNumber;
-		}
-
-		std::uint16_t Player::getRoomNumber() const
-		{
-			return m_roomNumber;
-		}
-
-		std::uint16_t Player::getPartyRoomNumber() const noexcept
-		{
-			return m_partyRoomNumber;
-		}
-
-		void Player::setIsInMatch(bool val)
-		{
-			m_isInMatch = val;
-		}
-
 		bool Player::isInMatch() const
 		{
 			return (m_playerState == Common::Enums::STATE_NORMAL || m_playerState == Common::Enums::STATE_DYING);
@@ -218,16 +104,16 @@ namespace Main
 
 		void Player::leaveRoom()
 		{
-			setRoomNumber(0);
-			setIsInMatch(false);
-			m_batteryObtainedInMatch = 0;
+			m_matchContext.roomNumber = 0;
+			m_matchContext.isInMatch = false;
+			m_matchContext.batteryObtainedInMatch = 0;
 		}
 
 		void Player::decreaseRoomNumber()
 		{
-			if (m_roomNumber > 0)
+			if (m_matchContext.roomNumber > 0)
 			{
-				--m_roomNumber;
+				--m_matchContext.roomNumber;
 			}
 		}
 

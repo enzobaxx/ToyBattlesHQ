@@ -80,7 +80,7 @@ namespace Main
 			}
 
 			m_players.emplace_back(createRoomPlayerInfo(session, team), std::weak_ptr<Main::Network::Session>{ session });
-			session->getPlayer().setRoomNumber(m_number);
+			session->getPlayer().getMatchContext().roomNumber = m_number;
 		}
 
 		void Room::addObserverPlayer(std::shared_ptr<Main::Network::Session> session)
@@ -102,7 +102,7 @@ namespace Main
 			}
 
 			m_observerPlayers.emplace_back(createRoomPlayerInfo(session, Common::Enums::TEAM_OBSERVER), std::weak_ptr<Main::Network::Session>{ session });
-			session->getPlayer().setRoomNumber(m_number);
+			session->getPlayer().getMatchContext().roomNumber = m_number;
 		}
 
 		// Refactored
@@ -328,7 +328,7 @@ namespace Main
 
 			Main::Structures::UniqueId originalHostUniqueId = hostSession->getAccountInfo().uniqueId;
 			const std::uint64_t originalHostSessionId = hostSession->getId();
-			hostSession->getPlayer().setIsInMatch(false); 
+			hostSession->getPlayer().getMatchContext().isInMatch = false; 
 
 			const std::size_t totalPlayersInMatch = std::count_if(
 				m_players.begin(), m_players.end(), [](const auto& currentPlayer) {
@@ -358,7 +358,7 @@ namespace Main
 				if (changeHost(bestMsIndexPlayerOutsideMatch))
 				{ // note: changeHost uses std::swap, the player to be removed now has index "bestMsPlayerIdxInMatch" (= previous host)
 					sendHostChangePacket(bestMsIndexPlayerOutsideMatch, Common::Enums::CHANGE_HOST_SUCCESS);
-					// The previous host leaves the match, host->getPlayer().setIsInMatch(false) already set at this point
+					// The previous host leaves the match, isInMatch = false already set at this point
 					removePlayerFromRoomAndMatch(bestMsIndexPlayerOutsideMatch, originalHostUniqueId, leaveTypeExtra);
 					m_hasMatchStarted = false; // The host was the only one inside the match, so we end it
 					return false; // Another player got the host in the room, no need to close it

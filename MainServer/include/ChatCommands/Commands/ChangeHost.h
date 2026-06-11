@@ -42,13 +42,13 @@ namespace Main
 					return;
 				}
 
-				if (session->getPlayer().getRoomNumber() >= Common::Constants::clanRoomNumberStart)
+				if (session->getPlayer().getMatchContext().roomNumber >= Common::Constants::clanRoomNumberStart)
 				{
 					session->sendMessage("Error: changing host in clan war rooms is currently disabled!");
 					return;
 				}
 
-				if (Main::Classes::Room* room = roomsManager.getRoomByNumber(session->getPlayer().getRoomNumber()))
+				if (Main::Classes::Room* room = roomsManager.getRoomByNumber(session->getPlayer().getMatchContext().roomNumber))
 				{
 					const bool changed = room->changeHostByNickname(m_targetPlayerName);
 					if (!changed)

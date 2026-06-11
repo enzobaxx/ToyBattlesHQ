@@ -19,7 +19,7 @@ namespace Main
             const Main::ClientData::Ping& pingData,
             Main::Persistence::MainScheduler& scheduler)
         {
-            if (Main::Classes::Room* room = roomsManager.getRoomByNumber(session->getPlayer().getRoomNumber());
+            if (Main::Classes::Room* room = roomsManager.getRoomByNumber(session->getPlayer().getMatchContext().roomNumber);
                 room && request.getMission() == 1)
             {
                 session->getPlayer().setPing(pingData.ping);

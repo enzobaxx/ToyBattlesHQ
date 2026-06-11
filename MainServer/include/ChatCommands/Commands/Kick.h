@@ -52,13 +52,13 @@ namespace Main
 					return;
 				}
 
-				if (session->getPlayer().getRoomNumber() >= Common::Constants::clanRoomNumberStart)
+				if (session->getPlayer().getMatchContext().roomNumber >= Common::Constants::clanRoomNumberStart)
 				{
 					session->sendMessage("Error: kicking someone from clan war rooms is currently disabled!");
 					return;
 				}
 
-				if (Main::Classes::Room* room = roomsManager.getRoomByNumber(session->getPlayer().getRoomNumber()))
+				if (Main::Classes::Room* room = roomsManager.getRoomByNumber(session->getPlayer().getMatchContext().roomNumber))
 				{
 					if (!room->kickPlayer(m_targetPlayerName.c_str()))
 					{
@@ -121,7 +121,7 @@ namespace Main
 					return;
 				}
 
-				if (Main::Classes::Room* room = roomsManager.getRoomByNumber(session->getPlayer().getRoomNumber()))
+				if (Main::Classes::Room* room = roomsManager.getRoomByNumber(session->getPlayer().getMatchContext().roomNumber))
 				{
 					if (!room->removeKickedPlayerByNickname(m_targetPlayerName.c_str()))
 					{
@@ -154,7 +154,7 @@ namespace Main
 				MP::MainScheduler&, std::uint32_t,
 				Main::MainServer&) override
 			{
-				if (Main::Classes::Room* room = roomsManager.getRoomByNumber(session->getPlayer().getRoomNumber()))
+				if (Main::Classes::Room* room = roomsManager.getRoomByNumber(session->getPlayer().getMatchContext().roomNumber))
 				{
 					auto kickedPlayers = room->getKickedPlayerNicknames();
 					if (kickedPlayers.empty())
