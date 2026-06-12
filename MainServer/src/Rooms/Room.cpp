@@ -1412,7 +1412,7 @@ namespace Main
 
 						if (sessionMatchTime >= 300000) 
 						{
-							session->sendEventMission(ClientData::EventMissionPoint{ 5 });
+							session->sendEventMission(ClientData::EventMissionPoint{ 1 });
 						}
 						if (stats.meleeKills >= 10)
 						{
@@ -1438,7 +1438,7 @@ namespace Main
 
 						if (uniqueWeaponKills >= 4)
 						{
-							session->sendEventMission(ClientData::EventMissionPoint{ 1 });
+							session->sendEventMission(ClientData::EventMissionPoint{ 5 });
 						}
 					}
 				}
