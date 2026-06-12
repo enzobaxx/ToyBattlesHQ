@@ -56,10 +56,7 @@ PACK_PUSH(1)
 
 			bool isValidCast() const noexcept
 			{
-				return sessionId <= Common::Constants::maxSessionsPerServer &&
-					size <= Common::Constants::maxPacketBytes &&
-					size >= 4 &&
-					(crypt == Common::Enums::NO_ENCRYPTION || crypt == Common::Enums::DEFAULT_ENCRYPTION);
+				return sessionId <= Common::Constants::maxSessionsPerServer
 			}
 		};
 PACK_POP()
