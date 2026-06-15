@@ -80,8 +80,6 @@ namespace Main
 				isFarm = (response.getDataSize() > 8) ? (data[8] == 5) : true;
 			}
 
-			const std::uint32_t totalPlayers = room->getPlayersCount();
-
 			struct PlayerInfo
 			{
 				Main::Structures::UniqueId uid;
@@ -89,13 +87,23 @@ namespace Main
 			};
 
 			std::vector<PlayerInfo> playerInfos;
-			playerInfos.reserve(totalPlayers);
+
+			const auto totalPlayers = static_cast<std::size_t>(room->getPlayersCount());
+			if (totalPlayers <= playerInfos.max_size())
+				playerInfos.reserve(totalPlayers);
 
 			for (auto& [roomInfo, session] : room->getAllPlayersWithSessions())
 			{
-				if (roomInfo.team == Common::Enums::TEAM_OBSERVER || !session->getPlayer().isInMatch()) continue;
+				if (roomInfo.team == Common::Enums::TEAM_OBSERVER ||
+					!session->getPlayer().isInMatch())
+				{
+					continue;
+				}
 
-				playerInfos.push_back({ session->getAccountInfo().uniqueId, pveRewardBoxFor(session->getPlayer().matchContext.totalBossBattleRespawnsLeft) });
+				playerInfos.push_back({
+					session->getAccountInfo().uniqueId,
+					pveRewardBoxFor(session->getPlayer().matchContext.totalBossBattleRespawnsLeft)
+					});
 			}
 
 			struct PveResponseSelf
@@ -106,47 +114,87 @@ namespace Main
 			} pveRespSelf;
 
 			response.setExtra(isFarm ? 6 : 1);
+
 			for (auto& [roomInfo, session] : room->getAllPlayersWithSessions())
 			{
-				if (roomInfo.team == Common::Enums::TEAM_OBSERVER || !session->getPlayer().isInMatch()) continue;
+				if (roomInfo.team == Common::Enums::TEAM_OBSERVER ||
+					!session->getPlayer().isInMatch())
+				{
+					continue;
+				}
 
 				pveRespSelf.totMP = session->getAccountInfo().microPoints;
 				pveRespSelf.totEXP = session->getAccountInfo().experience;
-				auto it = std::find_if(playerInfos.begin(), playerInfos.end(), [&](const PlayerInfo& info) {
-					return info.uid == session->getAccountInfo().uniqueId; });
+
+				auto it = std::find_if(
+					playerInfos.begin(),
+					playerInfos.end(),
+					[&](const PlayerInfo& info)
+					{
+						return info.uid == session->getAccountInfo().uniqueId;
+					});
+
 				pveRespSelf.rewardId = (it != playerInfos.end()) ? it->wonBoxId : 0;
-				response.setData(reinterpret_cast<const std::uint8_t*>(&pveRespSelf), sizeof(pveRespSelf));
+
+				response.setData(
+					reinterpret_cast<const std::uint8_t*>(&pveRespSelf),
+					sizeof(pveRespSelf));
+
 				session->asyncWrite(response);
 
 				if (pveRespSelf.rewardId && !isFarm)
 				{
-					session->spawnItemCommand(pveRespSelf.rewardId, "Boss Battle reward spawned automatically after completing the boss battle mode");
+					session->spawnItemCommand(
+						pveRespSelf.rewardId,
+						"Boss Battle reward spawned automatically after completing the boss battle mode");
+
 					session->sendRt(2000);
 					session->sendMessage("You obtained 2'000 RT and a Boss Battle reward!");
 				}
 			}
-			if (isFarm) return;
-			response.setData(nullptr, 0);
 
+			if (isFarm)
+				return;
+
+			response.setData(nullptr, 0);
 			response.setExtra(41);
+
 			for (auto& [roomInfo, session] : room->getAllPlayersWithSessions())
 			{
-				if (roomInfo.team == Common::Enums::TEAM_OBSERVER) continue;
+				if (roomInfo.team == Common::Enums::TEAM_OBSERVER)
+					continue;
 
-				auto selfId = session->getAccountInfo().uniqueId;
+				const auto selfId = session->getAccountInfo().uniqueId;
 				std::vector<PlayerInfo> filtered;
-				filtered.reserve(playerInfos.size() - 1);
-				for (auto& pi : playerInfos)
+				filtered.reserve(playerInfos.size());
+
+				for (const auto& pi : playerInfos)
 				{
-					if (pi.uid != selfId) filtered.push_back(pi);
+					if (pi.uid != selfId)
+						filtered.push_back(pi);
 				}
 
-				std::uint32_t count = static_cast<std::uint32_t>(filtered.size());
+				const std::uint32_t count =static_cast<std::uint32_t>(filtered.size());
+
 				std::vector<std::uint8_t> buffer;
-				buffer.reserve(sizeof(count) + filtered.size() * sizeof(PlayerInfo));
-				buffer.insert(buffer.end(), reinterpret_cast<const std::uint8_t*>(&count), reinterpret_cast<const std::uint8_t*>(&count) + sizeof(count));
-				buffer.insert(buffer.end(), reinterpret_cast<const std::uint8_t*>(filtered.data()),
-					reinterpret_cast<const std::uint8_t*>(filtered.data()) + filtered.size() * sizeof(PlayerInfo));
+				const std::size_t bufferSize =sizeof(count) + filtered.size() * sizeof(PlayerInfo);
+
+				if (bufferSize <= buffer.max_size())
+					buffer.reserve(bufferSize);
+
+				buffer.insert(
+					buffer.end(),
+					reinterpret_cast<const std::uint8_t*>(&count),
+					reinterpret_cast<const std::uint8_t*>(&count) + sizeof(count));
+
+				if (!filtered.empty())
+				{
+					buffer.insert(
+						buffer.end(),
+						reinterpret_cast<const std::uint8_t*>(filtered.data()),
+						reinterpret_cast<const std::uint8_t*>(filtered.data()) +
+						filtered.size() * sizeof(PlayerInfo));
+				}
 
 				response.setData(buffer.data(), buffer.size());
 				session->asyncWrite(response);
