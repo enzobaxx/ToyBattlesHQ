@@ -351,5 +351,13 @@ namespace Cast
 
 			room->endMatch();
 		}
+
+		std::uint64_t RoomsManager::getHostIdOf(std::uint64_t sessionId)
+		{
+			if (sessionId >= m_playerSessionIdToRoom.size()) return -1;
+			auto& room = m_playerSessionIdToRoom[sessionId];
+			if (!room) return -1;
+			return room->getHostId();
+		}
 	};
 }
