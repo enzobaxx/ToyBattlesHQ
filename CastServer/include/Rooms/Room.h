@@ -22,6 +22,7 @@ namespace Cast
 		private:
 			std::vector<std::weak_ptr<Cast::Network::Session>> m_playersVec{};
 			std::uint32_t m_map{};
+			std::uint64_t m_hostSessionId{};
 			std::uint32_t m_mode{};
 			std::uint32_t m_tick{};
 			std::uint32_t m_roomNumber = -1;
@@ -33,6 +34,7 @@ namespace Cast
 			bool m_hasMatchStarted{};
 			bool m_isInvisible{};
 			std::uint32_t m_roomTick{};
+			std::uint64_t getHostId() const { return m_hostSessionId; }
 
 			bool m_isArenaMode{};
 			bool m_arenaRoundFinished{};
