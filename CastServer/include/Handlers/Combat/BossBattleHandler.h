@@ -1,9 +1,7 @@
 #ifndef CAST_BOSS_BATTLE_HANDLER_H
 #define CAST_BOSS_BATTLE_HANDLER_H
-
 #include "Managers/RoomsManager.h"
 #include "Network/Sessions/CastSession.h"
-
 namespace Cast
 {
     namespace Handlers
@@ -13,7 +11,17 @@ namespace Cast
         {
             if (roomsManager.getModeOf(session->getId()) == Common::Enums::BossBattle)
             {
-                roomsManager.broadcastToMatch(session->getId(), const_cast<Common::Network::UnecryptedPacket&>(request));
+                uint64_t hostId = roomsManager.getHostIdOf(session->getId());
+                bool isHost = (session->getId() == hostId);
+
+                if (isHost)
+                {
+                    roomsManager.broadcastToMatch(session->getId(), const_cast<Common::Network::UnecryptedPacket&>(request));
+                }
+                else
+                {
+                    roomsManager.playerForwardToHost(hostId, session->getId(), const_cast<Common::Network::UnecryptedPacket&>(request));
+                }
             }
             else
             {
@@ -22,5 +30,4 @@ namespace Cast
         }
     }
 }
-
 #endif
