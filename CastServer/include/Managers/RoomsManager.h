@@ -51,6 +51,8 @@ namespace Cast
 
 			void endMatch(std::uint64_t hostId);
 
+			std::uint64_t getHostIdOf(std::uint64_t sessionId);
+
 			std::uint32_t getMapOf(std::uint64_t hostId);
 
 			std::uint32_t getModeOf(std::uint64_t playerId);
